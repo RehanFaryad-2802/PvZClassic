@@ -1,0 +1,329 @@
+/* js/player.js
+   Handles player name, coins, progress, save/load.
+   All data stored in localStorage under key "pvz3_save"
+*/
+
+const Player = (() => {
+  const SAVE_KEY = "pvz3_save";
+
+  const DEFAULT_SAVE = {
+    name: "",
+    coins: 0,
+    worldProgress: {
+      1: 0,
+      2: -1,
+      3: -1,
+      4: -1,
+      5: -1,
+      6: -1,
+      7: -1,
+      8: -1,
+      9: -1,
+      10: -1,
+    },
+    levelStars: {
+      1: {},
+      2: {},
+      3: {},
+      4: {},
+      5: {},
+      6: {},
+      7: {},
+      8: {},
+      9: {},
+      10: {},
+    },
+    plants: {
+      sunflower: { owned: false, level: 1, seeds: 0, unlockedByLevel: false },
+      peashooter: { owned: false, level: 1, seeds: 0, unlockedByLevel: false },
+      icepea: { owned: false, level: 1, seeds: 0, unlockedByLevel: false },
+      bonkchoy: { owned: false, level: 1, seeds: 0, unlockedByLevel: false },
+    },
+    unlockedMinigames: [],
+    totalLevelsBeaten: 0,
+  };
+
+  let data = null;
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        // Merge with defaults to handle new fields in updates
+        data = deepMerge(DEFAULT_SAVE, parsed);
+      } else {
+        data = JSON.parse(JSON.stringify(DEFAULT_SAVE));
+      }
+    } catch (e) {
+      data = JSON.parse(JSON.stringify(DEFAULT_SAVE));
+    }
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    } catch (e) {
+      console.warn("PvZ3: Could not save game", e);
+    }
+  }
+
+  function deepMerge(target, source) {
+    const out = Object.assign({}, target);
+    for (const key in source) {
+      if (
+        source[key] &&
+        typeof source[key] === "object" &&
+        !Array.isArray(source[key])
+      ) {
+        out[key] = deepMerge(target[key] || {}, source[key]);
+      } else {
+        out[key] = source[key];
+      }
+    }
+    return out;
+  }
+
+  function hasName() {
+    return data && data.name && data.name.trim().length > 0;
+  }
+
+  function setName(name) {
+    data.name = name.trim().slice(0, 16);
+    save();
+  }
+
+  function getName() {
+    return data.name || "Hero";
+  }
+
+  function getCoins() {
+    return data.coins || 0;
+  }
+
+  function addCoins(amount) {
+    data.coins = (data.coins || 0) + Math.floor(amount);
+    save();
+  }
+
+  function spendCoins(amount) {
+    if (data.coins < amount) return false;
+    data.coins -= amount;
+    save();
+    return true;
+  }
+
+  function getPlants() {
+    return data.plants;
+  }
+
+  function getPlant(id) {
+    return data.plants[id] || null;
+  }
+
+  function getOwnedPlants() {
+    return Object.entries(data.plants)
+      .filter(([, p]) => p.owned)
+      .map(([id, p]) => ({ id, ...p }));
+  }
+
+  function addSeeds(plantId, amount) {
+    if (!data.plants[plantId]) return;
+    data.plants[plantId].seeds = (data.plants[plantId].seeds || 0) + amount;
+    // Auto-unlock if not owned and seeds >= threshold
+    const UNLOCK_SEEDS = 10;
+    if (
+      !data.plants[plantId].owned &&
+      data.plants[plantId].seeds >= UNLOCK_SEEDS
+    ) {
+      data.plants[plantId].owned = true;
+      data.plants[plantId].seeds -= UNLOCK_SEEDS;
+    }
+    save();
+  }
+
+  function unlockPlantByLevel(plantId) {
+    if (!data.plants[plantId]) return false;
+    data.plants[plantId].owned = true;
+    data.plants[plantId].unlockedByLevel = true;
+    save();
+    return true;
+  }
+
+  function unlockMinigame(id) {
+    if (!data.unlockedMinigames) data.unlockedMinigames = [];
+    if (!data.unlockedMinigames.includes(id)) {
+      data.unlockedMinigames.push(id);
+      save();
+    }
+  }
+
+  function isMinigameUnlocked(id) {
+    if (!data.unlockedMinigames) return false;
+    return data.unlockedMinigames.includes(id);
+  }
+
+  function levelUpPlant(plantId) {
+    const p = data.plants[plantId];
+    if (!p || !p.owned) return false;
+    if (p.level >= 15) return false;
+    const needed = Seeds.getLevelUpCost(p.level);
+    if (!needed || p.seeds < needed) return false;
+    p.seeds -= needed;
+    p.level += 1;
+    save();
+    return true;
+  }
+
+  function getWorldProgress() {
+    return data.worldProgress;
+  }
+
+  function isWorldUnlocked(worldId) {
+    return data.worldProgress[worldId] !== -1;
+  }
+
+  function unlockWorld(worldId) {
+    if (data.worldProgress[worldId] === -1) {
+      data.worldProgress[worldId] = 0;
+      save();
+    }
+  }
+
+  function getLevelStars(worldId, levelIdx) {
+    return (
+      (data.levelStars[worldId] && data.levelStars[worldId][levelIdx]) || 0
+    );
+  }
+
+  function setLevelStars(worldId, levelIdx, stars) {
+    if (!data.levelStars[worldId]) data.levelStars[worldId] = {};
+    const current = data.levelStars[worldId][levelIdx] || 0;
+    if (stars > current) {
+      data.levelStars[worldId][levelIdx] = stars;
+    }
+    // Update world progress
+    const currentProg = data.worldProgress[worldId] || 0;
+    if (levelIdx + 1 > currentProg) {
+      data.worldProgress[worldId] = levelIdx + 1;
+    }
+    data.totalLevelsBeaten =
+      (data.totalLevelsBeaten || 0) +
+      (stars > current && current === 0 ? 1 : 0);
+    save();
+  }
+
+  function isLevelUnlocked(worldId, levelIdx) {
+    if (!isWorldUnlocked(worldId)) return false;
+    if (levelIdx === 0) return true;
+    // Previous level must be completed (stars > 0)
+    return getLevelStars(worldId, levelIdx - 1) > 0;
+  }
+
+  function getTotalLevelsBeaten() {
+    return data.totalLevelsBeaten || 0;
+  }
+
+  function reset() {
+    data = JSON.parse(JSON.stringify(DEFAULT_SAVE));
+    save();
+  }
+
+  function enableAllContent() {
+    // If already called with empty save (e.g., before PlantRegistry/Levels load), no crash.
+
+    // Open all worlds
+    data.worldProgress = Object.keys(data.worldProgress || {}).reduce(
+      (acc, k) => {
+        acc[k] = 9999;
+        return acc;
+      },
+      {},
+    );
+
+    // Mark all plants as owned and max them
+    const allPlants =
+      typeof PlantRegistry !== "undefined" && PlantRegistry.getAll
+        ? PlantRegistry.getAll()
+        : [];
+
+    // Fallback: ensure known ids exist in save
+    const ids = allPlants.length
+      ? allPlants.map((p) => p.id)
+      : Object.keys(data.plants || {});
+
+    ids.forEach((id) => {
+      if (!data.plants[id]) {
+        data.plants[id] = {
+          owned: false,
+          level: 1,
+          seeds: 0,
+          unlockedByLevel: false,
+        };
+      }
+      data.plants[id].owned = true;
+      data.plants[id].unlockedByLevel = true;
+      data.plants[id].level = 15;
+      data.plants[id].seeds = 999999;
+    });
+
+    // Ensure minigames are unlocked (all known ones)
+    // MINIGAME_UNLOCKS is defined in Levels; use it if available.
+    const allMgs =
+      typeof Levels !== "undefined" && Array.isArray(Levels.MINIGAME_UNLOCKS)
+        ? Levels.MINIGAME_UNLOCKS.map((x) => x.minigameId)
+        : [];
+    data.unlockedMinigames = Array.from(new Set(allMgs));
+
+    // Beat all levels
+    if (typeof Levels !== "undefined" && Levels.getAllWorlds) {
+      const allWorlds = Levels.getAllWorlds();
+      allWorlds.forEach((w) => {
+        const lvlCount = w.levelCount || 0;
+        if (!data.levelStars[w.id]) data.levelStars[w.id] = {};
+        for (let i = 0; i < lvlCount; i++) {
+          data.levelStars[w.id][i] = 3; // 3 stars for completed
+        }
+        data.worldProgress[w.id] = Math.max(
+          data.worldProgress[w.id] || 0,
+          lvlCount,
+        );
+      });
+    }
+
+    data.totalLevelsBeaten = 99999;
+
+    save();
+  }
+
+  // Initialize immediately
+  load();
+
+  return {
+    load,
+    save,
+    hasName,
+    setName,
+    getName,
+    getCoins,
+    addCoins,
+    spendCoins,
+    getPlants,
+    getPlant,
+    getOwnedPlants,
+    addSeeds,
+    levelUpPlant,
+    getWorldProgress,
+    isWorldUnlocked,
+    unlockWorld,
+    getLevelStars,
+    setLevelStars,
+    isLevelUnlocked,
+    getTotalLevelsBeaten,
+    reset,
+    enableAllContent,
+    unlockPlantByLevel,
+    unlockMinigame,
+    isMinigameUnlocked,
+  };
+})();

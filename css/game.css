@@ -1,0 +1,698 @@
+/* ═══════════════════════════════════════════════════
+   PvZ3 — game.css
+   Battle screen: HUD, plant tray, arena, grid,
+   demons, projectiles, effects, lawnmowers
+═══════════════════════════════════════════════════ */
+
+/* ─── Battle HUD ─────────────────────────────────── */
+.battle-hud {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 56px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 100%);
+  border-bottom: 1px solid rgba(168,85,247,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  z-index: 30;
+  gap: 8px;
+}
+.hud-left  { display: flex; align-items: center; gap: 10px; }
+.hud-right { display: flex; align-items: center; gap: 8px; }
+.hud-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+}
+.sun-display {
+  background: rgba(251,191,36,0.15);
+  border: 1px solid var(--gold);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--gold);
+  min-width: 72px;
+  text-align: center;
+}
+.hud-level-info {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--purple-light);
+  letter-spacing: 1px;
+}
+.wave-display {
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--white);
+}
+.progress-bar {
+  width: 120px;
+  height: 5px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--orange), var(--red));
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.5s ease;
+}
+.btn-pause {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: var(--white);
+  font-size: 18px;
+  border-radius: 8px;
+  padding: 4px 10px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* ─── Plant Tray ─────────────────────────────────── */
+.plant-tray {
+  position: absolute;
+  top: 56px; left: 0; right: 0;
+  height: 80px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 100%);
+  border-bottom: 1px solid rgba(34,197,94,0.2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  overflow-x: auto;
+  z-index: 25;
+}
+.tray-card {
+  flex-shrink: 0;
+  width: 64px;
+  height: 68px;
+  background: linear-gradient(135deg, #1a0040, #0d0020);
+  border: 2px solid var(--purple);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+.tray-card img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  pointer-events: none;
+}
+.tray-card .tray-cost {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--gold);
+  line-height: 1;
+}
+.tray-card.selected {
+  border-color: var(--green);
+  box-shadow: 0 0 12px rgba(34,197,94,0.6);
+  transform: scale(1.05);
+}
+.tray-card.cooldown {
+  cursor: not-allowed;
+}
+.tray-card .cooldown-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--white);
+  border-radius: 8px;
+}
+.tray-card.no-sun { opacity: 0.5; cursor: not-allowed; }
+
+/* ─── Battle Arena ───────────────────────────────── */
+.battle-arena {
+  position: absolute;
+  top: 136px; left: 0; right: 0; bottom: 0;
+  overflow: hidden;
+}
+.arena-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.grid-cell {
+  border: 1px solid rgba(0,0,0,0.2);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Chess board pattern - world 1 green */
+.arena-bg.world-1 ~ .grid-container .grid-row:nth-child(odd) .grid-cell:nth-child(odd),
+.arena-bg.world-1 ~ .grid-container .grid-row:nth-child(even) .grid-cell:nth-child(even) {
+  background: rgba(34, 120, 34, 0.45);
+}
+.arena-bg.world-1 ~ .grid-container .grid-row:nth-child(odd) .grid-cell:nth-child(even),
+.arena-bg.world-1 ~ .grid-container .grid-row:nth-child(even) .grid-cell:nth-child(odd) {
+  background: rgba(22, 80, 22, 0.45);
+}
+/* World 2 blue chess */
+.arena-bg.world-2 ~ .grid-container .grid-row:nth-child(odd) .grid-cell:nth-child(odd),
+.arena-bg.world-2 ~ .grid-container .grid-row:nth-child(even) .grid-cell:nth-child(even) {
+  background: rgba(30, 80, 160, 0.45);
+}
+.arena-bg.world-2 ~ .grid-container .grid-row:nth-child(odd) .grid-cell:nth-child(even),
+.arena-bg.world-2 ~ .grid-container .grid-row:nth-child(even) .grid-cell:nth-child(odd) {
+  background: rgba(10, 40, 100, 0.45);
+}
+/* World 3 iron/grey chess */
+.arena-bg.world-3 ~ .grid-container .grid-row:nth-child(odd) .grid-cell:nth-child(odd),
+.arena-bg.world-3 ~ .grid-container .grid-row:nth-child(even) .grid-cell:nth-child(even) {
+  background: rgba(80, 80, 90, 0.45);
+}
+.arena-bg.world-3 ~ .grid-container .grid-row:nth-child(odd) .grid-cell:nth-child(even),
+.arena-bg.world-3 ~ .grid-container .grid-row:nth-child(even) .grid-cell:nth-child(odd) {
+  background: rgba(40, 40, 50, 0.45);
+}
+/* World 4 shadow/dark chess */
+.arena-bg.world-4 ~ .grid-container .grid-row:nth-child(odd) .grid-cell:nth-child(odd),
+.arena-bg.world-4 ~ .grid-container .grid-row:nth-child(even) .grid-cell:nth-child(even) {
+  background: rgba(60, 0, 80, 0.45);
+}
+.arena-bg.world-4 ~ .grid-container .grid-row:nth-child(odd) .grid-cell:nth-child(even),
+.arena-bg.world-4 ~ .grid-container .grid-row:nth-child(even) .grid-cell:nth-child(odd) {
+  background: rgba(20, 0, 30, 0.45);
+}
+.grid-cell:hover { background: rgba(255,255,255,0.15) !important; }
+
+/* World backgrounds */
+.grid-container {
+  position: absolute;
+  left: 72px; /* space for lawnmowers */
+  top: 0; bottom: 0;
+  right: 120px; /* buffer zone for demons to walk in */
+  display: grid;
+  grid-template-rows: repeat(5, 1fr);
+  z-index: 5;
+}
+.arena-bg.world-2 {
+  background: linear-gradient(180deg, #001830 0%, #001020 60%, #000810 100%);
+}
+.arena-bg.world-3 {
+  background: linear-gradient(180deg, #1a1a20 0%, #101015 60%, #080808 100%);
+}
+.arena-bg.world-4 {
+  background: linear-gradient(180deg, #0f000f 0%, #080008 60%, #030003 100%);
+}
+/* ─── Grid ───────────────────────────────────────── */
+.grid-container {
+  position: absolute;
+  left: 72px; /* space for lawnmowers */
+  top: 0; bottom: 0;
+  right: 120px; /* buffer zone for demons to walk in */
+  display: grid;
+  grid-template-rows: repeat(5, 1fr);
+  z-index: 5;
+}
+.grid-row {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  position: relative;
+}
+.grid-row:nth-child(odd)  { background: transparent; }
+.grid-row:nth-child(even) { background: transparent; }
+
+.grid-cell {
+  border: 1px solid rgba(255,255,255,0.04);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.grid-cell:hover { background: rgba(34,197,94,0.12); }
+.grid-cell.occupied { cursor: default; }
+.grid-cell.occupied:hover { background: transparent; }
+
+/* Plant inside cell */
+.plant-entity {
+  position: absolute;
+  width: 85%;
+  height: 85%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+  z-index: 6;
+  pointer-events: none;
+  animation: plantPlace 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+}
+.plant-entity {
+  position: absolute;
+  width: 85%;
+  height: 85%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+  z-index: 6;
+  pointer-events: none;
+  animation: plantPlace 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+}
+@keyframes plantPlace {
+  from { transform: translate(-50%, -50%) scale(0) rotate(-10deg); opacity: 0; }
+  to   { transform: translate(-50%, -50%) scale(1) rotate(0deg);  opacity: 1; }
+}
+.plant-hp-bar {
+  position: absolute;
+  bottom: 2px;
+  left: 5%;
+  width: 90%;
+  height: 4px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 2px;
+  overflow: hidden;
+  z-index: 7;
+}
+.plant-hp-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 2px;
+  transition: width 0.2s, background 0.2s;
+}
+.plant-hp-fill.mid  { background: var(--orange); }
+.plant-hp-fill.low  { background: var(--red); }
+
+/* Sunflower pulse ring */
+.sun-pulse {
+  position: absolute;
+  width: 60%;
+  height: 60%;
+  border: 2px solid rgba(251,191,36,0.7);
+  border-radius: 50%;
+  animation: sunPulse 1s ease-out forwards;
+  pointer-events: none;
+  z-index: 8;
+}
+@keyframes sunPulse {
+  from { transform: scale(0.5); opacity: 1; }
+  to   { transform: scale(2.5); opacity: 0; }
+}
+
+/* ─── Sun Token ──────────────────────────────────── */
+.sun-token {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  background: radial-gradient(circle, #ffe066 0%, #fbbf24 60%, #d97706 100%);
+  border-radius: 50%;
+  border: 2px solid #fde68a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  cursor: pointer;
+  z-index: 100;
+  pointer-events: all !important;
+  animation: sunDrop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 0 12px rgba(251,191,36,0.8);
+  transition: transform 0.1s;
+}
+.sun-token:active { transform: scale(0.85); }
+@keyframes sunDrop {
+  0%   { transform: scale(0);    opacity: 0; }
+  30%  { transform: scale(1.4);  opacity: 1; }
+  50%  { transform: scale(0.85); opacity: 1; }
+  70%  { transform: scale(1.15); opacity: 1; }
+  85%  { transform: scale(0.95); opacity: 1; }
+  100% { transform: scale(1);    opacity: 1; }
+}
+.sun-token.collecting {
+  animation: sunCollect 0.3s ease-in forwards;
+}
+@keyframes sunCollect {
+  to { transform: scale(0) translateY(-40px); opacity: 0; }
+}
+
+/* ─── Coin Token ─────────────────────────────────── */
+.coin-token {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  background: radial-gradient(circle, #ffd700, #b8860b);
+  border-radius: 50%;
+  border: 2px solid #ffe066;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  z-index: 20;
+  animation: coinDrop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 0 8px rgba(255,215,0,0.7);
+}
+@keyframes coinDrop {
+  from { transform: scale(0) translateY(-15px); opacity: 0; }
+  to   { transform: scale(1) translateY(0);     opacity: 1; }
+}
+
+/* ─── Lawnmowers ─────────────────────────────────── */
+.lawnmowers-layer {
+  position: absolute;
+  left: 0;
+  top: 136px;
+  width: 72px;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+}
+.lawnmower {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  cursor: default;
+  transition: transform 0.1s;
+}
+.lawnmower.active {
+  animation: mowerSpin 0.5s linear infinite;
+}
+.lawnmower.gone { opacity: 0; }
+@keyframes mowerSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ─── Demons Layer ───────────────────────────────── */
+.demons-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+}
+.demon-entity {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  /* No transition — position updated every frame */
+}
+.demon-entity img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8));
+}
+.demon-hp-bar {
+  width: 60px;
+  height: 5px;
+  background: rgba(0,0,0,0.6);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 2px;
+}
+.demon-hp-fill {
+  height: 100%;
+  background: var(--red);
+  border-radius: 3px;
+  transition: width 0.1s;
+}
+.demon-entity.frozen img {
+  filter: drop-shadow(0 0 8px var(--ice-blue)) hue-rotate(160deg) brightness(1.3);
+}
+.demon-entity.stunned img {
+  filter: brightness(0.6) saturate(0);
+}
+/* Demon hit flash */
+.demon-entity.hit img {
+  filter: brightness(3) saturate(0) drop-shadow(0 0 6px #fff);
+}
+
+/* ─── Projectiles Layer ──────────────────────────── */
+.projectiles-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+}
+.projectile {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.projectile.pea {
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(circle, #86efac, #22c55e);
+  box-shadow: 0 0 8px rgba(34,197,94,0.8);
+}
+.projectile.ice-pea {
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle, #e0f2fe, #67e8f9);
+  box-shadow: 0 0 10px rgba(103,232,249,0.9);
+}
+.projectile.bonk {
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle, #fde68a, #f59e0b);
+  box-shadow: 0 0 10px rgba(245,158,11,0.8);
+  border-radius: 4px;
+}
+
+/* ─── Effects Layer ──────────────────────────────── */
+.effects-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+}
+.effect-hit {
+  position: absolute;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--white);
+  text-shadow: 0 0 8px rgba(255,255,255,0.8);
+  pointer-events: none;
+  animation: floatUp 0.7s ease-out forwards;
+  z-index: 20;
+}
+.effect-hit.crit { color: var(--gold); font-size: 26px; }
+.effect-hit.freeze { color: var(--ice-blue); }
+@keyframes floatUp {
+  from { transform: translateY(0);   opacity: 1; }
+  to   { transform: translateY(-40px); opacity: 0; }
+}
+.effect-explosion {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, var(--orange) 40%, transparent 70%);
+  animation: explode 0.4s ease-out forwards;
+  pointer-events: none;
+  z-index: 16;
+}
+@keyframes explode {
+  from { transform: scale(0.2); opacity: 1; }
+  to   { transform: scale(2.5); opacity: 0; }
+}
+.effect-freeze {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(103,232,249,0.8) 0%, transparent 70%);
+  animation: explode 0.5s ease-out forwards;
+  pointer-events: none;
+  z-index: 16;
+}
+
+/* ─── Danger flash when demons near end ─────────── */
+.battle-arena.danger {
+  animation: dangerFlash 1s ease-in-out infinite;
+}
+@keyframes dangerFlash {
+  0%, 100% { box-shadow: inset 0 0 0px transparent; }
+  50%       { box-shadow: inset 0 0 40px rgba(239,68,68,0.4); }
+}
+
+/* ─── Wave announce banner ───────────────────────── */
+.wave-banner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: 48px;
+  letter-spacing: 4px;
+  color: var(--white);
+  text-shadow: 0 0 30px var(--orange), 0 0 60px var(--orange);
+  z-index: 40;
+  pointer-events: none;
+  animation: waveBanner 2s ease-in-out forwards;
+  white-space: nowrap;
+}
+@keyframes waveBanner {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  20%  { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+  70%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+}
+
+/* ─── Plant shake when being eaten ──────────────── */
+@keyframes plantShake {
+  0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+  25%       { transform: translate(-50%, -50%) translateX(-4px) rotate(-3deg); }
+  75%       { transform: translate(-50%, -50%) translateX(4px) rotate(3deg); }
+}
+.plant-entity.shaking {
+  animation: plantShake 0.3s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px red) sepia(0.5) saturate(2) hue-rotate(-30deg);
+}
+/* ─── Shovel mode ────────────────────────────────── */
+.grid-cell.shovel-hover { background: rgba(239,68,68,0.2); cursor: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><text y='28' font-size='28'>🪣</text></svg>") 0 32, auto; }
+
+/* ─── Shovel button ──────────────────────────────── */
+.shovel-btn {
+  flex-shrink: 0;
+  width: 64px;
+  height: 68px;
+  background: linear-gradient(135deg, #3b0000, #1a0000);
+  border: 2px solid #ef4444;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 24px;
+  gap: 2px;
+  margin-left: auto;
+  transition: all 0.15s;
+}
+.shovel-btn.active {
+  border-color: #ff0000;
+  box-shadow: 0 0 12px rgba(239,68,68,0.7);
+}
+.shovel-btn span { font-size: 10px; color: #fca5a5; font-weight: 700; }
+
+/* ─── Mobile responsive ──────────────────────────── */
+@media (max-width: 480px) {
+  .grid-container { left: 44px; }
+  .lawnmowers-layer { width: 44px; }
+  .lawnmower { font-size: 16px; }
+  .tray-card { width: 54px; height: 58px; }
+  .tray-card img { width: 36px; height: 36px; }
+  .wave-banner { font-size: 32px; }
+}
+/* Extra black bg removal for video plants */
+.grid-cell video.plant-entity {
+  mix-blend-mode: screen;
+  isolation: isolate;
+}
+.grid-cell {
+  background-clip: padding-box;
+}
+/* ─── Demon Preview ──────────────────────────────── */
+.demon-preview-box {
+  background: linear-gradient(135deg, #0d0020, #1a0040);
+  border: 2px solid var(--purple-light);
+  border-radius: 20px;
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 0 60px rgba(168,85,247,0.4);
+  animation: previewPop 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+@keyframes previewPop {
+  from { transform: scale(0.7); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.dp-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 3px;
+  color: var(--red);
+  text-shadow: 0 0 20px rgba(239,68,68,0.6);
+}
+.dp-subtitle {
+  font-size: 13px;
+  color: var(--gray);
+  letter-spacing: 2px;
+}
+.dp-demons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 12px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 14px;
+  width: 100%;
+  min-height: 100px;
+}
+.dp-demon-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  animation: demonEntry 0.4s cubic-bezier(0.175,0.885,0.32,1.275) both;
+}
+@keyframes demonEntry {
+  from { transform: scale(0) rotate(-20deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0deg);   opacity: 1; }
+}
+.dp-demon-icon img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(239,68,68,0.6));
+}
+.dp-demon-icon .dp-demon-name {
+  font-size: 10px;
+  color: var(--gray);
+  text-align: center;
+  font-weight: 700;
+}
+.dp-demon-icon .dp-demon-count {
+  font-size: 11px;
+  color: var(--orange);
+  font-weight: 900;
+  background: rgba(255,106,0,0.15);
+  border: 1px solid var(--orange);
+  border-radius: 8px;
+  padding: 1px 7px;
+}
+.dp-countdown {
+  font-family: var(--font-display);
+  font-size: 48px;
+  color: var(--white);
+  text-shadow: 0 0 20px rgba(255,255,255,0.5);
+  min-width: 60px;
+  text-align: center;
+}
