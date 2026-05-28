@@ -6,9 +6,13 @@
 PlantRegistry.register({
   id: "lilybeam",
   name: "Lily Beam",
-  image: "assets/plants/lilybeam.jpg",
-  cost: 200,
+  image: "assets/plants/lilybeam/lilybeam.png",
+  cost: 50,
+  // cost: 200,
+  fireDistance: 9,
   cooldown: 6000,
+  fireDistance: 7,
+  hitCount: 99,
   hp: 350,
   fireRate: 2500,
   description: "Freezes all demons in its lane with an ice beam.",
@@ -147,15 +151,7 @@ PlantRegistry.register({
     const gridEl = document.getElementById("grid-container");
     const gridRect = gridEl ? gridEl.getBoundingClientRect() : null;
 
-    const demonAhead = active.some((d) => {
-      if (d.dead || d.row !== row) return false;
-      const dRect = d.el.getBoundingClientRect();
-      if (dRect.left <= cellRect.left) return false;
-      if (gridRect && dRect.left > gridRect.right) return false;
-      return true;
-    });
-
-    if (!demonAhead) return;
+    if (!PlantRegistry.isDemonInRange(row, col, this.fireDistance)) return;
 
     const stats = this.getStats(plantData.level);
 

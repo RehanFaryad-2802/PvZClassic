@@ -647,10 +647,10 @@ html, body {
 }
 .picker-available {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(14, 1fr);
   gap: 10px;
   overflow-y: auto;
-  flex: 1;
+  flex: 0 0 1;
 }
 .plant-card {
   background: linear-gradient(135deg, #1a0040, #0d0020);

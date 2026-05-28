@@ -1186,7 +1186,7 @@ const UI = (() => {
       id: "bombball",
       name: "Bomb Ball",
       icon: "💣",
-      desc: "Coming soon!",
+      desc: "Catch falling bombs!",
       reward: "Seeds",
       unlocked: false,
     },
@@ -1234,7 +1234,7 @@ const UI = (() => {
       id: "sharpshoot",
       name: "Sharp Shooters",
       icon: "🎯",
-      desc: "Coming soon!",
+      desc: "Shoot demons before they escape!",
       reward: "Seeds",
       unlocked: false,
     },
@@ -1264,6 +1264,12 @@ const UI = (() => {
     if (id === "blockhunt") {
       showScreen("screen-blockhunt");
       BlockHunt.startGame();
+    } else if (id === "bombball") {
+      showScreen("screen-bombball");
+      BombBall.startGame();
+    } else if (id === "sharpshoot") {
+      showScreen("screen-sharpshooters");
+      SharpShooters.startGame();
     } else {
       showToast("Coming soon! 🚧");
     }
@@ -1493,6 +1499,8 @@ const UI = (() => {
   function init() {
     initButtons();
     BlockHunt.init();
+    BombBall.init();
+    SharpShooters.init();
 
     // Check if player already has a name → skip name screen
     if (Player.hasName()) {

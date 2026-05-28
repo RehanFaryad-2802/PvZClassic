@@ -6,9 +6,8 @@
 */
 
 const PlantRegistry = (() => {
-
-  const plants = {};       // id -> full definition
-  const timers  = {};      // id -> per-instance timers { 'row,col': timerData }
+  const plants = {}; // id -> full definition
+  const timers = {}; // id -> per-instance timers { 'row,col': timerData }
 
   function register(def) {
     plants[def.id] = def;
@@ -16,8 +15,12 @@ const PlantRegistry = (() => {
     // console.log(`[PlantRegistry] Registered: ${def.id}`);
   }
 
-  function get(id) { return plants[id] || null; }
-  function getAll() { return Object.values(plants); }
+  function get(id) {
+    return plants[id] || null;
+  }
+  function getAll() {
+    return Object.values(plants);
+  }
 
   // Called when a plant is placed on the grid
   function onPlace(id, row, col, plantData) {
@@ -25,7 +28,7 @@ const PlantRegistry = (() => {
     if (def && def.onPlace) def.onPlace(row, col, plantData);
     // Start per-instance timer — use level stats if available
     if (!timers[id]) timers[id] = {};
-    const pp = typeof Player !== 'undefined' ? Player.getPlant(id) : null;
+    const pp = typeof Player !== "undefined" ? Player.getPlant(id) : null;
     const level = pp ? pp.level : 1;
     let fireRate = def ? def.fireRate || 2000 : 2000;
     if (def && def.levelStats && def.levelStats[level]) {
@@ -58,13 +61,23 @@ const PlantRegistry = (() => {
         const def = plants[cell.plantId];
         if (!def || !def.onTick) continue;
 
+        if (
+          def.hitCount === 0 &&
+          def.fireDistance === 0 &&
+          def.id !== "sunflower"
+        )
+          continue;
+
         // Skip if frozen
         if (cell.frozen) continue;
 
         const key = `${r},${c}`;
         if (!timers[cell.plantId]) timers[cell.plantId] = {};
         if (!timers[cell.plantId][key]) {
-          timers[cell.plantId][key] = { elapsed: 0, cooldown: def.fireRate || 2000 };
+          timers[cell.plantId][key] = {
+            elapsed: 0,
+            cooldown: def.fireRate || 2000,
+          };
         }
         const t = timers[cell.plantId][key];
         t.elapsed += dt * 1000;
@@ -80,6 +93,108 @@ const PlantRegistry = (() => {
   function clearTimers() {
     for (const id in timers) timers[id] = {};
   }
+  function isDemonInRange(row, col, fireDistance) {
+    const active = Demons.getActive();
+    const cellEl = Grid.getCellEl(row, col);
+    if (!cellEl) return false;
 
-  return { register, get, getAll, onPlace, onRemove, tick, clearTimers };
+    const cellRect = cellEl.getBoundingClientRect();
+    const gridEl = document.getElementById("grid-container");
+    const gridRect = gridEl ? gridEl.getBoundingClientRect() : null;
+    if (!gridRect) return false;
+
+    const cellW = gridRect.width / Grid.getCols();
+    const maxDist = fireDistance * cellW; // convert cells → pixels
+
+    return active.some((d) => {
+      if (d.dead || d.row !== row) return false;
+      const dRect = d.el.getBoundingClientRect();
+      // Demon must be to the RIGHT of plant
+      if (dRect.left <= cellRect.left) return false;
+      // Demon must be within fireDistance cells
+      const dist = dRect.left - cellRect.right;
+      if (dist > maxDist) return false;
+      // Demon must be visible on screen (inside grid)
+      if (dRect.left > gridRect.right) return false;
+      return true;
+    });
+  }
+
+  // Shared range check — returns true if any demon in row is within fireDistance cells
+  function isDemonInRange(row, col, fireDistance) {
+    const active = Demons.getActive();
+    const cellEl = Grid.getCellEl(row, col);
+    if (!cellEl) return false;
+
+    const cellRect = cellEl.getBoundingClientRect();
+    const gridEl = document.getElementById("grid-container");
+    const gridRect = gridEl ? gridEl.getBoundingClientRect() : null;
+    if (!gridRect) return false;
+
+    const cellW = gridRect.width / Grid.getCols();
+    const maxDist = fireDistance * cellW;
+
+    return active.some((d) => {
+      if (d.dead || d.row !== row) return false;
+      const dRect = d.el.getBoundingClientRect();
+      if (dRect.left <= cellRect.left) return false;
+      if (dRect.left > gridRect.right) return false;
+      return dRect.left - cellRect.right <= maxDist;
+    });
+  }
+
+  // Get demons in range sorted by closest first, capped by hitCount
+  function getDemonsInRange(row, col, fireDistance, hitCount) {
+    const active = Demons.getActive();
+    const cellEl = Grid.getCellEl(row, col);
+    if (!cellEl) return [];
+
+    const cellRect = cellEl.getBoundingClientRect();
+    const gridEl = document.getElementById("grid-container");
+    const gridRect = gridEl ? gridEl.getBoundingClientRect() : null;
+    if (!gridRect) return [];
+
+    const cellW = gridRect.width / Grid.getCols();
+    const maxDist = fireDistance * cellW;
+
+    const inRange = active.filter((d) => {
+      if (d.dead || d.row !== row) return false;
+      const dRect = d.el.getBoundingClientRect();
+      if (dRect.left <= cellRect.left) return false;
+      if (dRect.left > gridRect.right) return false;
+      return dRect.left - cellRect.right <= maxDist;
+    });
+
+    // Sort by closest first
+    inRange.sort((a, b) => {
+      const aRect = a.el.getBoundingClientRect();
+      const bRect = b.el.getBoundingClientRect();
+      return aRect.left - bRect.left;
+    });
+
+    // Cap by hitCount (99 = unlimited)
+    return hitCount >= 99 ? inRange : inRange.slice(0, hitCount);
+  }
+
+  return {
+    register,
+    get,
+    getAll,
+    onPlace,
+    onRemove,
+    tick,
+    clearTimers,
+    isDemonInRange,
+    getDemonsInRange,
+  };
+  return {
+    register,
+    get,
+    getAll,
+    onPlace,
+    onRemove,
+    tick,
+    clearTimers,
+    isDemonInRange,
+  };
 })();

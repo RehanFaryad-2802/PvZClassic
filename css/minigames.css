@@ -1,3 +1,4 @@
+@import url("minigames_additions.css");
 #screen-blockhunt {
   background: linear-gradient(160deg, #040018, #0c0030);
   overflow: hidden;

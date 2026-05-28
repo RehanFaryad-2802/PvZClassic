@@ -6,11 +6,14 @@
 PlantRegistry.register({
   id: "sporepuff",
   name: "Spore Puff",
-  image: "assets/plants/sporepuff.jpg",
-  cost: 150,
+  image: "assets/plants/sporepuff/sporepuff.png",
+  cost: 50,
+  // cost: 150,
+  fireDistance: 9,
   cooldown: 5000,
   hp: 280,
   fireRate: 3000,
+  hitCount: 99, // beam hits ALL demons in row
   description: "Confuses demons, making them walk backward.",
 
   levelStats: {
@@ -133,19 +136,18 @@ PlantRegistry.register({
   },
 
   onTick(row, col, plantData) {
+    if (!PlantRegistry.isDemonInRange(row, col, this.fireDistance)) return;
+
     const active = Demons.getActive();
     const cellEl = Grid.getCellEl(row, col);
     if (!cellEl) return;
     const cellRect = cellEl.getBoundingClientRect();
     const gridEl = document.getElementById("grid-container");
     const gridRect = gridEl ? gridEl.getBoundingClientRect() : null;
-
     const stats = this.getStats(plantData.level);
 
-    // Find closest demon in row ahead
-    let target = null;
-    let closestDist = Infinity;
-
+    let target = null,
+      closestDist = Infinity;
     active.forEach((d) => {
       if (d.dead || d.row !== row) return;
       const dRect = d.el.getBoundingClientRect();
@@ -157,7 +159,6 @@ PlantRegistry.register({
         target = d;
       }
     });
-
     if (!target) return;
 
     // Damage + confuse (reverse direction)

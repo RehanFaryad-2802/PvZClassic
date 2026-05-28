@@ -6,7 +6,7 @@ const BlockHunt = (() => {
       pips: 1,
       cols: 4,
       rows: 3,
-      time: 12,
+      time: 11,
       similarCount: 0,
       reward: { seeds: 1, coins: 5 },
     },
@@ -30,7 +30,7 @@ const BlockHunt = (() => {
     },
     {
       name: "Expert",
-      pips: 4,
+      pips: 5,
       cols: 7,
       rows: 5,
       time: 5,
@@ -39,23 +39,39 @@ const BlockHunt = (() => {
     },
     {
       name: "Insane",
-      pips: 5,
-      cols: 8,
-      rows: 6,
+      pips: 6,
+      cols: 16,
+      rows: 7,
       time: 4,
       similarCount: 8,
       reward: { seeds: 9, coins: 55 },
     },
   ];
 
-  // Emoji groups — similar looking ones grouped together for harder difficulty
   const EMOJI_GROUPS = [
-    ["🔴", "🟠", "🟡", "🟢", "🔵", "🟣"], // colored circles
-    ["😀", "😃", "😄", "😁", "😆", "😅"], // similar faces
-    ["🌟", "⭐", "✨", "💫", "🌠", "⚡"], // sparkles
-    ["🍎", "🍊", "🍋", "🍇", "🍓", "🍑"], // fruits
-    ["🐶", "🐱", "🐭", "🐹", "🐰", "🦊"], // animals
-    ["🌸", "🌺", "🌻", "🌹", "🌷", "💐"], // flowers
+    ["🔴", "🟠", "🟡", "🟢", "🔵", "🟣"],
+
+    ["🙂", "😊", "☺️", "😌", "😉", "😇"],
+
+    ["⭐", "🌟", "✨", "💫", "✴️", "🔆"],
+
+    ["❤️", "🩷", "🧡", "💛", "💚", "💙"],
+
+    ["🌑", "🌒", "🌓", "🌔", "🌕", "🌖"],
+
+    ["☀️", "🌤️", "⛅", "🌥️", "☁️", "🌦️"],
+
+    ["🌸", "🌺", "🌼", "🌻", "💮", "🏵️"],
+
+    ["🍎", "🍅", "🍑", "🍊", "🍒", "🍓"],
+
+    ["💎", "🔷", "🔹", "🔶", "🔸", "✨"],
+
+    ["🎵", "🎶", "🎼", "🎹", "🎧", "🎤"],
+
+    ["🎮", "🕹️", "🎲", "♟️", "🎯", "🧩"],
+
+    ["⚡", "🔥", "💥", "☄️", "🌠", "✨"],
   ];
 
   let screen = null;
@@ -84,6 +100,10 @@ const BlockHunt = (() => {
             <div class="bh-stat">
               <span class="stat-val" id="bh-round">1/5</span>
               <span class="stat-lbl">Round</span>
+            </div>
+            <div class="bh-objectives">
+              <div>🎯 Target Score: <span id="bh-target-score">0</span></div>
+              <div>📊 Max Rounds: <span id="bh-max-rounds">0</span></div>
             </div>
             <div class="bh-stat">
               <span class="stat-val" id="bh-time">12</span>
@@ -166,11 +186,19 @@ const BlockHunt = (() => {
     state = {
       score: 0,
       round: 1,
-      totalRounds: 5,
+      totalRounds: DIFFICULTIES[currentDiff].totalRounds,
       lives: 3,
       streak: 0,
       running: false,
     };
+    const TARGET_SCORE = [10, 18, 28, 40, 60];
+    const DIFFICULTIES = [
+      { name: "Easy", totalRounds: 12 },
+      { name: "Medium", totalRounds: 15 },
+      { name: "Hard", totalRounds: 18 },
+      { name: "Expert", totalRounds: 22 },
+      { name: "Insane", totalRounds: 28 },
+    ];
 
     // Update difficulty display
     const badge = document.getElementById("bh-diff-badge");
@@ -183,12 +211,18 @@ const BlockHunt = (() => {
     const nameEl = document.getElementById("bh-diff-name");
     if (nameEl) nameEl.textContent = diff.name;
 
+    const target = TARGET_SCORE[currentDiff];
+
+    document.getElementById("bh-target-score").textContent = target;
+    document.getElementById("bh-max-rounds").textContent = diff.totalRounds;
+
     updateHUD();
     startRound();
   }
 
   function startRound() {
-    if (state.round > state.totalRounds) {
+    const target = TARGET_SCORE[currentDiff];
+    if (state.round > state.totalRounds || state.score >= target) {
       endGame();
       return;
     }
@@ -215,12 +249,41 @@ const BlockHunt = (() => {
 
     const total = diff.cols * diff.rows;
     const targetIdx = Math.floor(Math.random() * total);
+    const decoyIndexes = new Set();
+
+    while (decoyIndexes.size < diff.similarCount) {
+      const idx = Math.floor(Math.random() * total);
+
+      if (idx !== targetIdx) {
+        decoyIndexes.add(idx);
+      }
+    }
 
     // Fill with emojis — use similar ones from same group for confusion
     const otherGroup = group.filter((e) => e !== targetEmoji);
     // Random emojis from other groups for easy filler
     const allOthers = EMOJI_GROUPS.flat().filter((e) => e !== targetEmoji);
 
+    // for (let i = 0; i < total; i++) {
+    //   const block = document.createElement("div");
+    //   block.className = "bh-block";
+
+    //   if (i === targetIdx) {
+    //     block.textContent = targetEmoji;
+    //     block.dataset.correct = "true";
+    //   } else {
+    //     // similarCount = how many similar-group emojis to use as decoys
+    //     // const useSimilar =
+    //     //   otherGroup.length > 0 &&
+    //     //   Math.random() < diff.similarCount / (diff.cols * diff.rows);
+    //     block.textContent = useSimilar
+    //       ? otherGroup[Math.floor(Math.random() * otherGroup.length)]
+    //       : allOthers[Math.floor(Math.random() * allOthers.length)];
+    //   }
+
+    //   block.addEventListener("click", () => onBlockClick(block));
+    //   gridEl.appendChild(block);
+    // }
     for (let i = 0; i < total; i++) {
       const block = document.createElement("div");
       block.className = "bh-block";
@@ -228,20 +291,17 @@ const BlockHunt = (() => {
       if (i === targetIdx) {
         block.textContent = targetEmoji;
         block.dataset.correct = "true";
+      } else if (decoyIndexes.has(i)) {
+        block.textContent =
+          otherGroup[Math.floor(Math.random() * otherGroup.length)];
       } else {
-        // similarCount = how many similar-group emojis to use as decoys
-        const useSimilar =
-          otherGroup.length > 0 &&
-          Math.random() < diff.similarCount / (diff.cols * diff.rows);
-        block.textContent = useSimilar
-          ? otherGroup[Math.floor(Math.random() * otherGroup.length)]
-          : allOthers[Math.floor(Math.random() * allOthers.length)];
+        block.textContent =
+          allOthers[Math.floor(Math.random() * allOthers.length)];
       }
 
       block.addEventListener("click", () => onBlockClick(block));
       gridEl.appendChild(block);
     }
-
     // Timer
     clearInterval(timerInterval);
     let timeLeft = diff.time;
@@ -294,7 +354,7 @@ const BlockHunt = (() => {
 
       // Points: base 1 + streak bonus
       const streakBonus = state.streak >= 3 ? 1 : 0;
-      const points = 1 + streakBonus;
+      const points = (1 + streakBonus) * (currentDiff + 1);
       state.score += points;
 
       updateHUD();
@@ -329,6 +389,12 @@ const BlockHunt = (() => {
     const s = document.getElementById("bh-score");
     const r = document.getElementById("bh-round");
     const l = document.getElementById("bh-lives");
+    const targetEl = document.getElementById("bh-target-score");
+
+    if (targetEl) {
+      const target = TARGET_SCORE[currentDiff];
+      targetEl.textContent = `${state.score} / ${target}`;
+    }
     if (s) s.textContent = state.score;
     if (r)
       r.textContent = `${Math.min(state.round, state.totalRounds)}/${state.totalRounds}`;

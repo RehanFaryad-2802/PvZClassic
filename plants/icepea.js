@@ -7,9 +7,11 @@
 PlantRegistry.register({
   id: "icepea",
   name: "Ice Peashooter",
-  image: "assets/plants/icepea.png",
+  image: "assets/plants/icepea/icepea.png",
+  fireDistance: 9,
   cost: 175,
   cooldown: 6000,
+  hitCount: 1,
   hp: 300,
   fireRate: 2000,
   description: "Fires icy balls that freeze demons completely.",
@@ -33,33 +35,12 @@ PlantRegistry.register({
   },
 
   onTick(row, col, plantData) {
-    const active  = Demons.getActive();
-    const cellEl  = Grid.getCellEl(row, col);
-    if (!cellEl) return;
-
-    const cellRect  = cellEl.getBoundingClientRect();
-    const arenaEl   = document.getElementById('screen-battle');
-    const arenaRect = arenaEl ? arenaEl.getBoundingClientRect() : null;
-
-    const gridEl   = document.getElementById('grid-container');
-    const gridRect = gridEl ? gridEl.getBoundingClientRect() : null;
-
-    const demonAhead = active.some(d => {
-      if (d.dead || d.row !== row) return false;
-      const dRect = d.el.getBoundingClientRect();
-      if (dRect.left <= cellRect.left) return false;
-      if (gridRect && dRect.left > gridRect.right) return false;
-      return true;
-    });
-
-    if (!demonAhead) return;
-
+    if (!PlantRegistry.isDemonInRange(row, col, this.fireDistance)) return;
     const stats = this.getStats(plantData.level);
     Projectiles.spawn("ice-pea", row, col, stats.damage, {
       slow: true,
       slowDuration: stats.slowDuration,
     });
   },
-
   onRemove(row, col) {},
 });

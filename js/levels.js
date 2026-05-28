@@ -15,7 +15,7 @@ const Levels = (() => {
       bgClass: "world-1",
       unlocked: true,
       levelCount: 30,
-      demons: ["imp", "bat"],
+      demons: ["imp", "ice"],
     },
     {
       id: 2,
@@ -125,7 +125,7 @@ const Levels = (() => {
       name: "Imp",
       image: "assets/demons/demon1_imp.png",
       hp: 80,
-      speed: 38, // px per second
+      speed: 50, // px per second
       damage: 40, // damage per bite tick
       biteRate: 800, // ms between bites
       special: "dodge", // 15% chance to dodge projectile
@@ -136,7 +136,7 @@ const Levels = (() => {
       name: "Shadow Bat",
       image: "assets/demons/demon3_bat.png",
       hp: 60,
-      speed: 55,
+      speed: 65,
       damage: 8,
       biteRate: 800,
       special: "flying", // skips row 1 plant (front row)
@@ -184,6 +184,14 @@ const Levels = (() => {
     { worldId: 1, levelIdx: 1, plantId: "sunflower" }, // W1 Level 2
     { worldId: 1, levelIdx: 6, plantId: "icepea" }, // W1 Level 7
     { worldId: 1, levelIdx: 12, plantId: "bonkchoy" }, // W1 Level 13
+    { worldId: 1, levelIdx: 0, plantId: "peashooter" },
+    { worldId: 1, levelIdx: 1, plantId: "sunflower" },
+    { worldId: 1, levelIdx: 2, plantId: "lilybeam" },
+    { worldId: 1, levelIdx: 3, plantId: "sporepuff" },
+    { worldId: 1, levelIdx: 4, plantId: "voltlotus" },
+    { worldId: 1, levelIdx: 5, plantId: "lavaburst" },
+    { worldId: 1, levelIdx: 6, plantId: "icepea" },
+    { worldId: 1, levelIdx: 12, plantId: "bonkchoy" },
     // Future plants added here
   ];
 
@@ -193,14 +201,15 @@ const Levels = (() => {
     // Future minigames added here
   ];
 
-  // ── Temporary plants for each level ───────────
-  // Plants given temporarily to play the level
-  // (not owned until level is WON)
   const LEVEL_TEMP_PLANTS = {
-    "1-0": ["peashooter"], // W1 L1: peashooter
-    "1-1": ["sunflower"], // W1 L2: sunflower (peashooter already owned)
-    "1-6": ["icepea"], // W1 L7: icepea
-    "1-12": ["bonkchoy"], // W1 L13: bonkchoy
+    "1-0": ["peashooter"],
+    "1-1": ["sunflower"],
+    "1-2": ["lilybeam"],
+    "1-3": ["sporepuff"],
+    "1-4": ["voltlotus"],
+    "1-5": ["lavaburst"],
+    "1-6": ["icepea"],
+    "1-12": ["bonkchoy"],
   };
 
   // ── Starting sun per level ─────────────────────
