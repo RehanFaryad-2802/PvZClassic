@@ -4,275 +4,78 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PvZ3 — Dev Test Panel</title>
+  <!-- CSS variables & minigame styles -->
+  <link rel="stylesheet" href="css/main.css"/>
+  <link rel="stylesheet" href="css/minigames.css"/>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      background: #0a0010;
-      color: #fff;
-      font-family: 'Segoe UI', sans-serif;
-      min-height: 100vh;
-    }
+    body { background:#0a0010; color:#fff; font-family:'Segoe UI',sans-serif; min-height:100vh; }
 
-    /* ── Header ── */
-    .dev-header {
-      background: linear-gradient(90deg, #1a0040, #0d0020);
-      border-bottom: 2px solid #7c3aed;
-      padding: 16px 24px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .dev-header h1 {
-      font-size: 22px;
-      color: #a855f7;
-      letter-spacing: 3px;
-      font-weight: 900;
-    }
-    .dev-badge {
-      background: #ef4444;
-      color: #fff;
-      font-size: 10px;
-      font-weight: 900;
-      padding: 3px 8px;
-      border-radius: 6px;
-      letter-spacing: 1px;
-    }
+    .dev-header { background:linear-gradient(90deg,#1a0040,#0d0020); border-bottom:2px solid #7c3aed; padding:16px 24px; display:flex; align-items:center; gap:16px; }
+    .dev-header h1 { font-size:22px; color:#a855f7; letter-spacing:3px; font-weight:900; }
+    .dev-badge { background:#ef4444; color:#fff; font-size:10px; font-weight:900; padding:3px 8px; border-radius:6px; letter-spacing:1px; }
 
-    /* ── Tabs ── */
-    .dev-tabs {
-      display: flex;
-      gap: 4px;
-      padding: 12px 24px 0;
-      border-bottom: 1px solid rgba(124,58,237,0.3);
-      background: rgba(0,0,0,0.3);
-    }
-    .dev-tab {
-      padding: 10px 20px;
-      border-radius: 8px 8px 0 0;
-      border: 1px solid rgba(124,58,237,0.3);
-      border-bottom: none;
-      background: rgba(124,58,237,0.1);
-      color: #9ca3af;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 700;
-      transition: all 0.15s;
-    }
-    .dev-tab.active {
-      background: #7c3aed;
-      color: #fff;
-      border-color: #7c3aed;
-    }
-    .dev-tab:hover:not(.active) { background: rgba(124,58,237,0.25); color: #fff; }
+    .dev-tabs { display:flex; gap:4px; padding:12px 24px 0; border-bottom:1px solid rgba(124,58,237,0.3); background:rgba(0,0,0,0.3); }
+    .dev-tab { padding:10px 20px; border-radius:8px 8px 0 0; border:1px solid rgba(124,58,237,0.3); border-bottom:none; background:rgba(124,58,237,0.1); color:#9ca3af; cursor:pointer; font-size:14px; font-weight:700; transition:all 0.15s; }
+    .dev-tab.active { background:#7c3aed; color:#fff; border-color:#7c3aed; }
+    .dev-tab:hover:not(.active) { background:rgba(124,58,237,0.25); color:#fff; }
 
-    /* ── Panels ── */
-    .dev-panel {
-      display: none;
-      padding: 24px;
-    }
-    .dev-panel.active { display: block; }
+    .dev-panel { display:none; padding:24px; }
+    .dev-panel.active { display:block; }
+    .section-title { font-size:13px; letter-spacing:3px; color:#6b7280; text-transform:uppercase; margin-bottom:14px; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.06); }
 
-    /* ── Section title ── */
-    .section-title {
-      font-size: 13px;
-      letter-spacing: 3px;
-      color: #6b7280;
-      text-transform: uppercase;
-      margin-bottom: 14px;
-      padding-bottom: 6px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
+    .plants-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:14px; margin-bottom:30px; }
+    .plant-test-card { background:linear-gradient(135deg,#1a0040,#0d0020); border:2px solid #4c1d95; border-radius:14px; padding:16px; display:flex; flex-direction:column; align-items:center; gap:8px; transition:border-color 0.15s; }
+    .plant-test-card:hover { border-color:#7c3aed; }
+    .plant-test-card img { width:80px; height:80px; object-fit:contain; filter:drop-shadow(0 0 8px rgba(168,85,247,0.4)); }
+    .plant-name { font-size:14px; font-weight:700; color:#e9d5ff; letter-spacing:1px; text-align:center; }
+    .plant-desc { font-size:11px; color:#6b7280; text-align:center; line-height:1.4; }
+    .plant-stat-row { display:flex; gap:6px; flex-wrap:wrap; justify-content:center; }
+    .plant-stat { background:rgba(124,58,237,0.2); border:1px solid rgba(124,58,237,0.3); border-radius:6px; padding:2px 7px; font-size:10px; color:#a78bfa; }
+    .btn-unlock { width:100%; background:linear-gradient(135deg,#16a34a,#15803d); border:none; border-radius:8px; color:#fff; font-size:12px; font-weight:700; padding:7px; cursor:pointer; transition:opacity 0.15s; }
+    .btn-unlock:hover { opacity:0.85; }
+    .btn-unlock.owned { background:linear-gradient(135deg,#1e3a8a,#1d4ed8); }
+    .btn-seeds { width:100%; background:linear-gradient(135deg,#92400e,#b45309); border:none; border-radius:8px; color:#fff; font-size:11px; font-weight:700; padding:5px; cursor:pointer; }
+    .plant-level-badge { background:#7c3aed; border-radius:20px; padding:2px 10px; font-size:11px; font-weight:800; }
 
-    /* ── Plant Cards ── */
-    .plants-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 14px;
-      margin-bottom: 30px;
-    }
-    .plant-test-card {
-      background: linear-gradient(135deg, #1a0040, #0d0020);
-      border: 2px solid #4c1d95;
-      border-radius: 14px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      transition: border-color 0.15s;
-    }
-    .plant-test-card:hover { border-color: #7c3aed; }
-    .plant-test-card img {
-      width: 80px; height: 80px;
-      object-fit: contain;
-      filter: drop-shadow(0 0 8px rgba(168,85,247,0.4));
-    }
-    .plant-name {
-      font-size: 14px; font-weight: 700;
-      color: #e9d5ff; letter-spacing: 1px;
-      text-align: center;
-    }
-    .plant-desc {
-      font-size: 11px; color: #6b7280;
-      text-align: center; line-height: 1.4;
-    }
-    .plant-stat-row {
-      display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;
-    }
-    .plant-stat {
-      background: rgba(124,58,237,0.2);
-      border: 1px solid rgba(124,58,237,0.3);
-      border-radius: 6px;
-      padding: 2px 7px;
-      font-size: 10px; color: #a78bfa;
-    }
-    .btn-unlock {
-      width: 100%;
-      background: linear-gradient(135deg, #16a34a, #15803d);
-      border: none; border-radius: 8px;
-      color: #fff; font-size: 12px; font-weight: 700;
-      padding: 7px; cursor: pointer;
-      transition: opacity 0.15s;
-    }
-    .btn-unlock:hover { opacity: 0.85; }
-    .btn-unlock.owned {
-      background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
-    }
-    .btn-seeds {
-      width: 100%;
-      background: linear-gradient(135deg, #92400e, #b45309);
-      border: none; border-radius: 8px;
-      color: #fff; font-size: 11px; font-weight: 700;
-      padding: 5px; cursor: pointer;
-    }
-    .plant-level-badge {
-      background: #7c3aed;
-      border-radius: 20px;
-      padding: 2px 10px;
-      font-size: 11px; font-weight: 800;
-    }
+    .minigames-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px; }
+    .mg-card { background:linear-gradient(135deg,#001a10,#002020); border:2px solid #065f46; border-radius:14px; padding:20px; display:flex; flex-direction:column; gap:10px; transition:border-color 0.15s; }
+    .mg-card:hover { border-color:#10b981; }
+    .mg-icon { font-size:40px; text-align:center; }
+    .mg-name { font-size:16px; font-weight:800; color:#6ee7b7; text-align:center; letter-spacing:1px; }
+    .mg-desc { font-size:11px; color:#6b7280; text-align:center; line-height:1.5; }
+    .mg-diff-btns { display:flex; flex-direction:column; gap:5px; margin-top:4px; }
+    .btn-mg { border:none; border-radius:8px; color:#fff; font-size:12px; font-weight:700; padding:8px; cursor:pointer; transition:opacity 0.15s; }
+    .btn-mg:hover { opacity:0.85; }
+    .btn-mg.easy   { background:#16a34a; }
+    .btn-mg.medium { background:#d97706; }
+    .btn-mg.hard   { background:#dc2626; }
+    .btn-mg.expert { background:#7c3aed; }
+    .btn-mg.insane { background:#000; border:1px solid #ef4444; }
 
-    /* ── Minigame Cards ── */
-    .minigames-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 14px;
-    }
-    .mg-card {
-      background: linear-gradient(135deg, #001a10, #002020);
-      border: 2px solid #065f46;
-      border-radius: 14px;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      transition: border-color 0.15s;
-    }
-    .mg-card:hover { border-color: #10b981; }
-    .mg-icon { font-size: 40px; text-align: center; }
-    .mg-name {
-      font-size: 16px; font-weight: 800;
-      color: #6ee7b7; text-align: center;
-      letter-spacing: 1px;
-    }
-    .mg-desc { font-size: 11px; color: #6b7280; text-align: center; line-height: 1.5; }
-    .mg-diff-btns {
-      display: flex; flex-direction: column; gap: 5px; margin-top: 4px;
-    }
-    .btn-mg {
-      border: none; border-radius: 8px;
-      color: #fff; font-size: 12px; font-weight: 700;
-      padding: 8px; cursor: pointer;
-      transition: opacity 0.15s;
-    }
-    .btn-mg:hover { opacity: 0.85; }
-    .btn-mg.easy   { background: #16a34a; }
-    .btn-mg.medium { background: #d97706; }
-    .btn-mg.hard   { background: #dc2626; }
-    .btn-mg.expert { background: #7c3aed; }
-    .btn-mg.insane { background: #000; border: 1px solid #ef4444; }
+    .cheat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px; }
+    .cheat-card { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:8px; }
+    .cheat-title { font-size:13px; font-weight:700; color:#fbbf24; }
+    .cheat-desc  { font-size:11px; color:#6b7280; }
+    .btn-cheat { border:none; border-radius:8px; padding:8px 12px; font-size:12px; font-weight:700; cursor:pointer; background:rgba(251,191,36,0.2); border:1px solid rgba(251,191,36,0.4); color:#fbbf24; transition:all 0.15s; }
+    .btn-cheat:hover { background:rgba(251,191,36,0.35); }
+    .btn-danger { background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.4); color:#f87171; }
+    .btn-danger:hover { background:rgba(239,68,68,0.3); }
 
-    /* ── Cheats panel ── */
-    .cheat-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 12px;
-    }
-    .cheat-card {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 12px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .cheat-title { font-size: 13px; font-weight: 700; color: #fbbf24; }
-    .cheat-desc  { font-size: 11px; color: #6b7280; }
-    .btn-cheat {
-      border: none; border-radius: 8px; padding: 8px 12px;
-      font-size: 12px; font-weight: 700; cursor: pointer;
-      background: rgba(251,191,36,0.2);
-      border: 1px solid rgba(251,191,36,0.4);
-      color: #fbbf24;
-      transition: all 0.15s;
-    }
-    .btn-cheat:hover { background: rgba(251,191,36,0.35); }
-    .btn-danger {
-      background: rgba(239,68,68,0.15);
-      border-color: rgba(239,68,68,0.4);
-      color: #f87171;
-    }
-    .btn-danger:hover { background: rgba(239,68,68,0.3); }
+    #dev-toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#7c3aed; color:#fff; font-weight:700; padding:10px 24px; border-radius:20px; font-size:14px; box-shadow:0 4px 20px rgba(124,58,237,0.5); z-index:9999; opacity:0; transition:opacity 0.3s; pointer-events:none; }
+    #dev-toast.show { opacity:1; }
 
-    /* ── Toast ── */
-    #dev-toast {
-      position: fixed;
-      bottom: 24px; left: 50%;
-      transform: translateX(-50%);
-      background: #7c3aed;
-      color: #fff; font-weight: 700;
-      padding: 10px 24px;
-      border-radius: 20px;
-      font-size: 14px;
-      box-shadow: 0 4px 20px rgba(124,58,237,0.5);
-      z-index: 9999;
-      opacity: 0;
-      transition: opacity 0.3s;
-      pointer-events: none;
-    }
-    #dev-toast.show { opacity: 1; }
+    /* ── Fullscreen minigame overlay ── */
+    #mg-container { position:fixed; inset:0; background:#0a0010; z-index:9000; display:none; flex-direction:column; }
+    #mg-container.open { display:flex; }
+    #mg-topbar { flex-shrink:0; display:flex; align-items:center; justify-content:space-between; padding:10px 16px; background:rgba(0,0,0,0.6); border-bottom:1px solid rgba(255,255,255,0.08); z-index:10; }
+    #mg-title  { font-size:16px; font-weight:700; color:#a855f7; letter-spacing:2px; }
+    #mg-close  { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:14px; border-radius:10px; padding:6px 14px; cursor:pointer; }
+    /* mg-inner fills the rest — minigame renders here */
+    #mg-inner  { flex:1; position:relative; overflow:hidden; min-height:0; }
 
-    /* ── Minigame container ── */
-    #mg-container {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.95);
-      z-index: 9000;
-      display: none;
-      flex-direction: column;
-    }
-    #mg-container.open { display: flex; }
-    #mg-close {
-      position: absolute;
-      top: 16px; right: 16px;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.2);
-      color: #fff; font-size: 18px;
-      border-radius: 10px; padding: 6px 14px;
-      cursor: pointer; z-index: 10;
-    }
-    #mg-inner { flex: 1; position: relative; overflow: hidden; }
-
-    /* Coins input row */
-    .input-row {
-      display: flex; gap: 8px; align-items: center;
-    }
-    .dev-input {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 8px; padding: 6px 12px;
-      color: #fff; font-size: 14px; width: 100px;
-    }
+    .input-row { display:flex; gap:8px; align-items:center; }
+    .dev-input { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:6px 12px; color:#fff; font-size:14px; width:100px; }
   </style>
 </head>
 <body>
@@ -283,26 +86,22 @@
   <span style="margin-left:auto;font-size:12px;color:#6b7280">Open game: <a href="index.html" style="color:#a78bfa">index.html</a></span>
 </div>
 
-<!-- Tabs -->
 <div class="dev-tabs">
   <div class="dev-tab active" data-tab="plants">🌿 Plants</div>
   <div class="dev-tab" data-tab="minigames">🎮 Minigames</div>
   <div class="dev-tab" data-tab="cheats">⚡ Cheats</div>
 </div>
 
-<!-- Plants Panel -->
 <div class="dev-panel active" id="tab-plants">
   <div class="section-title">All Plants — Click to unlock/level up for testing</div>
   <div class="plants-grid" id="plants-grid"></div>
 </div>
 
-<!-- Minigames Panel -->
 <div class="dev-panel" id="tab-minigames">
   <div class="section-title">All Minigames — Pick difficulty and play</div>
   <div class="minigames-grid" id="minigames-grid"></div>
 </div>
 
-<!-- Cheats Panel -->
 <div class="dev-panel" id="tab-cheats">
   <div class="section-title">Save & Cheat Controls</div>
   <div class="cheat-grid">
@@ -360,15 +159,17 @@
   </div>
 </div>
 
-<!-- Minigame fullscreen container -->
+<!-- Fullscreen minigame overlay -->
 <div id="mg-container">
-  <button id="mg-close" onclick="closeMg()">✕ Close</button>
+  <div id="mg-topbar">
+    <span id="mg-title">Minigame</span>
+    <button id="mg-close" onclick="closeMg()">✕ Close</button>
+  </div>
   <div id="mg-inner"></div>
 </div>
 
 <div id="dev-toast"></div>
 
-<!-- Load all game scripts so we can access Player, Seeds etc -->
 <script src="js/player.js"></script>
 <script src="js/seeds.js"></script>
 <script src="js/coins.js"></script>
@@ -383,139 +184,109 @@
 <script src="plants/voltlotus.js"></script>
 <script src="plants/lavaburst.js"></script>
 
-<script>
+<!-- Load ALL minigames upfront so globals are ready immediately -->
+<script src="js/minigames/block_hunt.js"></script>
+<script src="js/minigames/bomb_ball.js"></script>
+<script src="js/minigames/sharp_shooters.js"></script>
 
-// ── Init ──────────────────────────────────────────
+<script>
 Player.load();
 
+// Stub UI so minigames don't crash when they call UI.showScreen / UI.updateCoinDisplays
+window.UI = {
+  showScreen: () => closeMg(),
+  updateCoinDisplays: () => {}
+};
+
 const PLANT_DEFS = [
-  { id:'peashooter', name:'Peashooter',    image:'assets/plants/peashooter/peashooter.png', desc:'Fires peas at demons.', cost:100  },
-  { id:'sunflower',  name:'Sunflower',     image:'assets/plants/sunflower/sunflower.webm', desc:'Produces sun.', cost:50, isVideo:true },
-  { id:'icepea',     name:'Ice Peashooter',image:'assets/plants/icepea/icepea.png',     desc:'Fires icy balls that slow.', cost:175 },
-  { id:'bonkchoy',   name:'Bonk Choy',     image:'assets/plants/bonkchoy/bonkchoy.png',   desc:'Punches demons in melee.', cost:150 },
-  { id:'lilybeam',   name:'Lily Beam',     image:'assets/plants/lilybeam/lilybeam.png',   desc:'Freezes all in lane.', cost:200  },
-  { id:'sporepuff',  name:'Spore Puff',    image:'assets/plants/sporepuff/sporepuff.png',  desc:'Confuses demons to walk back.', cost:150 },
-  { id:'voltlotus',  name:'Volt Lotus',    image:'assets/plants/voltlotus/voltlotus.png',  desc:'Chain lightning. 5th shot = 3x.', cost:225 },
-  { id:'lavaburst',  name:'Lava Burst',    image:'assets/plants/lavaburst/lavaburst.png',  desc:'Lava DoT pool. Rages at low HP.', cost:175 },
+  { id:'peashooter', name:'Peashooter',     image:'assets/plants/peashooter/peashooter.png', desc:'Fires peas at demons.',           cost:100 },
+  { id:'sunflower',  name:'Sunflower',      image:'assets/plants/sunflower/sunflower.webm',  desc:'Produces sun.',                  cost:50, isVideo:true },
+  { id:'icepea',     name:'Ice Peashooter', image:'assets/plants/icepea/icepea.png',         desc:'Fires icy balls that slow.',     cost:175 },
+  { id:'bonkchoy',   name:'Bonk Choy',      image:'assets/plants/bonkchoy/bonkchoy.png',     desc:'Punches demons in melee.',       cost:150 },
+  { id:'lilybeam',   name:'Lily Beam',      image:'assets/plants/lilybeam/lilybeam.png',     desc:'Freezes all in lane.',           cost:200 },
+  { id:'sporepuff',  name:'Spore Puff',     image:'assets/plants/sporepuff/sporepuff.png',   desc:'Confuses demons to walk back.',  cost:150 },
+  { id:'voltlotus',  name:'Volt Lotus',     image:'assets/plants/voltlotus/voltlotus.png',   desc:'Chain lightning. 5th shot=3x.', cost:225 },
+  { id:'lavaburst',  name:'Lava Burst',     image:'assets/plants/lavaburst/lavaburst.png',   desc:'Lava DoT pool. Rages at low HP.',cost:175 },
 ];
 
 const MINIGAME_DEFS = [
-  {
-    id: 'blockhunt',
-    name: 'Block Hunt',
-    icon: '🔍',
-    desc: 'Find the glowing block among decoys before time runs out!',
-    file: 'js/minigames/block_hunt.js',
-    globalName: 'BlockHunt',
-    difficulties: ['Easy','Medium','Hard','Expert','Insane'],
-  },
-  {
-    id: 'bombball',
-    name: 'Bomb Ball',
-    icon: '💣',
-    desc: 'Catch falling bombs before they hit the ground. Miss too many = game over!',
-    file: 'js/minigames/bomb_ball.js',
-    globalName: 'BombBall',
-    difficulties: ['Easy','Medium','Hard','Expert','Insane'],
-  },
-  {
-    id: 'sharpshooters',
-    name: 'Sharp Shooters',
-    icon: '🎯',
-    desc: 'Click demons before they escape across the screen. Pure reflex!',
-    file: 'js/minigames/sharp_shooters.js',
-    globalName: 'SharpShooters',
-    difficulties: ['Easy','Medium','Hard','Expert','Insane'],
-  },
+  { id:'blockhunt',     name:'Block Hunt',     icon:'🔍', desc:'Find the glowing block among decoys before time runs out!',        globalName:'BlockHunt',     difficulties:['Easy','Medium','Hard','Expert','Insane'] },
+  { id:'bombball',      name:'Bomb Ball',      icon:'💣', desc:'Catch falling bombs before they hit the ground!',                 globalName:'BombBall',      difficulties:['Easy','Medium','Hard','Expert','Insane'] },
+  { id:'sharpshooters', name:'Sharp Shooters', icon:'🎯', desc:'Click demons before they escape across the screen. Pure reflex!', globalName:'SharpShooters', difficulties:['Easy','Medium','Hard','Expert','Insane'] },
 ];
 
-// ── Build Plants Panel ────────────────────────────
+// ── Plants ────────────────────────────────────────
 function buildPlants() {
   const grid = document.getElementById('plants-grid');
   grid.innerHTML = '';
-
   PLANT_DEFS.forEach(def => {
-    const pp    = Player.getPlant(def.id) || { owned: false, level: 1, seeds: 0 };
+    const pp    = Player.getPlant(def.id) || { owned:false, level:1, seeds:0 };
     const level = pp.level || 1;
     const seeds = pp.seeds || 0;
     const owned = pp.owned;
-
-    const card = document.createElement('div');
+    const card  = document.createElement('div');
     card.className = 'plant-test-card';
-
     const imgHtml = def.isVideo
       ? `<video src="${def.image}" autoplay loop muted style="width:80px;height:80px;object-fit:contain"></video>`
       : `<img src="${def.image}" alt="${def.name}"/>`;
-
     card.innerHTML = `
       ${imgHtml}
       <div class="plant-name">${def.name}</div>
-      <div class="plant-level-badge">${owned ? `Lv.${level}` : '🔒 Locked'}</div>
+      <div class="plant-level-badge">${owned?`Lv.${level}`:'🔒 Locked'}</div>
       <div class="plant-desc">${def.desc}</div>
       <div class="plant-stat-row">
         <span class="plant-stat">☀️${def.cost}</span>
         <span class="plant-stat">🌱${seeds} seeds</span>
       </div>
       <button class="btn-unlock ${owned?'owned':''}" onclick="toggleOwn('${def.id}')">
-        ${owned ? '✅ Owned — Click to Reset' : '🔓 Unlock Plant'}
+        ${owned?'✅ Owned — Click to Reset':'🔓 Unlock Plant'}
       </button>
-      ${owned ? `
-        <button class="btn-seeds" onclick="addSeedsTo('${def.id}', 100)">+100 Seeds</button>
+      ${owned?`
+        <button class="btn-seeds" onclick="addSeedsTo('${def.id}',100)">+100 Seeds</button>
         <button class="btn-seeds" style="background:#1e3a8a" onclick="levelUpPlant('${def.id}')">⬆️ Level Up (Lv.${level}→${Math.min(level+1,15)})</button>
-      ` : ''}
+      `:''}
     `;
     grid.appendChild(card);
   });
 }
 
 function toggleOwn(id) {
-  const pp = Player.getPlant(id);
+  const pp   = Player.getPlant(id);
+  const save = JSON.parse(localStorage.getItem('pvz3_save'));
   if (pp && pp.owned) {
-    // Reset
-    const save = JSON.parse(localStorage.getItem('pvz3_save'));
-    save.plants[id] = { owned: false, level: 1, seeds: 0 };
-    localStorage.setItem('pvz3_save', JSON.stringify(save));
-    Player.load();
+    save.plants[id] = { owned:false, level:1, seeds:0 };
   } else {
-   const save = JSON.parse(localStorage.getItem('pvz3_save'));
     if (!save.plants[id]) save.plants[id] = {};
     save.plants[id].owned = true;
     save.plants[id].level = save.plants[id].level || 1;
     save.plants[id].seeds = save.plants[id].seeds || 0;
-    localStorage.setItem('pvz3_save', JSON.stringify(save));
-    Player.load();
   }
-  toast(`${id} updated!`);
-  buildPlants();
+  localStorage.setItem('pvz3_save', JSON.stringify(save));
+  Player.load(); toast(`${id} updated!`); buildPlants();
 }
 
 function addSeedsTo(id, amount) {
   const save = JSON.parse(localStorage.getItem('pvz3_save'));
-  if (!save.plants[id]) save.plants[id] = { owned: true, level: 1, seeds: 0 };
-  save.plants[id].seeds = (save.plants[id].seeds || 0) + amount;
+  if (!save.plants[id]) save.plants[id] = { owned:true, level:1, seeds:0 };
+  save.plants[id].seeds = (save.plants[id].seeds||0) + amount;
   localStorage.setItem('pvz3_save', JSON.stringify(save));
-  Player.load();
-  toast(`+${amount} seeds to ${id}`);
-  buildPlants();
+  Player.load(); toast(`+${amount} seeds to ${id}`); buildPlants();
 }
 
 function levelUpPlant(id) {
   const save = JSON.parse(localStorage.getItem('pvz3_save'));
   if (!save.plants[id]) return;
-  save.plants[id].level = Math.min((save.plants[id].level || 1) + 1, 15);
+  save.plants[id].level = Math.min((save.plants[id].level||1)+1, 15);
   localStorage.setItem('pvz3_save', JSON.stringify(save));
-  Player.load();
-  toast(`${id} leveled up!`);
-  buildPlants();
+  Player.load(); toast(`${id} leveled up!`); buildPlants();
 }
 
-// ── Build Minigames Panel ─────────────────────────
+// ── Minigames ─────────────────────────────────────
 function buildMinigames() {
   const grid = document.getElementById('minigames-grid');
   grid.innerHTML = '';
-
+  const diffColors = ['easy','medium','hard','expert','insane'];
   MINIGAME_DEFS.forEach(mg => {
-    const diffColors = ['easy','medium','hard','expert','insane'];
     const card = document.createElement('div');
     card.className = 'mg-card';
     card.innerHTML = `
@@ -524,171 +295,113 @@ function buildMinigames() {
       <div class="mg-desc">${mg.desc}</div>
       <div class="mg-diff-btns">
         ${mg.difficulties.map((d,i) => `
-          <button class="btn-mg ${diffColors[i]}" onclick="launchMg('${mg.id}','${mg.file}','${mg.globalName}',${i})">
+          <button class="btn-mg ${diffColors[i]}"
+            onclick="launchMg('${mg.globalName}','${mg.name}',${i})">
             ${'★'.repeat(i+1)} ${d}
-          </button>
-        `).join('')}
+          </button>`).join('')}
       </div>
     `;
     grid.appendChild(card);
   });
 }
 
-// ── Launch Minigame ───────────────────────────────
-const loadedScripts = {};
-function launchMg(id, file, globalName, diffIdx) {
+// ── Launch — no dynamic script loading needed (all loaded upfront) ─────────
+function launchMg(globalName, mgName, diffIdx) {
+  const mg = window[globalName];
+  if (!mg) { toast(`❌ ${globalName} not found! Check console.`); return; }
+
+  // Prepare container
   const container = document.getElementById('mg-container');
   const inner     = document.getElementById('mg-inner');
+  const title     = document.getElementById('mg-title');
   inner.innerHTML = '';
+  title.textContent = mgName;
   container.classList.add('open');
 
-  function startGame() {
-    const mg = window[globalName];
-    if (!mg) { toast(`❌ ${globalName} not found!`); return; }
-
-    // Mock reward callback
-    const onReward = (r) => toast(`🎉 Reward: ${r.seeds||0} seeds, ${r.coins||0} coins`);
-    const onClose  = () => closeMg();
-
-    try {
-      mg.init(inner, diffIdx, { onReward, onClose });
-    } catch(e) {
-      inner.innerHTML = `<div style="color:#ef4444;padding:40px;text-align:center">
+  try {
+    // init(containerEl, diffIdx) — our new signature
+    mg.init(inner, diffIdx);
+  } catch(e) {
+    inner.innerHTML = `
+      <div style="color:#ef4444;padding:40px;text-align:center">
         <div style="font-size:48px">❌</div>
-        <div style="margin-top:16px;font-size:16px">Error launching ${globalName}:</div>
-        <div style="margin-top:8px;font-size:12px;color:#9ca3af">${e.message}</div>
+        <div style="margin-top:16px;font-size:16px">Error launching <b>${globalName}</b></div>
+        <pre style="margin-top:8px;font-size:11px;color:#9ca3af;text-align:left;background:rgba(255,255,255,0.05);padding:12px;border-radius:8px;overflow:auto">${e.stack||e.message}</pre>
       </div>`;
-      console.error(e);
-    }
-  }
-
-  if (loadedScripts[file]) {
-    startGame();
-  } else {
-    const script = document.createElement('script');
-    script.src   = file;
-    script.onload = () => { loadedScripts[file] = true; startGame(); };
-    script.onerror = () => {
-      inner.innerHTML = `<div style="color:#ef4444;padding:40px;text-align:center">
-        <div style="font-size:48px">❌</div>
-        <div style="margin-top:16px">Could not load <b>${file}</b></div>
-        <div style="font-size:12px;color:#9ca3af;margin-top:8px">
-          Make sure the file exists in your game folder.
-        </div>
-      </div>`;
-    };
-    document.head.appendChild(script);
+    console.error(e);
   }
 }
 
 function closeMg() {
-  const container = document.getElementById('mg-container');
-  const inner     = document.getElementById('mg-inner');
-
-  // Try to call stop/destroy on active minigame
+  // Stop whichever minigame is active
   ['BlockHunt','BombBall','SharpShooters'].forEach(name => {
     if (window[name]?.stop) try { window[name].stop(); } catch(e) {}
-    if (window[name]?.destroy) try { window[name].destroy(); } catch(e) {}
   });
-
-  inner.innerHTML = '';
-  container.classList.remove('open');
+  document.getElementById('mg-inner').innerHTML = '';
+  document.getElementById('mg-container').classList.remove('open');
 }
 
 // ── Cheats ────────────────────────────────────────
 function addCoins() {
-  const amount = parseInt(document.getElementById('coin-amount').value) || 500;
+  const amount = parseInt(document.getElementById('coin-amount').value)||500;
   const save = JSON.parse(localStorage.getItem('pvz3_save'));
-  save.coins = (save.coins || 0) + amount;
+  save.coins = (save.coins||0) + amount;
   localStorage.setItem('pvz3_save', JSON.stringify(save));
-  Player.load();
-  toast(`+${amount} coins added!`);
+  Player.load(); toast(`+${amount} coins added!`);
 }
-
 function addSeeds() {
-  const amount = parseInt(document.getElementById('seed-amount').value) || 100;
+  const amount = parseInt(document.getElementById('seed-amount').value)||100;
   const save = JSON.parse(localStorage.getItem('pvz3_save'));
   Object.keys(save.plants).forEach(id => {
-    if (save.plants[id].owned) {
-      save.plants[id].seeds = (save.plants[id].seeds || 0) + amount;
-    }
+    if (save.plants[id].owned) save.plants[id].seeds = (save.plants[id].seeds||0)+amount;
   });
   localStorage.setItem('pvz3_save', JSON.stringify(save));
-  Player.load();
-  toast(`+${amount} seeds to all owned plants!`);
-  buildPlants();
+  Player.load(); toast(`+${amount} seeds to all owned plants!`); buildPlants();
 }
-
 function unlockAllPlants() {
   const save = JSON.parse(localStorage.getItem('pvz3_save'));
   PLANT_DEFS.forEach(def => {
     if (!save.plants[def.id]) save.plants[def.id] = {};
     save.plants[def.id].owned = true;
-    save.plants[def.id].level = save.plants[def.id].level || 1;
-    save.plants[def.id].seeds = save.plants[def.id].seeds || 0;
+    save.plants[def.id].level = save.plants[def.id].level||1;
+    save.plants[def.id].seeds = save.plants[def.id].seeds||0;
   });
   localStorage.setItem('pvz3_save', JSON.stringify(save));
-  Player.load();
-  toast('All plants unlocked!');
-  buildPlants();
+  Player.load(); toast('All plants unlocked!'); buildPlants();
 }
-
 function maxAllPlants() {
   const save = JSON.parse(localStorage.getItem('pvz3_save'));
-  Object.keys(save.plants).forEach(id => {
-    if (save.plants[id].owned) save.plants[id].level = 15;
-  });
+  Object.keys(save.plants).forEach(id => { if (save.plants[id].owned) save.plants[id].level=15; });
   localStorage.setItem('pvz3_save', JSON.stringify(save));
-  Player.load();
-  toast('All owned plants maxed to Lv.15!');
-  buildPlants();
+  Player.load(); toast('All owned plants maxed to Lv.15!'); buildPlants();
 }
-
 function unlockAllWorlds() {
   const save = JSON.parse(localStorage.getItem('pvz3_save'));
-  for (let i = 1; i <= 10; i++) {
-    if (save.worldProgress[i] === -1 || save.worldProgress[i] === undefined) {
-      save.worldProgress[i] = 0;
-    }
-  }
+  for (let i=1;i<=10;i++) { if (save.worldProgress[i]===-1||save.worldProgress[i]===undefined) save.worldProgress[i]=0; }
   localStorage.setItem('pvz3_save', JSON.stringify(save));
-  Player.load();
-  toast('All worlds unlocked!');
+  Player.load(); toast('All worlds unlocked!');
 }
-
 function unlockAllMinigames() {
   const save = JSON.parse(localStorage.getItem('pvz3_save'));
   if (!save.minigames) save.minigames = {};
-  ['blockhunt','bombball','sharpshooters'].forEach(id => {
-    save.minigames[id] = true;
-  });
+  ['blockhunt','bombball','sharpshooters'].forEach(id => { save.minigames[id]=true; });
   localStorage.setItem('pvz3_save', JSON.stringify(save));
-  Player.load();
-  toast('All minigames unlocked!');
+  Player.load(); toast('All minigames unlocked!');
 }
-
 function completeWorld(worldId) {
   const save  = JSON.parse(localStorage.getItem('pvz3_save'));
   const world = Levels.getWorld(worldId);
   if (!world) return;
-  if (!save.levelStars[worldId]) save.levelStars[worldId] = {};
-  for (let i = 0; i < world.levelCount; i++) {
-    save.levelStars[worldId][i] = 3;
-  }
-  save.worldProgress[worldId] = world.levelCount;
+  if (!save.levelStars[worldId]) save.levelStars[worldId]={};
+  for (let i=0;i<world.levelCount;i++) save.levelStars[worldId][i]=3;
+  save.worldProgress[worldId]=world.levelCount;
   localStorage.setItem('pvz3_save', JSON.stringify(save));
-  Player.load();
-  toast(`World ${worldId} completed with 3 stars!`);
+  Player.load(); toast(`World ${worldId} completed with 3 stars!`);
 }
-
 function resetSave() {
   if (!confirm('Reset ALL save data? This cannot be undone!')) return;
-  localStorage.clear();
-  Player.load();
-  toast('Save reset!');
-  buildPlants();
+  localStorage.clear(); Player.load(); toast('Save reset!'); buildPlants();
 }
-
 function viewSave() {
   const save = JSON.parse(localStorage.getItem('pvz3_save'));
   console.log('PvZ3 Save Data:', save);
@@ -701,19 +414,17 @@ document.querySelectorAll('.dev-tab').forEach(tab => {
     document.querySelectorAll('.dev-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.dev-panel').forEach(p => p.classList.remove('active'));
     tab.classList.add('active');
-    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
   });
 });
 
 // ── Toast ─────────────────────────────────────────
 function toast(msg) {
   const t = document.getElementById('dev-toast');
-  t.textContent = msg;
-  t.classList.add('show');
+  t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-// ── Init ──────────────────────────────────────────
 buildPlants();
 buildMinigames();
 </script>
