@@ -10,116 +10,116 @@ PlantRegistry.register({
   cost: 50,
   // cost: 150,
   fireDistance: 9,
-  cooldown: 5000,
+  cooldown: 1000,
   hp: 280,
-  fireRate: 3000,
-  hitCount: 99, // beam hits ALL demons in row
+  fireRate: 1000,
+  hitCount: 99,
   description: "Confuses demons, making them walk backward.",
 
   levelStats: {
     1: {
       hp: 280,
-      fireRate: 3000,
-      damage: 12,
+      fireRate: 4000,
+      damage: 5,
       confuseDuration: 2000,
-      auraCells: 2,
+      auraCells: 6,
     },
     2: {
       hp: 340,
-      fireRate: 2800,
-      damage: 16,
-      confuseDuration: 2300,
+      fireRate: 3800,
+      damage: 6,
+      confuseDuration: 2200,
       auraCells: 2,
     },
     3: {
       hp: 410,
-      fireRate: 2600,
-      damage: 20,
-      confuseDuration: 2600,
+      fireRate: 3600,
+      damage: 7,
+      confuseDuration: 2400,
       auraCells: 2,
     },
     4: {
       hp: 490,
-      fireRate: 2400,
-      damage: 25,
-      confuseDuration: 3000,
+      fireRate: 3400,
+      damage: 8,
+      confuseDuration: 2600,
       auraCells: 3,
     },
     5: {
       hp: 580,
-      fireRate: 2200,
-      damage: 31,
-      confuseDuration: 3400,
+      fireRate: 3200,
+      damage: 9,
+      confuseDuration: 2800,
       auraCells: 3,
     },
     6: {
       hp: 680,
-      fireRate: 2000,
-      damage: 38,
-      confuseDuration: 3800,
+      fireRate: 3000,
+      damage: 10,
+      confuseDuration: 3000,
       auraCells: 3,
     },
     7: {
       hp: 790,
-      fireRate: 1800,
-      damage: 46,
-      confuseDuration: 4200,
+      fireRate: 2800,
+      damage: 11,
+      confuseDuration: 3300,
       auraCells: 4,
     },
     8: {
       hp: 910,
-      fireRate: 1650,
-      damage: 55,
-      confuseDuration: 4600,
+      fireRate: 2500,
+      damage: 12,
+      confuseDuration: 3500,
       auraCells: 4,
     },
     9: {
       hp: 1040,
-      fireRate: 1500,
-      damage: 65,
-      confuseDuration: 5000,
+      fireRate: 2200,
+      damage: 13,
+      confuseDuration: 3800,
       auraCells: 4,
     },
     10: {
       hp: 1200,
-      fireRate: 1380,
-      damage: 77,
-      confuseDuration: 5500,
+      fireRate: 1900,
+      damage: 15,
+      confuseDuration: 4150,
       auraCells: 5,
     },
     11: {
       hp: 1370,
-      fireRate: 1260,
-      damage: 90,
-      confuseDuration: 6000,
+      fireRate: 1900,
+      damage: 17,
+      confuseDuration: 4150,
       auraCells: 5,
     },
     12: {
       hp: 1550,
-      fireRate: 1150,
-      damage: 105,
-      confuseDuration: 6500,
+      fireRate: 1900,
+      damage: 19,
+      confuseDuration: 4150,
       auraCells: 5,
     },
     13: {
       hp: 1740,
-      fireRate: 1050,
-      damage: 122,
-      confuseDuration: 7000,
+      fireRate: 1900,
+      damage: 21,
+      confuseDuration: 4150,
       auraCells: 6,
     },
     14: {
       hp: 1950,
-      fireRate: 960,
-      damage: 141,
-      confuseDuration: 7500,
+      fireRate: 1900,
+      damage: 23,
+      confuseDuration: 4150,
       auraCells: 6,
     },
     15: {
       hp: 2200,
-      fireRate: 880,
-      damage: 163,
-      confuseDuration: 8000,
+      fireRate: 1900,
+      damage: 26,
+      confuseDuration: 4150,
       auraCells: 6,
     },
   },
@@ -133,40 +133,55 @@ PlantRegistry.register({
     const stats = this.getStats(plantData.level);
     plantData.maxHp = stats.hp;
     plantData.hp = stats.hp;
+    plantData.lastFireTime = 0;
   },
 
   onTick(row, col, plantData) {
+    const stats = this.getStats(plantData.level);
+
+    const now = Date.now();
+
+    if (!plantData.lastFireTime) plantData.lastFireTime = 0;
+
+    // fire rate control
+    if (now - plantData.lastFireTime < stats.fireRate) return;
+
     if (!PlantRegistry.isDemonInRange(row, col, this.fireDistance)) return;
 
     const active = Demons.getActive();
     const cellEl = Grid.getCellEl(row, col);
     if (!cellEl) return;
+
     const cellRect = cellEl.getBoundingClientRect();
     const gridEl = document.getElementById("grid-container");
     const gridRect = gridEl ? gridEl.getBoundingClientRect() : null;
-    const stats = this.getStats(plantData.level);
 
     let target = null,
       closestDist = Infinity;
+
     active.forEach((d) => {
       if (d.dead || d.row !== row) return;
       const dRect = d.el.getBoundingClientRect();
       if (dRect.left <= cellRect.left) return;
       if (gridRect && dRect.left > gridRect.right) return;
+
       const dist = dRect.left - cellRect.right;
       if (dist < closestDist) {
         closestDist = dist;
         target = d;
       }
     });
+
     if (!target) return;
 
-    // Damage + confuse (reverse direction)
     Demons.damage(target, stats.damage);
-    confuseDemon(target, stats.confuseDuration);
-
-    // Spore visual
+    setTimeout(() => {
+      confuseDemon(target, stats.confuseDuration);
+    }, 400);
     spawnSpore(row, col, target);
+
+    // update fire time AFTER attack
+    plantData.lastFireTime = now;
   },
 
   onRemove(row, col) {},

@@ -770,6 +770,20 @@ html, body {
   flex: 1;
   padding-bottom: 20px;
 }
+/* Collection Grid Upgrade Button */
+.cc-grid-upgrade-btn {
+  transition: all 0.2s ease;
+}
+
+.cc-grid-upgrade-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.5) !important;
+  filter: brightness(1.1);
+}
+
+.cc-grid-upgrade-btn:active {
+  transform: translateY(0);
+}
 .collection-card {
   background: linear-gradient(135deg, #1a0040, #0a0020);
   border: 2px solid var(--purple);
@@ -894,10 +908,10 @@ html, body {
 }
 .shop-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(12, 1fr);
   gap: 14px;
   overflow-y: auto;
-  flex: 1;
+  flex: 0 0 1;
   padding-bottom: 20px;
 }
 .shop-item {

@@ -93,34 +93,35 @@ const PlantRegistry = (() => {
   function clearTimers() {
     for (const id in timers) timers[id] = {};
   }
-  function isDemonInRange(row, col, fireDistance) {
-    const active = Demons.getActive();
-    const cellEl = Grid.getCellEl(row, col);
-    if (!cellEl) return false;
+  // function isDemonInRange(row, col, fireDistance) {
+  //   const active = Demons.getActive();
+  //   const cellEl = Grid.getCellEl(row, col);
+  //   if (!cellEl) return false;
 
-    const cellRect = cellEl.getBoundingClientRect();
-    const gridEl = document.getElementById("grid-container");
-    const gridRect = gridEl ? gridEl.getBoundingClientRect() : null;
-    if (!gridRect) return false;
+  //   const cellRect = cellEl.getBoundingClientRect();
+  //   const gridEl = document.getElementById("grid-container");
+  //   const gridRect = gridEl ? gridEl.getBoundingClientRect() : null;
+  //   if (!gridRect) return false;
 
-    const cellW = gridRect.width / Grid.getCols();
-    const maxDist = fireDistance * cellW; // convert cells → pixels
+  //   const cellW = gridRect.width / Grid.getCols();
+  //   const maxDist = fireDistance * cellW; // convert cells → pixels
 
-    return active.some((d) => {
-      if (d.dead || d.row !== row) return false;
-      const dRect = d.el.getBoundingClientRect();
-      // Demon must be to the RIGHT of plant
-      if (dRect.left <= cellRect.left) return false;
-      // Demon must be within fireDistance cells
-      const dist = dRect.left - cellRect.right;
-      if (dist > maxDist) return false;
-      // Demon must be visible on screen (inside grid)
-      if (dRect.left > gridRect.right) return false;
-      return true;
-    });
-  }
+  //   return active.some((d) => {
+  //     if (d.dead || d.row !== row) return false;
+  //     const dRect = d.el.getBoundingClientRect();
+  //     // Demon must be to the RIGHT of plant
+  //     if (dRect.left <= cellRect.left) return false;
+  //     // Demon must be within fireDistance cells
+  //     const dist = dRect.left - cellRect.right;
+  //     if (dist > maxDist) return false;
+  //     // Demon must be visible on screen (inside grid)
+  //     if (dRect.left > gridRect.right) return false;
+  //     return true;
+  //   });
+  // }
 
   // Shared range check — returns true if any demon in row is within fireDistance cells
+
   function isDemonInRange(row, col, fireDistance) {
     const active = Demons.getActive();
     const cellEl = Grid.getCellEl(row, col);
@@ -187,14 +188,14 @@ const PlantRegistry = (() => {
     isDemonInRange,
     getDemonsInRange,
   };
-  return {
-    register,
-    get,
-    getAll,
-    onPlace,
-    onRemove,
-    tick,
-    clearTimers,
-    isDemonInRange,
-  };
+  // return {
+  //   register,
+  //   get,
+  //   getAll,
+  //   onPlace,
+  //   onRemove,
+  //   tick,
+  //   clearTimers,
+  //   isDemonInRange,
+  // };
 })();

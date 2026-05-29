@@ -621,29 +621,56 @@ const UI = (() => {
       const pp = Player.getPlant(def.id);
       const owned = pp && pp.owned;
       const level = pp ? pp.level : 1;
+      const seeds = pp ? pp.seeds : 0;
+      const maxLevel = level >= 15;
+      const nextCost = Seeds.getLevelUpCost(level);
+      const seedProgress = nextCost ? Math.min(seeds / nextCost, 1) : 1;
 
       const card = document.createElement("div");
       card.className = "cc-grid-card" + (owned ? "" : " locked");
       card.style.cssText =
-        "cursor:pointer;align-items:center;text-align:center;padding:14px 8px;";
+        "cursor:pointer;align-items:center;text-align:center;padding:14px 8px;position:relative;";
+
       card.innerHTML = `
-        <div style="position:relative;display:inline-block;margin-bottom:8px">
-          <img src="${def.image}" alt="${def.name}"
-            style="width:80px;height:80px;object-fit:contain;
-            ${owned ? "" : "filter:grayscale(1) brightness(0.3)"}"/>
-          <div class="cc-level-badge" style="${owned ? "" : "background:#444"}">
-            ${owned ? `Lv.${level}` : "🔒"}
+      <div style="position:relative;display:inline-block;margin-bottom:8px">
+        <img src="${def.image}" alt="${def.name}"
+          style="width:80px;height:80px;object-fit:contain;
+          ${owned ? "" : "filter:grayscale(1) brightness(0.3)"}"/>
+        <div class="cc-level-badge" style="${owned ? "" : "background:#444"}">
+          ${owned ? `Lv.${level}` : "🔒"}
+        </div>
+      </div>
+      <div class="cc-grid-name">${def.name}</div>
+      
+      ${
+        owned
+          ? `
+        <!-- Seed Progress Bar -->
+        <div style="margin-top:6px;padding:0 4px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+            <span style="font-size:9px;color:var(--gray);">🌱 Seeds</span>
+            <span style="font-size:9px;color:${maxLevel ? "var(--gold)" : "var(--green)"};font-weight:700;">
+              ${maxLevel ? "MAX" : `${seeds}/${nextCost}`}
+            </span>
+          </div>
+          <div style="background:rgba(255,255,255,0.1);height:6px;border-radius:3px;overflow:hidden;">
+            <div style="background:${maxLevel ? "var(--gold)" : seeds >= (nextCost || 0) ? "var(--green)" : "var(--green)"};height:100%;width:${maxLevel ? 100 : seedProgress * 100}%;
+              transition:width 0.3s ease;"></div>
           </div>
         </div>
-        <div class="cc-grid-name">${def.name}</div>
-      `;
+      `
+          : ""
+      }
+    `;
 
       if (owned) {
         card.addEventListener("click", () => openPlantDetail(def.id));
       }
+
       grid.appendChild(card);
     });
   }
+
   function openPlantDetail(plantId) {
     const def = PlantRegistry.get(plantId);
     const pp = Player.getPlant(plantId);
@@ -1452,8 +1479,8 @@ const UI = (() => {
     document
       .getElementById("btn-start-battle")
       .addEventListener("click", () => {
-        if (selectedPlants.length === 0) {
-          showToast("Select at least 1 plant!");
+        if (selectedPlants.length < 5) {
+          showToast("Select all 5 plants before starting! 🌿");
           return;
         }
         const tempPlants = Levels.getTempPlants(

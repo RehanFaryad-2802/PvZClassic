@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PvZ3 — Battle Sandbox</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <link rel="stylesheet" href="css/game.css"/>
+  <style>
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Segoe UI',sans-serif; overflow:hidden; background:#1a2a1a; color:#1a1a1a; }
+    #sandbox-layout { display:flex; flex-direction:column; height:100vh; width:100vw; }
+
+    /* top bar */
+    #sandbox-topbar { display:flex;align-items:center;gap:6px;padding:6px 12px;background:linear-gradient(90deg,#2d5a1b,#3a7a22,#2d5a1b);border-bottom:3px solid #5aaa28;flex-shrink:0;z-index:100;flex-wrap:wrap;box-shadow:0 3px 12px rgba(0,0,0,0.4); }
+    #sandbox-topbar h1 { font-size:15px;font-weight:900;color:#c8ff44;letter-spacing:2px;text-shadow:0 2px 4px rgba(0,0,0,0.5);margin-right:4px; }
+    .sb-btn { border:none;border-radius:8px;padding:6px 11px;font-size:11px;font-weight:800;cursor:pointer;transition:transform 0.1s,filter 0.1s;box-shadow:0 2px 0 rgba(0,0,0,0.3); }
+    .sb-btn:hover  { filter:brightness(1.1); }
+    .sb-btn:active { transform:translateY(1px);box-shadow:0 1px 0 rgba(0,0,0,0.2); }
+    .sb-btn.red    { background:linear-gradient(180deg,#ff5555,#cc2222);color:#fff; }
+    .sb-btn.green  { background:linear-gradient(180deg,#55dd22,#339911);color:#fff; }
+    .sb-btn.blue   { background:linear-gradient(180deg,#44aaff,#1166cc);color:#fff; }
+    .sb-btn.orange { background:linear-gradient(180deg,#ffaa22,#cc6600);color:#fff; }
+    .sb-btn.gray   { background:linear-gradient(180deg,#888,#555);color:#fff; }
+    .sb-btn.purple { background:linear-gradient(180deg,#bb55ff,#7722cc);color:#fff; }
+    .sb-btn.active-mode { outline:3px solid #fff;outline-offset:2px; }
+    .kb-hint { font-size:9px;background:rgba(0,0,0,0.35);border-radius:4px;padding:1px 4px;margin-left:3px;opacity:0.8; }
+    #sb-sun-display { background:linear-gradient(180deg,#ffe566,#ffbb00);border:2px solid #cc8800;border-radius:16px;padding:4px 12px;font-weight:900;font-size:13px;color:#663300;box-shadow:0 2px 0 rgba(0,0,0,0.3); }
+    #sb-mode-badge { background:rgba(0,0,0,0.4);border-radius:8px;padding:3px 9px;font-size:10px;font-weight:700;color:#c8ff44;border:1px solid rgba(200,255,68,0.3);margin-left:auto; }
+    #sb-speed-badge { background:rgba(0,0,0,0.4);border-radius:8px;padding:3px 9px;font-size:10px;font-weight:700;color:#ffcc44;border:1px solid rgba(255,204,68,0.3); }
+
+    /* shortcut overlay */
+    #shortcut-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:9999;display:none;align-items:center;justify-content:center; }
+    #shortcut-overlay.show { display:flex; }
+    .shortcut-box { background:#1a2a1a;border:3px solid #5aaa28;border-radius:18px;padding:24px 32px;max-width:560px;width:95%;box-shadow:0 8px 40px rgba(0,0,0,0.7); }
+    .shortcut-box h2 { color:#c8ff44;font-size:18px;margin-bottom:14px;letter-spacing:2px; }
+    .shortcut-grid { display:grid;grid-template-columns:1fr 1fr;gap:5px 20px; }
+    .shortcut-row { display:flex;align-items:center;gap:8px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.07); }
+    .shortcut-key { background:#2d5a1b;border:1px solid #5aaa28;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:900;color:#c8ff44;min-width:34px;text-align:center; }
+    .shortcut-desc { font-size:11px;color:#ccc; }
+
+    /* main */
+    #sandbox-main { display:flex;flex:1;overflow:hidden; }
+    #sandbox-battle { flex:1;position:relative;overflow:hidden; }
+
+    /* side panel */
+    #sandbox-panel { width:275px;flex-shrink:0;background:#f0ede4;border-left:3px solid #8b6914;display:flex;flex-direction:column;overflow:hidden; }
+    .panel-tabs { display:flex;flex-shrink:0;background:#2d5a1b; }
+    .panel-tab { flex:1;padding:8px 3px;text-align:center;font-size:10px;font-weight:800;cursor:pointer;color:rgba(255,255,255,0.6);border-bottom:3px solid transparent;transition:all 0.15s;letter-spacing:0.5px; }
+    .panel-tab.active { color:#c8ff44;border-bottom-color:#c8ff44;background:rgba(0,0,0,0.2); }
+    .panel-tab:hover:not(.active) { color:#fff;background:rgba(255,255,255,0.1); }
+    .panel-content { flex:1;overflow-y:auto;padding:8px;display:none; }
+    .panel-content.active { display:block; }
+    .panel-content::-webkit-scrollbar { width:4px; }
+    .panel-content::-webkit-scrollbar-thumb { background:#8b6914;border-radius:2px; }
+    #selected-info { padding:5px 10px;background:linear-gradient(90deg,#fff8e1,#fffde7);border-bottom:2px solid #f9a825;font-size:10px;font-weight:700;color:#5d4037;flex-shrink:0;min-height:26px; }
+
+    /* entity cards */
+    .entity-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:5px; }
+    .entity-btn { background:#fff;border:2px solid #ddd;border-radius:9px;padding:6px 3px;text-align:center;cursor:pointer;transition:all 0.15s;display:flex;flex-direction:column;align-items:center;gap:3px;box-shadow:0 2px 0 #ccc; }
+    .entity-btn:hover { border-color:#5aaa28;background:#f0fff0;transform:translateY(-1px); }
+    .entity-btn.selected-entity { border-color:#22aa44;background:#e8ffe8;box-shadow:0 0 0 3px rgba(34,170,68,0.3); }
+    .entity-btn.selected-demon  { border-color:#cc2222;background:#ffe8e8;box-shadow:0 0 0 3px rgba(204,34,34,0.3); }
+    .entity-btn img { width:44px;height:44px;object-fit:contain; }
+    .entity-btn .ename { font-size:9px;font-weight:800;color:#333; }
+    .entity-btn .ecost { font-size:9px;color:#886600;font-weight:700; }
+    .entity-btn .ehp   { font-size:9px;color:#cc2222; }
+    .entity-btn .ekb   { font-size:8px;color:#888;background:#eee;border-radius:4px;padding:1px 3px; }
+
+    /* props */
+    .prop-group { margin-bottom:10px; }
+    .prop-group-title { font-size:9px;letter-spacing:2px;color:#888;text-transform:uppercase;margin-bottom:4px;padding-bottom:2px;border-bottom:1px solid #ddd;font-weight:800; }
+    .prop-row { display:flex;align-items:center;gap:4px;margin-bottom:3px; }
+    .prop-label { font-size:10px;color:#555;font-weight:700;width:90px;flex-shrink:0; }
+    .prop-input { flex:1;background:#fff;border:1px solid #ccc;border-radius:5px;padding:3px 6px;color:#222;font-size:11px;min-width:0; }
+    .prop-input:focus { outline:none;border-color:#5aaa28;background:#f8fff8; }
+    .prop-apply { background:linear-gradient(180deg,#55dd22,#339911);border:none;border-radius:5px;color:#fff;font-size:11px;padding:3px 7px;cursor:pointer;font-weight:800; }
+    .prop-action-btn { width:100%;margin-top:4px;border:none;border-radius:7px;padding:7px;cursor:pointer;font-size:11px;font-weight:800;box-shadow:0 2px 0 rgba(0,0,0,0.3); }
+    .prop-action-btn.danger { background:linear-gradient(180deg,#ff5555,#cc2222);color:#fff; }
+    .prop-action-btn.info   { background:linear-gradient(180deg,#44aaff,#1166cc);color:#fff; }
+    .props-entity-header { display:flex;align-items:center;gap:8px;padding:7px;background:#fff;border-radius:9px;border:2px solid #ddd;margin-bottom:8px; }
+    .props-entity-header img { width:44px;height:44px;object-fit:contain; }
+    .props-entity-name { font-size:12px;font-weight:800;color:#222; }
+    .props-entity-sub  { font-size:9px;color:#888;margin-top:1px; }
+    .stat-bar-row { display:flex;align-items:center;gap:5px;margin-bottom:2px; }
+    .stat-bar-label { font-size:9px;color:#888;width:50px;flex-shrink:0; }
+    .stat-bar-bg { flex:1;height:5px;background:#e0e0e0;border-radius:3px;overflow:hidden; }
+    .stat-bar-fill { height:100%;border-radius:3px;transition:width 0.3s; }
+
+    /* ── LIVE STATUS HUD ── */
+    #live-hud {
+      position:absolute; bottom:10px; left:10px;
+      display:flex; flex-direction:column; gap:4px;
+      pointer-events:none; z-index:500;
+      max-width:220px;
+    }
+    .live-card {
+      background:rgba(0,0,0,0.75);
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.15);
+      padding:6px 10px;
+      backdrop-filter:blur(4px);
+      font-size:10px;
+      color:#fff;
+      min-width:160px;
+    }
+    .live-card-title {
+      font-size:9px; font-weight:900; letter-spacing:1px;
+      text-transform:uppercase; margin-bottom:4px;
+      padding-bottom:3px; border-bottom:1px solid rgba(255,255,255,0.12);
+    }
+    .live-card-title.plant { color:#88ff44; }
+    .live-card-title.demon { color:#ff6644; }
+    .live-stat { display:flex;align-items:center;gap:5px;margin-bottom:2px; }
+    .live-stat-label { color:rgba(255,255,255,0.5);width:70px;flex-shrink:0;font-size:9px; }
+    .live-stat-val { color:#fff;font-weight:700;font-size:10px; }
+    .live-bar-wrap { flex:1;height:5px;background:rgba(255,255,255,0.15);border-radius:3px;overflow:hidden; }
+    .live-bar-fill { height:100%;border-radius:3px;transition:width 0.15s; }
+    .live-no-entity { color:rgba(255,255,255,0.3);font-size:9px;padding:4px 0; }
+
+    /* speed presets */
+    .speed-presets { display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px; }
+    .preset-btn { border:1px solid #ccc;background:#fff;border-radius:5px;padding:3px 7px;font-size:10px;font-weight:700;cursor:pointer; }
+    .preset-btn:hover { background:#e8ffe8;border-color:#5aaa28; }
+
+    /* spawn indicator */
+    #spawn-mode-indicator { position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#2d5a1b,#3a7a22);border:2px solid #c8ff44;border-radius:20px;padding:9px 22px;font-size:13px;font-weight:800;color:#c8ff44;pointer-events:none;z-index:9999;opacity:0;transition:opacity 0.3s;box-shadow:0 4px 20px rgba(0,0,0,0.5); }
+    #spawn-mode-indicator.show { opacity:1; }
+
+    /* mode cursor */
+    #grid-container.mode-plant .grid-cell:hover { background:rgba(85,221,34,0.35)!important;cursor:crosshair; }
+    #grid-container.mode-demon .grid-cell:hover { background:rgba(255,55,55,0.35)!important;cursor:crosshair; }
+    .grid-cell::after { content:'+';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;opacity:0;transition:opacity 0.1s;pointer-events:none; }
+    .grid-cell.occupied::after { content:''; }
+    #grid-container.mode-plant .grid-cell:not(.occupied)::after { opacity:0.7;color:#22cc44; }
+    #grid-container.mode-demon .grid-cell::after { opacity:0.7;color:#ff4422; }
+    .plant-entity { filter:drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
+
+    select.prop-input { cursor:pointer; }
+    .wave-row { display:flex;align-items:center;gap:4px;margin-bottom:4px; }
+  </style>
+</head>
+<body>
+<div id="sandbox-layout">
+
+  <div id="sandbox-topbar">
+    <h1>⚔️ SANDBOX</h1>
+    <div id="sb-sun-display">☀️ <span id="sb-sun">500</span></div>
+    <button class="sb-btn green" onclick="addSun(100)">+100☀️<span class="kb-hint">S</span></button>
+    <button class="sb-btn green" onclick="addSun(500)">+500☀️<span class="kb-hint">⇧S</span></button>
+    <button class="sb-btn green active-mode" id="btn-spawn-mode-plant" onclick="setSpawnMode('plant')">🌿 Plant<span class="kb-hint">P</span></button>
+    <button class="sb-btn red"    id="btn-spawn-mode-demon" onclick="setSpawnMode('demon')">👹 Demon<span class="kb-hint">D</span></button>
+    <button class="sb-btn orange" onclick="clearAll()">🗑️ Clear<span class="kb-hint">C</span></button>
+    <button class="sb-btn blue"   id="btn-pause" onclick="togglePause()">⏸️ Pause<span class="kb-hint">Spc</span></button>
+    <button class="sb-btn purple" onclick="spawnWave()">🌊 Wave<span class="kb-hint">W</span></button>
+    <button class="sb-btn orange" onclick="spawnAllRows()">👹×5<span class="kb-hint">A</span></button>
+    <button class="sb-btn gray"   onclick="toggleShortcuts()">⌨️ Keys<span class="kb-hint">?</span></button>
+    <a href="index.html" class="sb-btn gray" style="text-decoration:none">← Game</a>
+    <div id="sb-speed-badge">⚡ 1×</div>
+    <div id="sb-mode-badge">🌿 PLANT MODE</div>
+  </div>
+
+  <div id="sandbox-main">
+    <div id="sandbox-battle">
+      <div class="arena-bg world-1" id="sb-arena-bg" style="position:absolute;inset:0"></div>
+      <div class="battle-arena" id="battle-arena" style="position:absolute;inset:0">
+        <div class="lawnmowers-layer"  id="lawnmowers-layer"></div>
+        <div class="grid-container"    id="grid-container"></div>
+        <div class="demons-layer"      id="demons-layer"></div>
+        <div class="projectiles-layer" id="projectiles-layer"></div>
+        <div class="effects-layer"     id="effects-layer"></div>
+      </div>
+
+      <!-- LIVE HUD overlay -->
+      <div id="live-hud">
+        <div class="live-card" id="live-plant-card">
+          <div class="live-card-title plant">🌿 Plant Status</div>
+          <div class="live-no-entity" id="live-plant-none">No plant selected</div>
+          <div id="live-plant-stats" style="display:none"></div>
+        </div>
+        <div class="live-card" id="live-demon-card">
+          <div class="live-card-title demon">👹 Demon Status</div>
+          <div class="live-no-entity" id="live-demon-none">No demon selected</div>
+          <div id="live-demon-stats" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Side panel -->
+    <div id="sandbox-panel">
+      <div id="selected-info">Click a cell to place • Select entity below</div>
+      <div class="panel-tabs">
+        <div class="panel-tab active" data-tab="plants" onclick="switchTab('plants')">🌿 Plants</div>
+        <div class="panel-tab"        data-tab="demons" onclick="switchTab('demons')">👹 Demons</div>
+        <div class="panel-tab"        data-tab="wave"   onclick="switchTab('wave')">🌊 Wave</div>
+        <div class="panel-tab"        data-tab="props"  onclick="switchTab('props')">⚙️ Props</div>
+      </div>
+
+      <div class="panel-content active" id="tab-plants">
+        <div class="prop-group-title" style="margin-bottom:7px">Select plant <span style="color:#888;font-weight:400">(1-8 keys)</span></div>
+        <div class="entity-grid" id="plant-picker-grid"></div>
+      </div>
+
+      <div class="panel-content" id="tab-demons">
+        <div class="prop-group-title" style="margin-bottom:7px">Select demon <span style="color:#888;font-weight:400">(Q,E,R,T)</span></div>
+        <div style="margin-bottom:8px">
+          <div class="prop-group-title">Speed Presets</div>
+          <div class="speed-presets">
+            <button class="preset-btn" onclick="setDemonSpeedPreset(0.5)">½× Slow</button>
+            <button class="preset-btn" onclick="setDemonSpeedPreset(1)">1× Normal</button>
+            <button class="preset-btn" onclick="setDemonSpeedPreset(2)">2× Fast</button>
+            <button class="preset-btn" onclick="setDemonSpeedPreset(4)">4× Insane</button>
+          </div>
+        </div>
+        <div class="entity-grid" id="demon-picker-grid"></div>
+      </div>
+
+      <div class="panel-content" id="tab-wave">
+        <div class="prop-group-title" style="margin-bottom:7px">Wave Spawner</div>
+        <div class="prop-group">
+          <div class="prop-group-title">Demon Type</div>
+          <select class="prop-input" id="wave-demon-type" style="width:100%;margin-bottom:5px">
+            <option value="imp">Imp</option>
+            <option value="bat">Shadow Bat</option>
+            <option value="ice">Ice Gargoyle</option>
+            <option value="armored">Armored Demon</option>
+            <option value="brute">Brute</option>
+          </select>
+        </div>
+        <div class="prop-row"><span class="prop-label">Count / row</span><input class="prop-input" id="wave-count" type="number" value="3" min="1" max="20"/></div>
+        <div class="prop-row"><span class="prop-label">Delay (ms)</span><input class="prop-input" id="wave-delay" type="number" value="500" min="0" max="5000" step="100"/></div>
+        <div class="prop-group" style="margin-top:6px">
+          <div class="prop-group-title">Rows</div>
+          <div id="wave-row-checks" style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px"></div>
+        </div>
+        <div class="prop-group">
+          <div class="prop-group-title">Special</div>
+          <select class="prop-input" id="wave-special" style="width:100%">
+            <option value="">none</option>
+            <option value="dodge">dodge</option><option value="armor">armor</option>
+            <option value="charge">charge</option><option value="regen">regen</option>
+            <option value="shield">shield</option><option value="ghost">ghost</option>
+            <option value="berserk">berserk</option><option value="explode">explode</option>
+            <option value="split">split</option><option value="flying">flying</option>
+            <option value="lifesteal">lifesteal</option><option value="tank">tank</option>
+          </select>
+        </div>
+        <button class="sb-btn red"    style="width:100%;font-size:13px;padding:9px;margin-top:3px" onclick="spawnWaveFromPanel()">🌊 Spawn Wave!</button>
+        <button class="sb-btn orange" style="width:100%;font-size:11px;padding:7px;margin-top:5px" onclick="spawnAllRows()">👹 All 5 Rows Now</button>
+      </div>
+
+      <div class="panel-content" id="tab-props">
+        <div id="props-placeholder" style="text-align:center;padding:24px 10px">
+          <div style="font-size:36px;margin-bottom:8px">⚙️</div>
+          <div style="font-size:11px;font-weight:800;color:#555;margin-bottom:4px">No entity selected</div>
+          <div style="font-size:10px;color:#888">Click a plant on the grid<br/>or a demon to edit properties</div>
+        </div>
+        <div id="props-editor" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="spawn-mode-indicator"></div>
+
+<!-- Shortcut overlay -->
+<div id="shortcut-overlay">
+  <div class="shortcut-box">
+    <h2>⌨️ Keyboard Shortcuts</h2>
+    <div class="shortcut-grid">
+      <div class="shortcut-row"><span class="shortcut-key">Space</span><span class="shortcut-desc">Pause / Resume</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">P / D</span><span class="shortcut-desc">Plant / Demon mode</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">S</span><span class="shortcut-desc">+100 Sun</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">⇧S</span><span class="shortcut-desc">+500 Sun</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">C</span><span class="shortcut-desc">Clear all</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">W</span><span class="shortcut-desc">Spawn wave (all rows)</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">A</span><span class="shortcut-desc">Spawn demon in all rows</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">F</span><span class="shortcut-desc">Freeze all demons 3s</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">K</span><span class="shortcut-desc">Kill all demons</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">H</span><span class="shortcut-desc">Heal all plants</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">+ / -</span><span class="shortcut-desc">Speed up / slow down</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">0</span><span class="shortcut-desc">Reset game speed</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">1–8</span><span class="shortcut-desc">Select plant 1–8</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">Q,E,R,T</span><span class="shortcut-desc">Select demon</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">Del</span><span class="shortcut-desc">Remove selected plant</span></div>
+      <div class="shortcut-row"><span class="shortcut-key">?</span><span class="shortcut-desc">Toggle this help</span></div>
+    </div>
+    <button class="sb-btn gray" style="width:100%;margin-top:14px" onclick="toggleShortcuts()">Close</button>
+  </div>
+</div>
+
+<!-- scripts -->
+<script src="js/player.js"></script>
+<script src="js/seeds.js"></script>
+<script src="js/coins.js"></script>
+<script src="js/levels.js"></script>
+<script src="js/grid.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/projectiles.js"></script>
+<script src="js/demons.js"></script>
+<script src="js/plant_registry.js"></script>
+<script src="plants/sunflower.js"></script>
+<script src="plants/peashooter.js"></script>
+<script src="plants/icepea.js"></script>
+<script src="plants/bonkchoy.js"></script>
+<script src="plants/lilybeam.js"></script>
+<script src="plants/sporepuff.js"></script>
+<script src="plants/voltlotus.js"></script>
+<script src="plants/lavaburst.js"></script>
+
+<script>
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let sun           = 500;
+let spawnMode     = 'plant';
+let selectedPlant = null;
+let selectedDemon = null;
+let paused        = false;
+let gameSpeed     = 1;
+let lastTime      = 0;
+let selectedCell  = null;  // {row,col} for Delete key
+
+// live-preview tracking
+let liveWatchPlant = null;  // { plantData, row, col }
+let liveWatchDemon = null;  // demon object ref
+
+let plantOrder = [];
+const demonOrder = ['imp','bat','ice','armored','brute'];
+const demonOverrides = {};
+
+// ── Sun ──────────────────────────────────────
+function addSun(n) {
+  sun += n;
+  document.getElementById('sb-sun').textContent = sun;
+}
+
+// ── Pause ────────────────────────────────────
+function togglePause() {
+  paused = !paused;
+  const btn = document.getElementById('btn-pause');
+  btn.innerHTML = (paused?'▶️ Resume':'⏸️ Pause')+'<span class="kb-hint">Spc</span>';
+  btn.style.background = paused
+    ? 'linear-gradient(180deg,#ffaa22,#cc6600)'
+    : 'linear-gradient(180deg,#44aaff,#1166cc)';
+  showIndicator(paused?'⏸️ PAUSED':'▶️ Resumed');
+}
+
+// ── Clear ─────────────────────────────────────
+function clearAll() {
+  Grid.clear(); Demons.clear();
+  if (Projectiles.clear) Projectiles.clear();
+  document.getElementById('effects-layer').innerHTML='';
+  liveWatchPlant=null; liveWatchDemon=null;
+  updateLiveHUD();
+  showIndicator('🗑️ Cleared');
+}
+
+// ── Speed ─────────────────────────────────────
+function setGameSpeed(mult) {
+  gameSpeed = Math.max(0.25, Math.min(8, mult));
+  document.getElementById('sb-speed-badge').textContent = `⚡ ${gameSpeed}×`;
+  showIndicator(`⚡ Speed: ${gameSpeed}×`);
+}
+
+// ── Demon speed preset ────────────────────────
+function setDemonSpeedPreset(mult) {
+  const stats = Levels.getDemonStats(selectedDemon);
+  if (!stats) return;
+  demonOverrides[selectedDemon] = demonOverrides[selectedDemon]||{};
+  demonOverrides[selectedDemon].speed = stats.speed * mult;
+  showIndicator(`⚡ ${stats.name} speed ${mult}×`);
+}
+
+// ── Spawn mode ────────────────────────────────
+function setSpawnMode(mode) {
+  spawnMode = mode;
+  document.getElementById('btn-spawn-mode-plant').classList.toggle('active-mode',mode==='plant');
+  document.getElementById('btn-spawn-mode-demon').classList.toggle('active-mode',mode==='demon');
+  const badge = document.getElementById('sb-mode-badge');
+  const gridEl= document.getElementById('grid-container');
+  if (mode==='plant') {
+    gridEl.className='grid-container mode-plant';
+    badge.textContent='🌿 PLANT MODE'; badge.style.color='#c8ff44';
+    switchTab('plants');
+    showIndicator('🌿 Click cell to place plant');
+  } else {
+    gridEl.className='grid-container mode-demon';
+    badge.textContent='👹 DEMON MODE'; badge.style.color='#ff8888';
+    switchTab('demons');
+    showIndicator('👹 Click row to spawn demon');
+  }
+}
+
+function showIndicator(msg) {
+  const el=document.getElementById('spawn-mode-indicator');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),2000);
+}
+
+// ── Tabs ──────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.panel-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  document.querySelectorAll('.panel-content').forEach(p=>p.classList.toggle('active',p.id==='tab-'+tab));
+}
+
+function toggleShortcuts() {
+  document.getElementById('shortcut-overlay').classList.toggle('show');
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+function init() {
+  try { Player.load(); } catch(e) { try { Player.init(); } catch(e2){} }
+
+  Grid.init(document.getElementById('grid-container'));
+
+  const arenaEl   = document.getElementById('battle-arena');
+  const arenaRect = arenaEl.getBoundingClientRect();
+  Demons.init(document.getElementById('demons-layer'), document.getElementById('effects-layer'), arenaRect, {
+    onReachedEnd: ()  => showIndicator('💀 Demon reached end!'),
+    onAllDefeated: () => showIndicator('🎉 All demons defeated!'),
+  });
+  Projectiles.init(document.getElementById('projectiles-layer'), arenaRect);
+
+  patchGridCells();
+  buildPlantPicker();
+  buildDemonPicker();
+  buildWaveRowChecks();
+
+  selectedPlant='peashooter'; selectedDemon='imp';
+  requestAnimationFrame(gameLoop);
+}
+
+// ── Game loop ─────────────────────────────────
+function gameLoop(ts) {
+  if (!paused) {
+    const dt = Math.min((ts-lastTime)/1000,0.1) * gameSpeed;
+    lastTime = ts;
+    Demons.setArenaRect(document.getElementById('battle-arena').getBoundingClientRect());
+    PlantRegistry.tick(dt);
+    Demons.update(dt);
+    Projectiles.update(dt);
+    updateLiveHUD();
+  } else {
+    lastTime = ts;
+    updateLiveHUD();  // still update even paused so numbers show
+  }
+  requestAnimationFrame(gameLoop);
+}
+
+// ══════════════════════════════════════════════
+// LIVE HUD — updates every frame automatically
+// ══════════════════════════════════════════════
+function updateLiveHUD() {
+  // ── Plant ──
+  const pStats = document.getElementById('live-plant-stats');
+  const pNone  = document.getElementById('live-plant-none');
+
+  if (liveWatchPlant) {
+    const { plantData, row, col } = liveWatchPlant;
+
+    // Check it still exists on grid
+    const stillThere = Grid.getPlant && Grid.getPlant(row, col);
+    if (!stillThere || stillThere !== plantData) {
+      liveWatchPlant = null;
+      pStats.style.display='none'; pNone.style.display='block';
+      pNone.textContent='Plant removed';
+    } else {
+      pNone.style.display='none'; pStats.style.display='block';
+      const def      = PlantRegistry.get(plantData.plantId);
+      const isMelee  = def?.meleeAttack || def?.attackType==='melee';
+      const rateKey  = isMelee ? 'punchRate' : 'fireRate';
+      const rateMs   = def?.[rateKey] || def?.fireRate || 1500;
+      const pps      = (1000/rateMs).toFixed(2);
+      const hpPct    = Math.round((plantData.hp / plantData.maxHp)*100);
+      const hpColor  = hpPct>60?'#55dd22':hpPct>30?'#ffaa00':'#ff4444';
+      const timer    = PlantRegistry.getTimer?.(plantData.plantId, row, col);
+      const cdPct    = timer ? Math.min(100, Math.round((timer.elapsed/timer.cooldown)*100)) : 0;
+
+      pStats.innerHTML = `
+        ${liveStatBar('❤️ HP', hpPct, hpColor, plantData.hp+'/'+plantData.maxHp)}
+        ${liveStatBar('⏱️ CD', cdPct, '#44aaff', cdPct+'%')}
+        ${liveStat(isMelee?'👊 Punch/s':'🔫 Fire/s', pps)}
+        ${liveStat(isMelee?'👊 Rate ms':'🔫 Rate ms', rateMs)}
+        ${liveStat('💥 Damage', def?.levelStats?.[plantData.level]?.damage || '?')}
+        ${liveStat('📍 Pos', `R${row+1} C${col+1}`)}
+        ${liveStat('⭐ Level', plantData.level)}
+      `;
+    }
+  } else {
+    pStats.style.display='none';
+    pNone.style.display='block';
+    if (pNone.textContent==='Plant removed') pNone.textContent='No plant selected';
+  }
+
+  // ── Demon ──
+  const dStats = document.getElementById('live-demon-stats');
+  const dNone  = document.getElementById('live-demon-none');
+
+  if (liveWatchDemon) {
+    if (liveWatchDemon.dead || !liveWatchDemon.el?.parentNode) {
+      liveWatchDemon = null;
+      dStats.style.display='none'; dNone.style.display='block';
+      dNone.textContent='Demon died';
+    } else {
+      const d = liveWatchDemon;
+      dNone.style.display='none'; dStats.style.display='block';
+      const hpPct   = Math.round((d.hp/d.maxHp)*100);
+      const hpColor = hpPct>60?'#55dd22':hpPct>30?'#ffaa00':'#ff4444';
+      const spd     = Math.round(d.currentSpeed||d.speed);
+      const spdPct  = Math.min(100, Math.round((spd/200)*100));
+      const bps     = (1000/d.biteRate).toFixed(2);
+      const dps     = (d.damage * parseFloat(bps)).toFixed(1);
+      const specialStr = Array.isArray(d.special)?d.special.join(','):(d.special||'none');
+
+      dStats.innerHTML = `
+        ${liveStatBar('❤️ HP', hpPct, hpColor, d.hp+'/'+d.maxHp)}
+        ${liveStatBar('⚡ Speed', spdPct, '#4488ff', spd+'px/s')}
+        ${liveStat('🦷 Bite/s', bps)}
+        ${liveStat('💥 Dmg/bite', d.damage)}
+        ${liveStat('📊 DPS', dps)}
+        ${liveStat('📍 Row', d.row+1)}
+        ${liveStat('✨ Special', specialStr)}
+        ${d.shieldActive ? liveStat('🛡️ Shield','active') : ''}
+        ${d.frozen ? liveStat('❄️ Frozen', 'yes') : ''}
+        ${d.charging ? liveStat('⚡ Charging','yes') : ''}
+      `;
+    }
+  } else {
+    dStats.style.display='none';
+    dNone.style.display='block';
+    if (dNone.textContent==='Demon died') dNone.textContent='No demon selected';
+  }
+}
+
+function liveStat(label, val) {
+  return `<div class="live-stat">
+    <span class="live-stat-label">${label}</span>
+    <span class="live-stat-val">${val}</span>
+  </div>`;
+}
+function liveStatBar(label, pct, color, valText) {
+  return `<div class="live-stat">
+    <span class="live-stat-label">${label}</span>
+    <div class="live-bar-wrap"><div class="live-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+    <span class="live-stat-val" style="margin-left:4px;min-width:44px;text-align:right;font-size:9px">${valText}</span>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════
+// GRID CELL PATCHING
+// ══════════════════════════════════════════════
+function patchGridCells() {
+  document.getElementById('grid-container').querySelectorAll('.grid-cell').forEach(cell => {
+    const row=parseInt(cell.dataset.row), col=parseInt(cell.dataset.col);
+    const newCell=cell.cloneNode(true);
+    cell.parentNode.replaceChild(newCell,cell);
+    newCell.addEventListener('click', e => {
+      e.stopPropagation();
+      spawnMode==='plant' ? placePlant(row,col) : spawnDemon(row);
+    });
+    newCell.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      Grid.removePlant(row,col);
+      if (liveWatchPlant?.row===row && liveWatchPlant?.col===col) liveWatchPlant=null;
+      showIndicator('🗑️ Removed plant');
+    });
+  });
+}
+
+// ══════════════════════════════════════════════
+// PLANT PLACEMENT
+// ══════════════════════════════════════════════
+function placePlant(row, col) {
+  if (Grid.isOccupied(row,col)) {
+    const p=Grid.getPlant(row,col);
+    if (p) {
+      selectedCell={row,col};
+      liveWatchPlant={plantData:p, row, col};
+      openPlantProps(p,row,col);
+    }
+    return;
+  }
+  const def=PlantRegistry.get(selectedPlant);
+  if (!def) return;
+  if (sun<def.cost) { showIndicator(`❌ Need ${def.cost} ☀️`); return; }
+
+  Grid.placePlant(row, col, {...def, level:15, owned:true});
+  sun-=def.cost;
+  document.getElementById('sb-sun').textContent=sun;
+
+  // Auto-watch the newly placed plant
+  const p = Grid.getPlant(row,col);
+  if (p) { liveWatchPlant={plantData:p,row,col}; selectedCell={row,col}; }
+  showIndicator(`🌿 Placed ${def.name}`);
+}
+
+// ══════════════════════════════════════════════
+// DEMON SPAWNING
+// ══════════════════════════════════════════════
+function spawnDemon(row) {
+  const stats=Levels.getDemonStats(selectedDemon);
+  if (!stats) return;
+  const ov=demonOverrides[selectedDemon]||{};
+  const cfg={
+    type:selectedDemon,
+    hp:      ov.hp       ?? stats.hp,
+    speed:   ov.speed    ?? stats.speed,
+    damage:  ov.damage   ?? stats.damage,
+    biteRate:ov.biteRate ?? stats.biteRate,
+    special: ov.special  ?? stats.special ?? [],
+    row, spawnDelay:0,
+  };
+  const demon=Demons.spawn(cfg);
+  if (!demon) return;
+
+  // Auto-watch first demon spawned
+  if (!liveWatchDemon || liveWatchDemon.dead) liveWatchDemon=demon;
+
+  showIndicator(`👹 ${stats.name} row ${row+1}`);
+  if (demon.el) {
+    demon.el.style.pointerEvents='all';
+    demon.el.style.cursor='pointer';
+    demon.el.addEventListener('click', e => {
+      e.stopPropagation();
+      liveWatchDemon=demon;
+      openDemonProps(demon);
+    });
+  }
+  return demon;
+}
+
+function spawnAllRows() {
+  const rows=Grid.getRows?Grid.getRows():5;
+  for(let r=0;r<rows;r++) spawnDemon(r);
+  showIndicator('👹 Spawned all rows!');
+}
+
+function spawnWave() {
+  const rows=Grid.getRows?Grid.getRows():5;
+  let i=0;
+  const iv=setInterval(()=>{
+    for(let r=0;r<rows;r++) spawnDemon(r);
+    if(++i>=3) clearInterval(iv);
+  },500);
+  showIndicator('🌊 Wave incoming!');
+}
+
+function spawnWaveFromPanel() {
+  const type   =document.getElementById('wave-demon-type').value;
+  const count  =Math.max(1,parseInt(document.getElementById('wave-count').value)||3);
+  const delay  =Math.max(0,parseInt(document.getElementById('wave-delay').value)||500);
+  const special=document.getElementById('wave-special').value||'';
+  const rows   =Grid.getRows?Grid.getRows():5;
+  const checkedRows=[];
+  for(let r=0;r<rows;r++){const cb=document.getElementById('wave-row-'+r);if(cb&&cb.checked)checkedRows.push(r);}
+  const rowsToUse=checkedRows.length?checkedRows:Array.from({length:rows},(_,i)=>i);
+  const prev=selectedDemon; selectedDemon=type;
+  if(special){demonOverrides[type]=demonOverrides[type]||{};demonOverrides[type].special=special;}
+  let spawned=0;
+  function next(){
+    if(spawned>=count){selectedDemon=prev;return;}
+    rowsToUse.forEach(r=>spawnDemon(r)); spawned++;
+    if(spawned<count)setTimeout(next,delay);else selectedDemon=prev;
+  }
+  next(); showIndicator(`🌊 ${count}× ${type}!`);
+}
+
+function buildWaveRowChecks(){
+  const rows=Grid.getRows?Grid.getRows():5;
+  const c=document.getElementById('wave-row-checks');if(!c)return;c.innerHTML='';
+  for(let r=0;r<rows;r++){const l=document.createElement('label');l.style.cssText='display:flex;align-items:center;gap:3px;font-size:11px;font-weight:700;cursor:pointer;';l.innerHTML=`<input type="checkbox" id="wave-row-${r}" checked/> R${r+1}`;c.appendChild(l);}
+}
+
+// ══════════════════════════════════════════════
+// ENTITY PICKERS
+// ══════════════════════════════════════════════
+function buildPlantPicker(){
+  const grid=document.getElementById('plant-picker-grid');
+  const all=PlantRegistry.getAll(); plantOrder=all.map(d=>d.id);
+  all.forEach((def,idx)=>{
+    const isMelee=def.meleeAttack||def.attackType==='melee';
+    const rateMs=isMelee?(def.punchRate||def.fireRate||800):(def.fireRate||1500);
+    const atkInfo=isMelee?`👊${(1000/rateMs).toFixed(1)}/s`:`🔫${(1000/rateMs).toFixed(1)}/s`;
+    const btn=document.createElement('div');
+    btn.className='entity-btn'+(def.id===selectedPlant?' selected-entity':'');
+    btn.id='plant-btn-'+def.id;
+    btn.innerHTML=`
+      <img src="${def.image||''}" alt="${def.name}" onerror="this.src='';this.style.fontSize='26px';this.style.lineHeight='44px';this.textContent='🌿'"/>
+      <div class="ename">${def.name}</div>
+      <div class="ecost">☀️${def.cost}</div>
+      <div class="ehp">❤️${def.hp} · ${atkInfo}</div>
+      ${idx<9?`<div class="ekb">[${idx+1}]</div>`:''}
+    `;
+    btn.addEventListener('click',()=>{
+      selectedPlant=def.id; setSpawnMode('plant');
+      grid.querySelectorAll('.entity-btn').forEach(b=>b.classList.remove('selected-entity'));
+      btn.classList.add('selected-entity');
+      document.getElementById('selected-info').textContent=`🌿 ${def.name} — ☀️${def.cost} | ❤️${def.hp} | ${atkInfo}`;
+    });
+    grid.appendChild(btn);
+  });
+}
+
+function buildDemonPicker(){
+  const grid=document.getElementById('demon-picker-grid');
+  const keys=['Q','(W)','E','R','T'];
+  demonOrder.forEach((type,idx)=>{
+    const stats=Levels.getDemonStats(type); if(!stats)return;
+    const btn=document.createElement('div');
+    btn.className='entity-btn'+(type===selectedDemon?' selected-demon':'');
+    btn.id='demon-btn-'+type;
+    btn.innerHTML=`
+      <img src="${stats.image||''}" alt="${stats.name}" onerror="this.src='';this.style.fontSize='26px';this.style.lineHeight='44px';this.textContent='👹'"/>
+      <div class="ename">${stats.name}</div>
+      <div class="ehp">❤️${stats.hp}</div>
+      <div class="ecost" style="color:#cc2222">⚡${stats.speed}px/s</div>
+      <div class="ekb">[${keys[idx]}]</div>
+    `;
+    btn.addEventListener('click',()=>{
+      selectedDemon=type; setSpawnMode('demon');
+      grid.querySelectorAll('.entity-btn').forEach(b=>b.classList.remove('selected-demon'));
+      btn.classList.add('selected-demon');
+      document.getElementById('selected-info').textContent=`👹 ${stats.name} — ❤️${stats.hp} | ⚡${stats.speed} | 💥${stats.damage}`;
+    });
+    grid.appendChild(btn);
+  });
+}
+
+// ══════════════════════════════════════════════
+// PROPERTY EDITORS
+// ══════════════════════════════════════════════
+function openPlantProps(plantData, row, col) {
+  switchTab('props');
+  liveWatchPlant={plantData,row,col};
+  const editor=document.getElementById('props-editor');
+  document.getElementById('props-placeholder').style.display='none';
+  editor.style.display='block';
+
+  const def=PlantRegistry.get(plantData.plantId);
+  const stats=def?.levelStats?.[plantData.level]||{};
+  const hpPct=Math.round((plantData.hp/plantData.maxHp)*100);
+  const hpColor=hpPct>60?'#22aa44':hpPct>30?'#ffaa00':'#cc2222';
+  const isMelee=def?.meleeAttack||def?.attackType==='melee';
+  const rateKey=isMelee?'punchRate':'fireRate';
+  const rateMs=def?.[rateKey]||def?.fireRate||1500;
+  const pps=(1000/rateMs).toFixed(2);
+
+  editor.innerHTML=`
+    <div class="props-entity-header">
+      <img src="${def?.image||''}" alt="${def?.name}"/>
+      <div>
+        <div class="props-entity-name">🌿 ${def?.name||plantData.plantId}</div>
+        <div class="props-entity-sub">Level ${plantData.level} · R${row+1} C${col+1}</div>
+        <div style="margin-top:3px">
+          <div class="stat-bar-row">
+            <span class="stat-bar-label" style="color:${hpColor}">❤️ ${plantData.hp}</span>
+            <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${hpPct}%;background:${hpColor}"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="prop-group">
+      <div class="prop-group-title">⚔️ Combat</div>
+      ${propRow('HP', plantData.hp, v=>{ plantData.hp=+v; plantData.maxHp=+v; if(plantData.hpBar)plantData.hpBar.style.width='100%'; })}
+      ${propRow('Damage', stats.damage||0, v=>{ if(def?.levelStats?.[plantData.level]) def.levelStats[plantData.level].damage=+v; })}
+      ${propRow(isMelee?'Punch Rate ms':'Fire Rate ms', rateMs, v=>{
+        if(def){
+          // KEY FIX: update BOTH def AND the live timer cooldown
+          def[rateKey]=+v;
+          if(def.fireRate!==undefined) def.fireRate=+v;
+          PlantRegistry.setTimerCooldown(plantData.plantId, row, col, +v);
+        }
+      })}
+      <div style="font-size:10px;color:#2266cc;margin:-1px 0 5px 93px" id="pps-display">
+        ${isMelee?'👊':'🔫'} ${pps}/s
+      </div>
+      ${!isMelee?propRow('Fire Distance', def?.fireDistance||9, v=>{ if(def)def.fireDistance=+v; }):''}
+      ${!isMelee?propRow('Hit Count', def?.hitCount||1, v=>{ if(def)def.hitCount=+v; }):''}
+    </div>
+    <div class="prop-group">
+      <div class="prop-group-title">📈 Level</div>
+      ${propRow('Level (1-15)', plantData.level, v=>{ plantData.level=Math.min(15,Math.max(1,+v)); openPlantProps(plantData,row,col); })}
+    </div>
+    <div class="prop-group">
+      <div class="prop-group-title">🔧 Actions</div>
+      <button class="prop-action-btn danger" onclick="Grid.removePlant(${row},${col});liveWatchPlant=null;document.getElementById('props-editor').style.display='none';document.getElementById('props-placeholder').style.display='block'">🗑️ Remove</button>
+      <button class="prop-action-btn info" style="margin-top:4px" onclick="plantData.hp=plantData.maxHp;if(plantData.hpBar)plantData.hpBar.style.width='100%'">❤️ Full Heal</button>
+    </div>
+  `;
+  wireProps(editor);
+  document.getElementById('selected-info').textContent=`⚙️ ${def?.name} R${row+1}C${col+1}`;
+}
+
+function openDemonProps(demon) {
+  switchTab('props');
+  liveWatchDemon=demon;
+  const editor=document.getElementById('props-editor');
+  document.getElementById('props-placeholder').style.display='none';
+  editor.style.display='block';
+
+  const stats=Levels.getDemonStats(demon.type)||{};
+  const hpPct=Math.round((demon.hp/demon.maxHp)*100);
+  const hpColor=hpPct>60?'#22aa44':hpPct>30?'#ffaa00':'#cc2222';
+  const specialStr=Array.isArray(demon.special)?demon.special.join(', '):(demon.special||'none');
+  const bps=(1000/demon.biteRate).toFixed(2);
+  const dps=(demon.damage*parseFloat(bps)).toFixed(1);
+
+  editor.innerHTML=`
+    <div class="props-entity-header" style="border-color:#ffcccc;background:#fff5f5">
+      <img src="${stats.image||''}" alt="${demon.name}" onerror="this.src='';this.style.fontSize='26px';this.textContent='👹'"/>
+      <div>
+        <div class="props-entity-name" style="color:#cc2222">👹 ${demon.name}</div>
+        <div class="props-entity-sub">Row ${demon.row+1} · ${specialStr}</div>
+        <div style="margin-top:3px">
+          <div class="stat-bar-row">
+            <span class="stat-bar-label" style="color:${hpColor}">❤️ ${demon.hp}</span>
+            <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${hpPct}%;background:${hpColor}"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="prop-group">
+      <div class="prop-group-title">⚔️ Combat</div>
+      ${propRow('HP', demon.hp, v=>{ demon.hp=+v; demon.maxHp=+v; if(demon.hpFill)demon.hpFill.style.width='100%'; })}
+      ${propRow('Speed px/s', demon.speed, v=>{ demon.speed=+v; demon.currentSpeed=+v; })}
+      ${propRow('Damage', demon.damage, v=>{ demon.damage=+v; })}
+      ${propRow('Bite Rate ms', demon.biteRate, v=>{ demon.biteRate=+v; demon.currentBiteRate=+v; })}
+    </div>
+    <div class="prop-group">
+      <div class="prop-group-title">📊 Live Stats</div>
+      <div style="font-size:10px;color:#2266cc;line-height:1.8">
+        Bites/sec: <b>${bps}</b> &nbsp;·&nbsp; DPS: <b>${dps}</b>
+      </div>
+    </div>
+    <div class="prop-group">
+      <div class="prop-group-title">✨ Special (comma-sep)</div>
+      ${propRow('Special', specialStr, v=>{
+        const arr=v.split(',').map(s=>s.trim()).filter(Boolean);
+        demon.special=arr.length===1?arr[0]:arr;
+      })}
+    </div>
+    <div class="prop-group">
+      <div class="prop-group-title">🔧 Actions</div>
+      <button class="prop-action-btn danger" onclick="Demons.kill(window._ed);liveWatchDemon=null;document.getElementById('props-editor').style.display='none';document.getElementById('props-placeholder').style.display='block'">💀 Kill</button>
+      <button class="prop-action-btn info" style="margin-top:4px" onclick="Demons.freeze(window._ed,5000)">❄️ Freeze 5s</button>
+      <button class="prop-action-btn" style="margin-top:4px;background:linear-gradient(180deg,#ff9900,#cc6600);color:#fff" onclick="window._ed.hp=window._ed.maxHp;if(window._ed.hpFill)window._ed.hpFill.style.width='100%'">❤️ Full Heal</button>
+    </div>
+  `;
+  window._ed=demon;
+  wireProps(editor);
+  document.getElementById('selected-info').textContent=`⚙️ ${demon.name} Row${demon.row+1}`;
+}
+
+function propRow(label, value, onChange) {
+  const id='prop_'+Math.random().toString(36).slice(2);
+  window._propCbs=window._propCbs||{};
+  window._propCbs[id]=onChange;
+  return `<div class="prop-row">
+    <span class="prop-label">${label}</span>
+    <input class="prop-input" id="${id}" value="${value}" data-cb="${id}"/>
+    <button class="prop-apply" onclick="applyProp('${id}')">✓</button>
+  </div>`;
+}
+function applyProp(id) {
+  const input=document.getElementById(id);
+  const cb=window._propCbs?.[id];
+  if(input&&cb){ cb(input.value); input.style.borderColor='#22c55e'; setTimeout(()=>input.style.borderColor='',600); }
+}
+function wireProps(editor) {
+  editor.querySelectorAll('.prop-input').forEach(input=>{
+    input.addEventListener('keydown',e=>{ if(e.key==='Enter') applyProp(input.id); });
+  });
+}
+
+// ══════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ══════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||e.target.tagName==='TEXTAREA') return;
+  const key=e.key.toLowerCase();
+  if(e.key==='?'||e.key==='/'){toggleShortcuts();return;}
+  if(e.key==='Escape'){document.getElementById('shortcut-overlay').classList.remove('show');return;}
+  if(e.key===' '){e.preventDefault();togglePause();return;}
+  if(key==='s'){e.shiftKey?addSun(500):addSun(100);return;}
+  if(key==='p'){setSpawnMode('plant');return;}
+  if(key==='d'&&!e.ctrlKey){setSpawnMode('demon');return;}
+  if(key==='c'){clearAll();return;}
+  if(key==='w'){spawnWave();return;}
+  if(key==='a'){spawnAllRows();return;}
+  if(key==='f'){Demons.getActive().forEach(d=>Demons.freeze(d,3000));showIndicator('❄️ All frozen 3s');return;}
+  if(key==='k'){Demons.getActive().forEach(d=>Demons.kill(d));showIndicator('💀 All killed');return;}
+  if(key==='h'){if(Grid.getAll)Grid.getAll().forEach(p=>{if(p){p.hp=p.maxHp;if(p.hpBar)p.hpBar.style.width='100%';}});showIndicator('❤️ All healed');return;}
+  if(e.key==='Delete'&&selectedCell){Grid.removePlant(selectedCell.row,selectedCell.col);liveWatchPlant=null;showIndicator('🗑️ Removed');return;}
+  if(e.key==='+'||e.key==='='){setGameSpeed(gameSpeed+0.25);return;}
+  if(e.key==='-'){setGameSpeed(gameSpeed-0.25);return;}
+  if(e.key==='0'){setGameSpeed(1);return;}
+  const num=parseInt(e.key);
+  if(!isNaN(num)&&num>=1&&num<=8&&plantOrder[num-1]){
+    const id=plantOrder[num-1]; selectedPlant=id; setSpawnMode('plant');
+    document.querySelectorAll('#plant-picker-grid .entity-btn').forEach(b=>b.classList.remove('selected-entity'));
+    document.getElementById('plant-btn-'+id)?.classList.add('selected-entity');
+    showIndicator(`🌿 ${PlantRegistry.get(id)?.name||id}`); return;
+  }
+  const demonKeys={q:0,e:2,r:3,t:4};
+  if(demonKeys[key]!==undefined){
+    const type=demonOrder[demonKeys[key]]; if(!type)return;
+    selectedDemon=type; setSpawnMode('demon');
+    document.querySelectorAll('#demon-picker-grid .entity-btn').forEach(b=>b.classList.remove('selected-demon'));
+    document.getElementById('demon-btn-'+type)?.classList.add('selected-demon');
+    showIndicator(`👹 ${Levels.getDemonStats(type)?.name||type}`); return;
+  }
+});
+
+// ══════════════════════════════════════════════
+// MOCK GLOBALS
+// ══════════════════════════════════════════════
+const Core = {
+  addSun(n){addSun(n);},
+  getSun(){return sun;},
+  spendSun(n){sun=Math.max(0,sun-n);document.getElementById('sb-sun').textContent=sun;},
+  onCellClick(){},
+  triggerLawnmower(){},
+};
+const UI = {
+  updateSunDisplay(){document.getElementById('sb-sun').textContent=sun;},
+  showWaveBanner(){},updateWaveDisplay(){},updateCoinDisplays(){},
+};
+
+window.addEventListener('load', init);
+</script>
+</body>
+</html>
