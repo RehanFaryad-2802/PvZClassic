@@ -164,6 +164,7 @@ PlantRegistry.register({
     plantData.maxHp = stats.hp;
     plantData.hp = stats.hp;
     plantData.raging = false;
+    plantData.lastAttackTime = 0; // Allow immediate first attack when placed
   },
 
   onTick(row, col, plantData) {
@@ -187,6 +188,19 @@ PlantRegistry.register({
     if (demonsAhead.length === 0) return;
 
     const stats = this.getStats(plantData.level);
+
+    // === Attack Timing Logic (First shot immediate, then fireRate) ===
+    const now = Date.now();
+    if (!plantData.lastAttackTime) {
+      plantData.lastAttackTime = 0; // Allow immediate first attack
+    }
+
+    if (now - plantData.lastAttackTime < stats.fireRate) {
+      return; // Still on cooldown
+    }
+
+    // Update last attack time
+    plantData.lastAttackTime = now;
 
     // Check rage mode
     const hpPct = plantData.hp / plantData.maxHp;

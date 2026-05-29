@@ -169,6 +169,7 @@ const Demons = (() => {
       name: stats.name,
       el: wrap,
       imgEl: sprite,
+      video: sprite, // reference for switching animation
       hpFill,
       shieldEl,
       hp: cfg.hp,
@@ -178,7 +179,7 @@ const Demons = (() => {
       damage: cfg.damage,
       biteRate: cfg.biteRate,
       currentBiteRate: cfg.biteRate,
-      special: cfg.special, // kept as-is (string or array)
+      special: cfg.special,
       row: cfg.row,
       x,
       y,
@@ -192,6 +193,7 @@ const Demons = (() => {
       biteTimer: 0,
       targeting: null,
       hitFlashTimer: 0,
+      eating: false, // ← NEW
       // shield
       shieldActive: sp.includes("shield"),
       // regen
@@ -208,7 +210,6 @@ const Demons = (() => {
       // lifesteal (applied in bite)
       // split / explode (applied in kill)
     };
-
     demons.push(demon);
     return demon;
   }
@@ -338,13 +339,13 @@ const Demons = (() => {
       }
 
       // ── Find plant to eat ──
+      // ── Find plant to eat ──
       let eating = false;
       const plantsInRow = Grid.getPlantsInRow(d.row);
 
       // FLYING: skip the first (rightmost) plant, target the second
       let plantsFiltered = plantsInRow;
       if (hasSpecial(d, "flying") && plantsInRow.length > 1) {
-        // sort by col descending (rightmost first), then skip index 0
         const sorted = [...plantsInRow].sort((a, b) => b.col - a.col);
         plantsFiltered = sorted.slice(1);
       }
@@ -393,11 +394,23 @@ const Demons = (() => {
             if (died) {
               d.targeting = null;
               d.biteTimer = 0;
+              stopEating(d); // Stop eating when plant is destroyed
             }
           }
+
+          // Start eating animation
+          if (!d.eating) {
+            startEating(d);
+          }
+
           eating = true;
           break;
         }
+      }
+
+      // ← NEW: If no longer eating anything, stop animation
+      if (!eating && d.eating) {
+        stopEating(d);
       }
 
       if (eating) continue;
@@ -406,6 +419,7 @@ const Demons = (() => {
         Grid.stopShaking(d.targeting.row, d.targeting.col);
         d.targeting = null;
         d.biteTimer = 0;
+        stopEating(d); // ← Stop eating animation
       }
 
       // Move left
@@ -485,6 +499,9 @@ const Demons = (() => {
     if (demon.targeting) {
       Grid.stopShaking(demon.targeting.row, demon.targeting.col);
       demon.targeting = null;
+    }
+    if (demon.eating) {
+      stopEating(demon);
     }
 
     // EXPLODE: damage all plants in row within range
@@ -609,6 +626,35 @@ const Demons = (() => {
   function clear() {
     demons.forEach((d) => d.el && d.el.remove());
     demons = [];
+  }
+
+  function startEating(demon) {
+    if (demon.eating || !demon.video || demon.video.tagName !== "VIDEO") return;
+
+    demon.eating = true;
+
+    const eatSrc = `assets/demons/demon1_imp/eat.webm`;
+
+    demon.video.pause();
+    demon.video.src = eatSrc;
+    demon.video.loop = true;
+    demon.video.currentTime = 0; // Restart animation from beginning
+    demon.video.play().catch(() => {});
+  }
+  function stopEating(demon) {
+    if (!demon.eating || !demon.video) return;
+
+    demon.eating = false;
+
+    // Switch back to normal walking animation
+    const walkSrc =
+      Levels.getDemonStats(demon.type)?.animation ||
+      `assets/demons/${demon.type}.webm`;
+
+    demon.video.pause();
+    demon.video.src = walkSrc;
+    demon.video.loop = true;
+    demon.video.play().catch(() => {});
   }
 
   return {
