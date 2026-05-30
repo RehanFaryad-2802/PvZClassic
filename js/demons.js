@@ -25,28 +25,35 @@
 */
 
 const Demons = (() => {
-  // ── Config — all tunable values in one place ──────────────────────────────
   const CFG = {
     DEMON_WIDTH: 120,
     DEMON_HEIGHT: 120,
-    DODGE_CHANCE: 0.15, // 15%
-    ARMOR_REDUCTION: 0.4, // 40% dmg reduction
-    REGEN_INTERVAL: 2000, // ms between regen ticks
-    REGEN_PERCENT: 0.03, // 3% maxHp per tick
-    EXPLODE_RANGE: 2, // cells either side
+    DODGE_CHANCE: 0.15,
+    ARMOR_REDUCTION: 0.4,
+    REGEN_INTERVAL: 2000,
+    REGEN_PERCENT: 0.03,
+    EXPLODE_RANGE: 2,
     EXPLODE_DAMAGE: 60,
-    SPLIT_COUNT: 2, // imps spawned on split-death
-    SPLIT_HP_MULT: 0.3, // split imps have 30% of parent hp
-    LIFESTEAL_PCT: 0.3, // heal 30% of damage dealt
-    BERSERK_MAX_MULT: 2.5, // max speed/biteRate multiplier at 1hp
-    GHOST_ON_TIME: 2000, // ms invisible
-    GHOST_OFF_TIME: 3500, // ms visible
-    TANK_SLOW_THRESH: 0.2, // HP% threshold to slow
-    TANK_SLOW_SPEED: 4, // px/s when tanking
-    TANK_CHARGE_MULT: 3.5, // speed burst after tank
-    FREEZE_PLANT_DUR: 3000, // ms plant fire-rate is halved
+    SPLIT_COUNT: 2,
+    SPLIT_HP_MULT: 0.3,
+    LIFESTEAL_PCT: 0.3,
+    BERSERK_MAX_MULT: 2.5,
+    GHOST_ON_TIME: 2000,
+    GHOST_OFF_TIME: 3500,
+    TANK_SLOW_THRESH: 0.2,
+    TANK_SLOW_SPEED: 4,
+    TANK_CHARGE_MULT: 3.5,
+    FREEZE_PLANT_DUR: 3000,
     CHARGE_THRESH: 0.3,
     CHARGE_MULT: 2.0,
+
+    // ── Variant damage modifiers (change these to rebalance) ──
+    IMP_AXE_PHYS_IMMUNITY: 0, // 0 = full immune to physical
+    IMP_SHIELD_ALL_REDUCTION: 0.7, // takes 70% of all damage (30% less)
+    IMP_SHIELD_PSYCHIC_MULT: 1.4, // psychic deals 40% more
+    IMP_HEAVY_PHYS_MULT: 1.4, // physical deals 40% more
+    IMP_KING_STOP_COL: 1, // column index king stops at
+    IMP_KING_SPAWN_INTERVAL: 7000, // ms between king spawns
   };
 
   let demons = [];
@@ -101,6 +108,8 @@ const Demons = (() => {
     const stats = Levels.getDemonStats(cfg.type);
     if (!stats) return;
 
+    const resolvedImage = stats.image;
+
     const y =
       gridRect && layerRect
         ? gridRect.top -
@@ -131,7 +140,7 @@ const Demons = (() => {
       sprite.poster = stats.image;
     } else {
       sprite = document.createElement("img");
-      sprite.src = stats.image;
+      sprite.src = resolvedImage || stats.image;
       sprite.alt = stats.name;
       sprite.draggable = false;
     }
@@ -162,6 +171,25 @@ const Demons = (() => {
     wrap.appendChild(sprite);
     wrap.appendChild(hpWrap);
     layer.appendChild(wrap);
+
+    // CSS idle animation per type
+    wrap.classList.add(`type-${cfg.type}`);
+
+    if (cfg.type === "imp" || cfg.type.startsWith("imp_")) {
+      wrap.classList.add("imp-walk");
+    } else if (cfg.type === "bat") {
+      wrap.classList.add("bat-idle");
+    } else if (cfg.type === "ice") {
+      wrap.classList.add("ice-idle");
+    } else if (cfg.type === "armored") {
+      wrap.classList.add("armored-idle");
+    } else if (cfg.type === "brute") {
+      wrap.classList.add("brute-idle");
+    }
+
+    if (cfg.type === "imp_king") {
+      wrap.classList.add("king-aura");
+    }
 
     const demon = {
       id: Date.now() + Math.random(),
@@ -241,7 +269,10 @@ const Demons = (() => {
       }
 
       const dtMs = dt * 1000;
-
+      // ── King special logic ──
+      if (d.type === "imp_king") {
+        updateKing(d, dt, gridRect, arenaLayerRect, cellW);
+      }
       // ── Hit flash ──
       if (d.hitFlashTimer > 0) {
         d.hitFlashTimer -= dtMs;
@@ -284,7 +315,17 @@ const Demons = (() => {
         }
       }
 
-      // ── CHARGE ──
+      if (!d.charging) {
+        d.charging = true;
+        d.currentSpeed = d.speed * CFG.CHARGE_MULT;
+        if (d.type === "imp" || d.type.startsWith("imp_")) {
+          d.el.classList.remove("imp-walk", "imp-eat");
+          d.el.classList.add("imp-charging");
+        } else if (d.type === "brute") {
+          d.el.classList.remove("brute-idle", "brute-eat");
+          d.el.classList.add("brute-charging");
+        }
+      }
       if (
         hasSpecial(d, "charge") &&
         !d.charging &&
@@ -450,8 +491,9 @@ const Demons = (() => {
   }
 
   // ── Damage ────────────────────────────────────────────────────────────────
-  function damage(demon, amount) {
+  function damage(demon, amount, damageType = "physical") {
     if (demon.dead) return;
+    demon.lastDamageType = damageType; // track for death animation
 
     // GHOST: if invisible, projectile passes through
     if (hasSpecial(demon, "ghost") && !demon.ghostVisible) return;
@@ -479,14 +521,41 @@ const Demons = (() => {
       finalDmg = Math.max(1, Math.floor(amount * (1 - CFG.ARMOR_REDUCTION)));
     }
 
+    // VARIANT DAMAGE MODIFIERS
+    const stats = Levels.getDemonStats(demon.type);
+    if (stats && stats.damageModifiers) {
+      const mod = stats.damageModifiers[damageType];
+      if (mod !== undefined) {
+        if (mod === 0) {
+          // Full immunity — show immune text and return
+          showImmuneText(demon);
+          return;
+        }
+        finalDmg = Math.floor(finalDmg * mod);
+      }
+    }
+
+    // ice-pea is BOTH physical and ice — apply physical modifier too if different type
+    if (damageType === "ice" && stats && stats.damageModifiers) {
+      const physMod = stats.damageModifiers["physical"];
+      if (physMod !== undefined && physMod !== 1.0) {
+        if (physMod === 0) {
+          showImmuneText(demon);
+          return;
+        }
+        finalDmg = Math.floor(finalDmg * physMod);
+      }
+    }
+
     demon.hp = Math.max(0, demon.hp - finalDmg);
     updateHpBar(demon);
 
-    // Hit flash
-    demon.el.classList.remove("hit");
-    void demon.el.offsetWidth;
+    // HIT FLASH
     demon.el.classList.add("hit");
-    demon.hitFlashTimer = 120;
+    setTimeout(() => demon.el.classList.remove("hit"), 120);
+
+    // Armored gets gold sparks on hit
+    if (demon.type === "armored") showArmorSparks(demon);
 
     if (demon.hp <= 0) kill(demon);
   }
@@ -508,7 +577,10 @@ const Demons = (() => {
     if (hasSpecial(demon, "explode")) {
       triggerExplode(demon);
     }
-
+    // KING: kill all spawned minions
+    if (demon.type === "imp_king") {
+      killKingMinions(demon);
+    }
     // SPLIT: spawn 2 mini imps
     if (hasSpecial(demon, "split")) {
       triggerSplit(demon);
@@ -521,15 +593,8 @@ const Demons = (() => {
       if (effectsEl) Coins.spawnCoinToken(effectsEl, demon.x, demon.y, coinAmt);
     }
 
-    // Death animation
-    if (demon.imgEl) {
-      demon.imgEl.style.transition = "opacity 0.3s, transform 0.3s";
-      demon.imgEl.style.opacity = "0";
-      demon.imgEl.style.transform = "scale(0.5) rotate(20deg)";
-    }
-    setTimeout(() => {
-      if (demon.el.parentNode) demon.el.remove();
-    }, 350);
+    // Death animation — style based on last damage type
+    playDeathAnimation(demon);
   }
 
   // ── Special effects ───────────────────────────────────────────────────────
@@ -580,8 +645,74 @@ const Demons = (() => {
       }, i * 200);
     }
   }
+  function showImmuneText(demon) {
+    const effectsEl = document.getElementById("effects-layer");
+    if (!effectsEl) return;
+    const el = document.createElement("div");
+    el.textContent = "IMMUNE!";
+    el.style.cssText = `
+      position:absolute;
+      left:${demon.x + demon.width / 2}px;
+      top:${demon.y - 20}px;
+      transform:translateX(-50%);
+      color:#a78bfa;font-weight:900;font-size:13px;
+      font-family:var(--font-display);
+      text-shadow:0 0 8px rgba(167,139,250,0.8);
+      pointer-events:none;
+      animation:floatUp 0.8s ease-out forwards;
+    `;
+    effectsEl.appendChild(el);
+    setTimeout(() => el.remove(), 800);
+  }
+
+  function showArmorSparks(demon) {
+    const effectsEl = document.getElementById("effects-layer");
+    if (!effectsEl) return;
+    const dRect = demon.el.getBoundingClientRect();
+    const eRect = effectsEl.getBoundingClientRect();
+    const cx = dRect.left - eRect.left + dRect.width / 2;
+    const cy = dRect.top - eRect.top + dRect.height / 2;
+
+    for (let i = 0; i < 6; i++) {
+      const spark = document.createElement("div");
+      spark.className = "armor-spark";
+      const angle = (i / 6) * Math.PI * 2;
+      const dist = 20 + Math.random() * 20;
+      spark.style.cssText = `
+        left:${cx}px; top:${cy}px;
+        --sx:${Math.cos(angle) * dist}px;
+        --sy:${Math.sin(angle) * dist}px;
+        animation-delay:${i * 0.03}s;
+      `;
+      effectsEl.appendChild(spark);
+      setTimeout(() => spark.remove(), 350);
+    }
+  }
+  function spawnIceBreathCloud(demon) {
+    const effectsEl = document.getElementById("effects-layer");
+    if (!effectsEl || !demon.el) return;
+    const dRect = demon.el.getBoundingClientRect();
+    const eRect = effectsEl.getBoundingClientRect();
+
+    const cloud = document.createElement("div");
+    cloud.className = "ice-breath-cloud";
+    cloud.style.cssText = `
+      position:absolute;
+      left:${dRect.left - eRect.left - 10}px;
+      top:${dRect.top - eRect.top + dRect.height * 0.4}px;
+      width:40px; height:40px;
+    `;
+    effectsEl.appendChild(cloud);
+    setTimeout(() => cloud.remove(), 600);
+  }
 
   function showDodgeText(demon) {
+    // Dodge sidestep animation on the demon
+    if (demon.type === "imp") {
+      demon.el.classList.add("imp-dodge");
+      setTimeout(() => demon.el.classList.remove("imp-dodge"), 300);
+    }
+
     const el = document.createElement("div");
     el.textContent = "DODGE!";
     el.style.cssText = `
@@ -629,34 +760,476 @@ const Demons = (() => {
   }
 
   function startEating(demon) {
-    if (demon.eating || !demon.video || demon.video.tagName !== "VIDEO") return;
-
+    if (demon.eating) return;
     demon.eating = true;
 
-    const eatSrc = `assets/demons/demon1_imp/eat.webm`;
+    if (demon.type === "imp" || demon.type.startsWith("imp_")) {
+      demon.el.classList.remove("imp-walk", "imp-charging");
+      demon.el.classList.add("imp-eat");
+    } else if (demon.type === "bat") {
+      demon.el.classList.remove("bat-idle");
+      demon.el.classList.add("bat-eat");
+    } else if (demon.type === "ice") {
+      demon.el.classList.remove("ice-idle");
+      demon.el.classList.add("ice-eat");
+      spawnIceBreathCloud(demon);
+    } else if (demon.type === "armored") {
+      demon.el.classList.remove("armored-idle");
+      demon.el.classList.add("armored-eat");
+    } else if (demon.type === "brute") {
+      demon.el.classList.remove("brute-idle", "brute-charging");
+      demon.el.classList.add("brute-eat");
+    }
 
-    demon.video.pause();
-    demon.video.src = eatSrc;
-    demon.video.loop = true;
-    demon.video.currentTime = 0; // Restart animation from beginning
-    demon.video.play().catch(() => {});
+    // Video eating animation if available
+    if (demon.video && demon.video.tagName === "VIDEO") {
+      const eatSrc = `assets/demons/demon1_imp/eat.webm`;
+      demon.video.pause();
+      demon.video.src = eatSrc;
+      demon.video.loop = true;
+      demon.video.currentTime = 0;
+      demon.video.play().catch(() => {});
+    }
   }
-  function stopEating(demon) {
-    if (!demon.eating || !demon.video) return;
 
+  function stopEating(demon) {
+    if (!demon.eating) return;
     demon.eating = false;
 
-    // Switch back to normal walking animation
-    const walkSrc =
-      Levels.getDemonStats(demon.type)?.animation ||
-      `assets/demons/${demon.type}.webm`;
+    // Restore idle animation per type
+    if (demon.type === "imp" || demon.type.startsWith("imp_")) {
+      demon.el.classList.remove("imp-eat");
+      demon.el.classList.add(demon.charging ? "imp-charging" : "imp-walk");
+    } else if (demon.type === "bat") {
+      demon.el.classList.remove("bat-eat");
+      demon.el.classList.add("bat-idle");
+    } else if (demon.type === "ice") {
+      demon.el.classList.remove("ice-eat");
+      demon.el.classList.add("ice-idle");
+    } else if (demon.type === "armored") {
+      demon.el.classList.remove("armored-eat");
+      demon.el.classList.add("armored-idle");
+    } else if (demon.type === "brute") {
+      demon.el.classList.remove("brute-eat");
+      demon.el.classList.add(demon.charging ? "brute-charging" : "brute-idle");
+    }
 
-    demon.video.pause();
-    demon.video.src = walkSrc;
-    demon.video.loop = true;
-    demon.video.play().catch(() => {});
+    if (demon.video && demon.video.tagName === "VIDEO") {
+      const walkSrc = Levels.getDemonStats(demon.type)?.animation || "";
+      if (walkSrc) {
+        demon.video.pause();
+        demon.video.src = walkSrc;
+        demon.video.loop = true;
+        demon.video.play().catch(() => {});
+      }
+    }
   }
 
+  function playDeathAnimation(demon) {
+    const type = demon.lastDamageType || "physical";
+    const el = demon.el;
+    const imgEl = demon.imgEl;
+    const effectsEl = document.getElementById("effects-layer");
+    const demonLayerEl = document.getElementById("demons-layer");
+
+    // Get position relative to effects layer
+    const dRect = el.getBoundingClientRect();
+    const eRect = effectsEl ? effectsEl.getBoundingClientRect() : dRect;
+    const cx = dRect.left - eRect.left + dRect.width / 2;
+    const cy = dRect.top - eRect.top + dRect.height / 2;
+    const sz = dRect.width;
+
+    if (type === "physical") {
+      // ── Shatter: image cracks apart into 4 pieces ──
+      if (imgEl) {
+        imgEl.style.transition = "none";
+        imgEl.style.animation = "impShatter 0.5s ease-out forwards";
+      }
+
+      // 4 shard divs flying outward
+      const directions = [
+        { tx: -40, ty: -40, r: -45 },
+        { tx: 40, ty: -30, r: 30 },
+        { tx: -30, ty: 40, r: -20 },
+        { tx: 50, ty: 30, r: 60 },
+      ];
+      if (effectsEl) {
+        directions.forEach((d, i) => {
+          const shard = document.createElement("div");
+          shard.style.cssText = `
+            position:absolute;
+            left:${cx - sz * 0.2}px; top:${cy - sz * 0.2}px;
+            width:${sz * 0.4}px; height:${sz * 0.4}px;
+            background:rgba(220,38,38,0.85);
+            clip-path:polygon(50% 0%,100% 100%,0% 100%);
+            box-shadow:0 0 8px rgba(239,68,68,0.6);
+            pointer-events:none; z-index:40;
+            animation:shardFly 0.55s ease-out ${i * 0.04}s forwards;
+            --tx:${d.tx}px; --ty:${d.ty}px; --r:${d.r}deg;
+          `;
+          effectsEl.appendChild(shard);
+          setTimeout(() => shard.remove(), 600);
+        });
+      }
+      setTimeout(() => el.remove(), 500);
+    } else if (type === "ice") {
+      // ── Freeze solid then shatter in blue ──
+      if (imgEl) {
+        imgEl.style.transition = "none";
+        imgEl.style.animation = "impFreezeKill 0.8s ease-out forwards";
+      }
+
+      // Ice crystal burst
+      if (effectsEl) {
+        for (let i = 0; i < 6; i++) {
+          const angle = (i / 6) * Math.PI * 2;
+          const crystal = document.createElement("div");
+          crystal.style.cssText = `
+            position:absolute;
+            left:${cx}px; top:${cy}px;
+            width:8px; height:22px;
+            background:linear-gradient(to top, #67e8f9, #e0f2fe);
+            border-radius:3px 3px 0 0;
+            box-shadow:0 0 8px rgba(103,232,249,0.9);
+            pointer-events:none; z-index:40;
+            transform-origin:bottom center;
+            --tx:${Math.cos(angle) * 45}px;
+            --ty:${Math.sin(angle) * 45}px;
+            --r:${(angle * 180) / Math.PI + 90}deg;
+            animation:crystalBurst 0.6s ease-out ${i * 0.05}s forwards;
+          `;
+          effectsEl.appendChild(crystal);
+          setTimeout(() => crystal.remove(), 700);
+        }
+
+        // Freeze ring
+        const ring = document.createElement("div");
+        ring.style.cssText = `
+          position:absolute;
+          left:${cx - sz * 0.5}px; top:${cy - sz * 0.5}px;
+          width:${sz}px; height:${sz}px;
+          border-radius:50%;
+          border:3px solid rgba(103,232,249,0.9);
+          box-shadow:0 0 20px rgba(103,232,249,0.6);
+          pointer-events:none; z-index:39;
+          animation:iceBurstRing 0.6s ease-out forwards;
+        `;
+        effectsEl.appendChild(ring);
+        setTimeout(() => ring.remove(), 600);
+      }
+      setTimeout(() => el.remove(), 800);
+    } else if (type === "fire") {
+      // ── Burns up — rises and dissolves in flames ──
+      if (imgEl) {
+        imgEl.style.transition = "none";
+        imgEl.style.animation = "impBurnKill 0.7s ease-out forwards";
+      }
+
+      // Flame particles rising
+      if (effectsEl) {
+        for (let i = 0; i < 8; i++) {
+          const flame = document.createElement("div");
+          const offX = (Math.random() - 0.5) * sz;
+          flame.style.cssText = `
+            position:absolute;
+            left:${cx + offX - 10}px;
+            top:${cy - 10}px;
+            width:${12 + Math.random() * 14}px;
+            height:${18 + Math.random() * 20}px;
+            background:radial-gradient(ellipse at bottom, #fbbf24, #f97316, #dc2626, transparent);
+            border-radius:50% 50% 30% 30%;
+            pointer-events:none; z-index:40;
+            animation:flameDie 0.7s ease-out ${i * 0.06}s forwards;
+            --offX:${offX}px;
+          `;
+          effectsEl.appendChild(flame);
+          setTimeout(() => flame.remove(), 800);
+        }
+
+        // Scorch mark
+        const scorch = document.createElement("div");
+        scorch.style.cssText = `
+          position:absolute;
+          left:${cx - 24}px; top:${cy + sz * 0.3}px;
+          width:48px; height:16px;
+          border-radius:50%;
+          background:radial-gradient(ellipse, rgba(0,0,0,0.6), transparent);
+          pointer-events:none; z-index:38;
+          animation:scorchFade 1.2s ease-out forwards;
+        `;
+        effectsEl.appendChild(scorch);
+        setTimeout(() => scorch.remove(), 1200);
+      }
+      setTimeout(() => el.remove(), 700);
+    } else if (type === "electric") {
+      // ── Electrocuted — stiff jolt then disintegrates ──
+      if (imgEl) {
+        imgEl.style.transition = "none";
+        imgEl.style.animation = "impElectroKill 0.6s ease-out forwards";
+      }
+
+      // Lightning arcs bursting outward
+      if (effectsEl) {
+        const svg = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "svg",
+        );
+        svg.style.cssText = `
+          position:absolute; left:0; top:0;
+          width:100%; height:100%;
+          pointer-events:none; z-index:40; overflow:visible;
+        `;
+        effectsEl.appendChild(svg);
+
+        for (let i = 0; i < 6; i++) {
+          const angle = (i / 6) * Math.PI * 2;
+          const len = 40 + Math.random() * 30;
+          const ex = cx + Math.cos(angle) * len;
+          const ey = cy + Math.sin(angle) * len;
+          const mx =
+            cx + Math.cos(angle) * len * 0.5 + (Math.random() - 0.5) * 20;
+          const my =
+            cy + Math.sin(angle) * len * 0.5 + (Math.random() - 0.5) * 20;
+
+          const path = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "path",
+          );
+          path.setAttribute("d", `M${cx},${cy} Q${mx},${my} ${ex},${ey}`);
+          path.setAttribute("stroke", i % 2 === 0 ? "#fde047" : "#fff");
+          path.setAttribute("stroke-width", "2.5");
+          path.setAttribute("fill", "none");
+          path.setAttribute("opacity", "0.9");
+          path.style.animation = `arcFade 0.5s ease-out ${i * 0.04}s forwards`;
+          svg.appendChild(path);
+        }
+        setTimeout(() => svg.remove(), 600);
+
+        // Yellow burst circle
+        const burst = document.createElement("div");
+        burst.style.cssText = `
+          position:absolute;
+          left:${cx - sz * 0.5}px; top:${cy - sz * 0.5}px;
+          width:${sz}px; height:${sz}px;
+          border-radius:50%;
+          background:radial-gradient(circle, rgba(254,240,138,0.8) 0%, rgba(250,204,21,0.5) 40%, transparent 70%);
+          box-shadow:0 0 30px rgba(250,204,21,0.7);
+          pointer-events:none; z-index:39;
+          animation:electroBurst 0.5s ease-out forwards;
+        `;
+        effectsEl.appendChild(burst);
+        setTimeout(() => burst.remove(), 500);
+      }
+      setTimeout(() => el.remove(), 600);
+    } else if (type === "psychic") {
+      // ── Confused spin then dissolve in purple ──
+      if (imgEl) {
+        imgEl.style.transition = "none";
+        imgEl.style.animation = "impPsychicKill 0.7s ease-out forwards";
+      }
+
+      if (effectsEl) {
+        // Spiral rings
+        for (let i = 0; i < 3; i++) {
+          const ring = document.createElement("div");
+          const rs = sz * (0.4 + i * 0.3);
+          ring.style.cssText = `
+            position:absolute;
+            left:${cx - rs / 2}px; top:${cy - rs / 2}px;
+            width:${rs}px; height:${rs}px;
+            border-radius:50%;
+            border:2px solid rgba(168,85,247,${0.9 - i * 0.2});
+            box-shadow:0 0 10px rgba(168,85,247,0.6);
+            pointer-events:none; z-index:40;
+            animation:psychicRing 0.7s ease-out ${i * 0.1}s forwards;
+          `;
+          effectsEl.appendChild(ring);
+          setTimeout(() => ring.remove(), 800);
+        }
+      }
+      setTimeout(() => el.remove(), 700);
+    } else if (type === "beam") {
+      // ── Flash white then vaporizes ──
+      if (imgEl) {
+        imgEl.style.transition = "none";
+        imgEl.style.animation = "impBeamKill 0.5s ease-out forwards";
+      }
+
+      if (effectsEl) {
+        const flash = document.createElement("div");
+        flash.style.cssText = `
+          position:absolute;
+          left:${cx - sz}px; top:${cy - sz}px;
+          width:${sz * 2}px; height:${sz * 2}px;
+          border-radius:50%;
+          background:radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(34,211,238,0.7) 40%, transparent 70%);
+          pointer-events:none; z-index:40;
+          animation:beamVaporize 0.5s ease-out forwards;
+        `;
+        effectsEl.appendChild(flash);
+        setTimeout(() => flash.remove(), 500);
+      }
+      setTimeout(() => el.remove(), 500);
+    } else {
+      // ── Default fallback ──
+      if (imgEl) {
+        imgEl.style.transition = "opacity 0.3s, transform 0.3s";
+        imgEl.style.opacity = "0";
+        imgEl.style.transform = "scale(0.5) rotate(20deg)";
+      }
+      setTimeout(() => el.remove(), 350);
+    }
+  }
+  // ── Imp King logic ────────────────────────────────────────────────────────
+  function updateKing(king, dt, gridRect, layerRect, cellW) {
+    if (king.dead || king.type !== "imp_king") return;
+
+    const cfg = Levels.getDemonStats("imp_king")?.kingConfig;
+    if (!cfg) return;
+
+    // Calculate x position of stop column
+    const gridOffX =
+      gridRect && layerRect ? gridRect.left - layerRect.left : 72;
+    const stopX = gridOffX + cfg.STOP_COL * cellW;
+
+    // Stop when reaching stop column
+    if (!king.kingStopped && king.x <= stopX) {
+      king.kingStopped = true;
+      king.currentSpeed = 0;
+      king.x = stopX;
+      king.el.style.left = king.x + "px";
+      king.kingSpawnTimer = 0;
+      // Crown glow effect
+      king.el.classList.add("king-stopped");
+    }
+
+    if (!king.kingStopped) return;
+
+    // Spawn timer
+    king.kingSpawnTimer = (king.kingSpawnTimer || 0) + dt * 1000;
+    if (king.kingSpawnTimer >= cfg.SPAWN_INTERVAL) {
+      king.kingSpawnTimer = 0;
+      spawnKingMinions(king, cfg, cellW, gridOffX);
+    }
+  }
+
+  function spawnKingMinions(king, cfg, cellW, gridOffX) {
+    if (!king.kingMinions) king.kingMinions = [];
+
+    // Remove dead minions from tracking
+    king.kingMinions = king.kingMinions.filter((m) => !m.dead);
+
+    const kingCol = Math.round((king.x - gridOffX) / cellW);
+    const kingRow = king.row;
+
+    cfg.SPAWN_OFFSETS.forEach((offset, i) => {
+      const targetRow = kingRow + offset.rowDelta;
+      const targetCol = kingCol + offset.colDelta;
+
+      // Bounds check
+      if (targetRow < 0 || targetRow >= Grid.getRows()) return;
+      if (targetCol < 0 || targetCol >= Grid.getCols()) return;
+
+      const spawnType = cfg.SPAWN_TYPES[i] || "imp";
+      const baseStats = Levels.getDemonStats(spawnType);
+      if (!baseStats) return;
+
+      setTimeout(() => {
+        if (king.dead) return;
+
+        const minionCfg = {
+          type: spawnType,
+          hp: Math.floor(baseStats.hp * 0.5), // minions are weaker
+          speed: baseStats.speed,
+          damage: baseStats.damage,
+          biteRate: baseStats.biteRate,
+          special: [],
+          row: targetRow,
+          isKingMinion: true,
+        };
+
+        const minion = spawn(minionCfg);
+        if (minion) {
+          minion.kingParent = king;
+          king.kingMinions.push(minion);
+
+          // Rise from ground spawn animation
+          showMinionSpawnEffect(minion);
+
+          // Override x position to spawn near king
+          const gridEl = document.getElementById("grid-container");
+          const layerEl = document.getElementById("demons-layer");
+          if (gridEl && layerEl) {
+            const gRect = gridEl.getBoundingClientRect();
+            const lRect = layerEl.getBoundingClientRect();
+            const spawnX =
+              gRect.left - lRect.left + targetCol * cellW + cellW / 2;
+            minion.x = spawnX;
+            minion.el.style.left = spawnX + "px";
+          }
+        }
+      }, i * 300); // stagger spawns slightly
+    });
+  }
+
+  function showMinionSpawnEffect(minion) {
+    if (!minion || !minion.el) return;
+
+    // Start underground
+    minion.el.style.opacity = "0";
+    minion.el.style.transform = "translateY(40px) scaleY(0.3)";
+    minion.el.style.transition = "none";
+
+    // Rise up animation
+    setTimeout(() => {
+      minion.el.style.transition =
+        "transform 0.5s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.4s ease-out";
+      minion.el.style.transform = "translateY(0px) scaleY(1)";
+      minion.el.style.opacity = "1";
+    }, 50);
+
+    // Ground crack effect
+    const effectsEl = document.getElementById("effects-layer");
+    const layerEl = document.getElementById("demons-layer");
+    if (effectsEl && layerEl && minion.el) {
+      const mRect = minion.el.getBoundingClientRect();
+      const eRect = effectsEl.getBoundingClientRect();
+      const cx = mRect.left - eRect.left + mRect.width / 2;
+      const cy = mRect.bottom - eRect.top;
+
+      const crack = document.createElement("div");
+      crack.style.cssText = `
+        position:absolute;
+        left:${cx - 20}px; top:${cy - 6}px;
+        width:40px; height:12px;
+        border-radius:50%;
+        background:radial-gradient(ellipse, rgba(139,69,19,0.8), rgba(0,0,0,0.4), transparent);
+        box-shadow:0 0 10px rgba(0,0,0,0.6);
+        pointer-events:none; z-index:35;
+        animation:crackFade 0.8s ease-out forwards;
+      `;
+      effectsEl.appendChild(crack);
+      setTimeout(() => crack.remove(), 800);
+    }
+  }
+
+  function killKingMinions(king) {
+    if (!king.kingMinions) return;
+    king.kingMinions.forEach((minion) => {
+      if (!minion.dead) {
+        minion.dead = true;
+        // Vanish animation for minions
+        if (minion.el) {
+          minion.el.style.transition =
+            "transform 0.4s ease-in, opacity 0.4s ease-in";
+          minion.el.style.transform = "translateY(-30px) scale(0)";
+          minion.el.style.opacity = "0";
+          setTimeout(() => minion.el && minion.el.remove(), 400);
+        }
+      }
+    });
+    king.kingMinions = [];
+  }
   return {
     init,
     spawn,

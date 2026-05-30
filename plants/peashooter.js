@@ -54,7 +54,7 @@ PlantRegistry.register({
   onTick(row, col, plantData) {
     if (!PlantRegistry.isDemonInRange(row, col, this.fireDistance)) return;
     const stats = this.getStats(plantData.level);
-    Projectiles.spawn("pea", row, col, stats.damage);
+    Projectiles.spawn("pea", row, col, stats.damage, { damageType: "physical" });
 
     // Shoot animation
     const cell = Grid.getCellEl(row, col);

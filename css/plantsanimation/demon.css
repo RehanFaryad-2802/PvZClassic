@@ -1,0 +1,529 @@
+/* ══════════════════════════════════════════════════
+   IMP DEMON CSS ANIMATIONS
+   States: walk, eat, hit, death, dodge
+══════════════════════════════════════════════════ */
+
+/* ── Walk: running stride ────────────────────────── */
+.demon-entity.imp-walk {
+  animation: impWalk 0.5s ease-in-out infinite;
+}
+
+@keyframes impWalk {
+  0%   { transform: translateY(0px)  rotate(0deg);  }
+  20%  { transform: translateY(-5px) rotate(-2deg); }
+  40%  { transform: translateY(0px)  rotate(0deg);  }
+  60%  { transform: translateY(-3px) rotate(2deg);  }
+  80%  { transform: translateY(-6px) rotate(-1deg); }
+  100% { transform: translateY(0px)  rotate(0deg);  }
+}
+
+/* ── Imp image: eye glow + wing shadow ───────────── */
+.demon-entity.imp-walk img,
+.demon-entity.imp-walk video {
+  filter:
+    drop-shadow(0 0 6px rgba(234,179,8,0.6))
+    drop-shadow(0 2px 8px rgba(0,0,0,0.8));
+  animation: impEyeGlow 1.4s ease-in-out infinite;
+}
+
+@keyframes impEyeGlow {
+  0%, 100% { filter: drop-shadow(0 0 5px rgba(234,179,8,0.5))  drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
+  50%       { filter: drop-shadow(0 0 12px rgba(234,179,8,0.9)) drop-shadow(0 0 20px rgba(251,191,36,0.4)) drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
+}
+
+/* ── Eating: lean forward chomp bob ──────────────── */
+.demon-entity.imp-eat {
+  animation: impEat 0.35s ease-in-out infinite;
+}
+
+@keyframes impEat {
+  0%   { transform: translateY(0px)  translateX(0px)  rotate(0deg);  }
+  30%  { transform: translateY(-2px) translateX(4px)  rotate(-5deg); }
+  60%  { transform: translateY(2px)  translateX(-2px) rotate(3deg);  }
+  100% { transform: translateY(0px)  translateX(0px)  rotate(0deg);  }
+}
+
+.demon-entity.imp-eat img,
+.demon-entity.imp-eat video {
+  filter:
+    drop-shadow(0 0 10px rgba(239,68,68,0.7))
+    drop-shadow(0 0 20px rgba(234,179,8,0.5))
+    drop-shadow(0 2px 8px rgba(0,0,0,0.8));
+}
+
+/* ── Hit flash — enhanced ────────────────────────── */
+.demon-entity.hit img,
+.demon-entity.hit video {
+  filter: brightness(4) saturate(0) drop-shadow(0 0 10px #fff) !important;
+  animation: impHitFlash 0.12s ease-out 1 !important;
+}
+
+@keyframes impHitFlash {
+  0%   { filter: brightness(4) saturate(0) drop-shadow(0 0 14px #fff); transform: scaleX(0.85) scaleY(1.1); }
+  50%  { filter: brightness(2) saturate(0.3) drop-shadow(0 0 8px rgba(239,68,68,0.8)); transform: scaleX(1.05) scaleY(0.96); }
+  100% { filter: brightness(1) saturate(1); transform: scaleX(1) scaleY(1); }
+}
+
+/* ── Frozen ───────────────────────────────────────── */
+.demon-entity.frozen img,
+.demon-entity.frozen video {
+  filter: drop-shadow(0 0 10px var(--ice-blue)) hue-rotate(160deg) brightness(1.3) !important;
+  animation: impFreeze 1s ease-in-out infinite !important;
+}
+
+@keyframes impFreeze {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(103,232,249,0.8))  hue-rotate(160deg) brightness(1.2); }
+  50%       { filter: drop-shadow(0 0 16px rgba(103,232,249,1))   hue-rotate(180deg) brightness(1.5); }
+}
+
+/* ── Charge: speed burst red trail ──────────────── */
+.demon-entity.imp-charging {
+  animation: impCharge 0.25s ease-in-out infinite;
+}
+
+@keyframes impCharge {
+  0%   { transform: translateY(0px)  scaleX(1.1); }
+  50%  { transform: translateY(-4px) scaleX(1.15); }
+  100% { transform: translateY(0px)  scaleX(1.1); }
+}
+
+.demon-entity.imp-charging img,
+.demon-entity.imp-charging video {
+  filter:
+    drop-shadow(-8px 0 6px rgba(239,68,68,0.8))
+    drop-shadow(-14px 0 10px rgba(239,68,68,0.4))
+    drop-shadow(0 0 10px rgba(234,179,8,0.7)) !important;
+}
+
+/* ── Dodge: quick sidestep flash ─────────────────── */
+.demon-entity.imp-dodge {
+  animation: impDodge 0.3s ease-out forwards;
+}
+
+@keyframes impDodge {
+  0%   { transform: translateY(0px)  translateX(0px); opacity: 1; }
+  40%  { transform: translateY(-14px) translateX(8px); opacity: 0.4; }
+  70%  { transform: translateY(-8px)  translateX(4px); opacity: 0.7; }
+  100% { transform: translateY(0px)   translateX(0px); opacity: 1; }
+}
+
+
+/* ══════════════════════════════════════════════════
+   DEMON DEATH ANIMATIONS — per damage type
+══════════════════════════════════════════════════ */
+
+/* ── Shared keyframe for CSS vars ────────────────── */
+@keyframes shardFly {
+  0%   { transform: translate(0,0) rotate(0deg) scale(1); opacity: 1; }
+  60%  { opacity: 0.7; }
+  100% { transform: translate(var(--tx), var(--ty)) rotate(var(--r)) scale(0.3); opacity: 0; }
+}
+
+/* Physical — shatter */
+@keyframes impShatter {
+  0%   { transform: scale(1)    rotate(0deg);   opacity: 1;   filter: brightness(2) saturate(0); }
+  30%  { transform: scale(1.15) rotate(-5deg);  opacity: 0.9; filter: brightness(3) saturate(0); }
+  60%  { transform: scale(0.8)  rotate(8deg);   opacity: 0.5; }
+  100% { transform: scale(0.1)  rotate(20deg);  opacity: 0;   }
+}
+
+/* Ice — freeze solid then shatter */
+@keyframes impFreezeKill {
+  0%   { filter: hue-rotate(160deg) brightness(1.3) saturate(1.5); transform: scale(1); opacity: 1; }
+  30%  { filter: hue-rotate(200deg) brightness(2)   saturate(0) drop-shadow(0 0 16px rgba(103,232,249,1)); transform: scale(1.1); }
+  60%  { filter: hue-rotate(200deg) brightness(1.5) saturate(0); transform: scale(0.9) rotate(-10deg); opacity: 0.7; }
+  100% { filter: hue-rotate(200deg) brightness(0.5) saturate(0); transform: scale(0.2) rotate(-20deg); opacity: 0; }
+}
+@keyframes crystalBurst {
+  0%   { transform: translate(0,0) rotate(var(--r)) scale(0.5); opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) rotate(var(--r)) scale(0.2); opacity: 0; }
+}
+@keyframes iceBurstRing {
+  0%   { transform: scale(0.3); opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* Fire — burn up */
+@keyframes impBurnKill {
+  0%   { transform: scale(1)    translateY(0px);   opacity: 1;   filter: brightness(1.5) sepia(0.3); }
+  30%  { transform: scale(1.1)  translateY(-8px);  opacity: 0.9; filter: brightness(2) sepia(1) saturate(3) hue-rotate(-20deg); }
+  70%  { transform: scale(0.7)  translateY(-20px); opacity: 0.5; filter: brightness(1) sepia(1) saturate(2); }
+  100% { transform: scale(0.1)  translateY(-35px); opacity: 0;   }
+}
+@keyframes flameDie {
+  0%   { transform: translateY(0px) translateX(0px) scale(1); opacity: 0.9; }
+  50%  { transform: translateY(-30px) translateX(calc(var(--offX) * 0.3)) scale(0.8); opacity: 0.7; }
+  100% { transform: translateY(-60px) translateX(calc(var(--offX) * 0.5)) scale(0.2); opacity: 0; }
+}
+@keyframes scorchFade {
+  0%   { opacity: 0.7; transform: scaleX(1); }
+  100% { opacity: 0;   transform: scaleX(1.5); }
+}
+
+/* Electric — electrocuted */
+@keyframes impElectroKill {
+  0%   { transform: scale(1)    rotate(0deg);  opacity: 1;   filter: brightness(1) saturate(1); }
+  15%  { transform: scale(1.12) rotate(-3deg); opacity: 1;   filter: brightness(4) saturate(0); }
+  30%  { transform: scale(0.95) rotate(4deg);  opacity: 0.9; filter: brightness(3) saturate(0) hue-rotate(40deg); }
+  50%  { transform: scale(1.05) rotate(-2deg); opacity: 0.7; filter: brightness(2) saturate(0); }
+  100% { transform: scale(0.2)  rotate(10deg); opacity: 0;   filter: brightness(0.5) saturate(0); }
+}
+@keyframes arcFade {
+  0%   { opacity: 0.9; stroke-width: 2.5; }
+  100% { opacity: 0;   stroke-width: 0.5; }
+}
+@keyframes electroBurst {
+  0%   { transform: scale(0.3); opacity: 1; }
+  100% { transform: scale(2);   opacity: 0; }
+}
+
+/* Psychic — spiral dissolve */
+@keyframes impPsychicKill {
+  0%   { transform: scale(1)   rotate(0deg);   opacity: 1;   filter: hue-rotate(0deg)   brightness(1); }
+  30%  { transform: scale(1.1) rotate(180deg); opacity: 0.8; filter: hue-rotate(120deg)  brightness(1.5) saturate(2); }
+  70%  { transform: scale(0.6) rotate(300deg); opacity: 0.4; filter: hue-rotate(260deg)  brightness(1.2); }
+  100% { transform: scale(0)   rotate(420deg); opacity: 0;   filter: hue-rotate(300deg); }
+}
+@keyframes psychicRing {
+  0%   { transform: scale(0.5) rotate(0deg);   opacity: 1; }
+  100% { transform: scale(2)   rotate(180deg); opacity: 0; }
+}
+
+/* Beam — vaporize */
+@keyframes impBeamKill {
+  0%   { transform: scaleX(1)   scaleY(1);    opacity: 1;   filter: brightness(1); }
+  20%  { transform: scaleX(0.3) scaleY(1.4);  opacity: 1;   filter: brightness(5) saturate(0); }
+  50%  { transform: scaleX(0.1) scaleY(0.8);  opacity: 0.6; filter: brightness(3); }
+  100% { transform: scaleX(0)   scaleY(0);    opacity: 0; }
+}
+@keyframes beamVaporize {
+  0%   { transform: scale(0.2); opacity: 1; }
+  50%  { transform: scale(1.5); opacity: 0.8; }
+  100% { transform: scale(2);   opacity: 0; }
+}
+/* ══════════════════════════════════════════════════
+   IMP VARIANTS + KING CSS
+══════════════════════════════════════════════════ */
+
+/* King stopped — pulsing crown glow */
+.demon-entity.king-stopped {
+  animation: kingAura 1.8s ease-in-out infinite;
+}
+
+@keyframes kingAura {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(234,179,8,0.6))  drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
+  50%       { filter: drop-shadow(0 0 20px rgba(234,179,8,1))   drop-shadow(0 0 35px rgba(251,191,36,0.5)) drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
+}
+
+/* King spawn banner above it */
+.king-spawn-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 3px solid rgba(234,179,8,0.9);
+  box-shadow: 0 0 16px rgba(234,179,8,0.7);
+  pointer-events: none;
+  z-index: 36;
+  animation: kingSpawnRing 0.6s ease-out forwards;
+}
+@keyframes kingSpawnRing {
+  0%   { transform: scale(0.3); opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* Ground crack on minion spawn */
+@keyframes crackFade {
+  0%   { transform: scaleX(0.5); opacity: 0.9; }
+  50%  { transform: scaleX(1.2); opacity: 0.7; }
+  100% { transform: scaleX(1.5); opacity: 0; }
+}
+
+/* Axe imp — slightly red tint showing weapon power */
+.demon-entity.type-imp_axe img {
+  filter: drop-shadow(0 0 6px rgba(239,68,68,0.5)) drop-shadow(0 2px 8px rgba(0,0,0,0.8));
+}
+
+/* Shield imp — blue defensive glow */
+.demon-entity.type-imp_shield img {
+  filter: drop-shadow(0 0 6px rgba(96,165,250,0.5)) drop-shadow(0 2px 8px rgba(0,0,0,0.8));
+}
+
+/* Heavy imp — dark heavy shadow */
+.demon-entity.type-imp_heavy img {
+  filter: drop-shadow(0 0 8px rgba(0,0,0,0.9)) drop-shadow(0 0 4px rgba(239,68,68,0.4)) drop-shadow(0 2px 8px rgba(0,0,0,0.8));
+}
+/* ══════════════════════════════════════════════════
+   BAT DEMON CSS ANIMATIONS
+   States: idle wing flap, dive eat, hit, frozen
+══════════════════════════════════════════════════ */
+
+.demon-entity.bat-idle {
+  animation: batFly 0.6s ease-in-out infinite;
+}
+
+@keyframes batFly {
+  0%   { transform: translateY(0px)  scaleY(1)    rotate(0deg);  }
+  25%  { transform: translateY(-8px) scaleY(0.92) rotate(-3deg); }
+  50%  { transform: translateY(-4px) scaleY(1.04) rotate(0deg);  }
+  75%  { transform: translateY(-10px) scaleY(0.9) rotate(2deg);  }
+  100% { transform: translateY(0px)  scaleY(1)    rotate(0deg);  }
+}
+
+.demon-entity.bat-idle img {
+  filter:
+    drop-shadow(0 0 6px rgba(239,68,68,0.5))
+    drop-shadow(0 2px 8px rgba(0,0,0,0.9));
+  animation: batEyeGlow 1.8s ease-in-out infinite;
+}
+
+@keyframes batEyeGlow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(239,68,68,0.4))  drop-shadow(0 2px 8px rgba(0,0,0,0.9)); }
+  50%       { filter: drop-shadow(0 0 12px rgba(239,68,68,0.9)) drop-shadow(0 0 20px rgba(239,68,68,0.4)) drop-shadow(0 2px 8px rgba(0,0,0,0.9)); }
+}
+
+.demon-entity.bat-eat {
+  animation: batDive 0.4s ease-in-out infinite;
+}
+
+@keyframes batDive {
+  0%   { transform: translateY(0px)   rotate(0deg)   scaleX(1); }
+  30%  { transform: translateY(-6px)  rotate(-8deg)  scaleX(0.9); }
+  60%  { transform: translateY(4px)   rotate(5deg)   scaleX(1.1); }
+  100% { transform: translateY(0px)   rotate(0deg)   scaleX(1); }
+}
+
+.demon-entity.bat-eat img {
+  filter:
+    drop-shadow(0 0 14px rgba(239,68,68,0.8))
+    drop-shadow(0 2px 8px rgba(0,0,0,0.9)) !important;
+}
+
+/* ══════════════════════════════════════════════════
+   FROST GARGOYLE (ICE) CSS ANIMATIONS
+   States: idle crystal shimmer, freeze breath eat, hit
+══════════════════════════════════════════════════ */
+
+.demon-entity.ice-idle {
+  animation: iceFly 2.2s ease-in-out infinite;
+}
+
+@keyframes iceFly {
+  0%   { transform: translateY(0px)  rotate(0deg)  scaleY(1);    }
+  30%  { transform: translateY(-5px) rotate(-1deg) scaleY(1.02); }
+  60%  { transform: translateY(-8px) rotate(1deg)  scaleY(0.98); }
+  100% { transform: translateY(0px)  rotate(0deg)  scaleY(1);    }
+}
+
+.demon-entity.ice-idle img {
+  animation: iceShimmer 2s ease-in-out infinite;
+}
+
+@keyframes iceShimmer {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(103,232,249,0.6))  drop-shadow(0 0 12px rgba(147,197,253,0.3))  drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
+  40%       { filter: drop-shadow(0 0 14px rgba(103,232,249,0.9)) drop-shadow(0 0 26px rgba(186,230,253,0.6))  drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
+  70%       { filter: drop-shadow(0 0 8px rgba(103,232,249,0.7))  drop-shadow(0 0 16px rgba(147,197,253,0.4))  drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
+}
+
+.demon-entity.ice-eat {
+  animation: iceBreath 0.5s ease-in-out infinite;
+}
+
+@keyframes iceBreath {
+  0%   { transform: translateY(0px)  scaleX(1)    rotate(0deg);  }
+  25%  { transform: translateY(-3px) scaleX(0.92) rotate(-4deg); }
+  55%  { transform: translateY(2px)  scaleX(1.08) rotate(3deg);  }
+  100% { transform: translateY(0px)  scaleX(1)    rotate(0deg);  }
+}
+
+.demon-entity.ice-eat img {
+  filter:
+    drop-shadow(0 0 18px rgba(103,232,249,1))
+    drop-shadow(0 0 32px rgba(186,230,253,0.7))
+    brightness(1.4) !important;
+}
+
+/* Ice breath cloud when eating */
+.ice-breath-cloud {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(186,230,253,0.8) 0%, rgba(103,232,249,0.4) 50%, transparent 70%);
+  box-shadow: 0 0 12px rgba(103,232,249,0.6);
+  pointer-events: none;
+  z-index: 22;
+  animation: iceBreathCloud 0.6s ease-out forwards;
+}
+
+@keyframes iceBreathCloud {
+  0%   { transform: scale(0.3) translateX(0px); opacity: 1; }
+  100% { transform: scale(2)   translateX(-30px); opacity: 0; }
+}
+
+/* ══════════════════════════════════════════════════
+   IRON WARLORD (ARMORED) CSS ANIMATIONS
+   States: idle heavy march, axe slam eat, armor hit
+══════════════════════════════════════════════════ */
+
+.demon-entity.armored-idle {
+  animation: armoredMarch 0.9s ease-in-out infinite;
+}
+
+@keyframes armoredMarch {
+  0%   { transform: translateY(0px)  rotate(0deg)   scaleY(1);    }
+  20%  { transform: translateY(-3px) rotate(-1deg)  scaleY(1.01); }
+  40%  { transform: translateY(0px)  rotate(0deg)   scaleY(0.99); }
+  60%  { transform: translateY(-2px) rotate(1deg)   scaleY(1.01); }
+  80%  { transform: translateY(0px)  rotate(0deg)   scaleY(0.99); }
+  100% { transform: translateY(0px)  rotate(0deg)   scaleY(1);    }
+}
+
+.demon-entity.armored-idle img {
+  filter:
+    drop-shadow(0 0 8px rgba(239,68,68,0.4))
+    drop-shadow(0 0 16px rgba(100,116,139,0.5))
+    drop-shadow(0 2px 10px rgba(0,0,0,0.9));
+  animation: armoredEyeRed 2.5s ease-in-out infinite;
+}
+
+@keyframes armoredEyeRed {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(239,68,68,0.3))  drop-shadow(0 0 14px rgba(100,116,139,0.4)) drop-shadow(0 2px 10px rgba(0,0,0,0.9)); }
+  50%       { filter: drop-shadow(0 0 14px rgba(239,68,68,0.9)) drop-shadow(0 0 24px rgba(100,116,139,0.6)) drop-shadow(0 2px 10px rgba(0,0,0,0.9)); }
+}
+
+.demon-entity.armored-eat {
+  animation: armoredAxeSwing 0.7s ease-in-out infinite;
+}
+
+@keyframes armoredAxeSwing {
+  0%   { transform: translateY(0px)  translateX(0px)  rotate(0deg);  }
+  25%  { transform: translateY(-4px) translateX(6px)  rotate(-6deg); }
+  55%  { transform: translateY(3px)  translateX(-3px) rotate(4deg);  }
+  100% { transform: translateY(0px)  translateX(0px)  rotate(0deg);  }
+}
+
+.demon-entity.armored-eat img {
+  filter:
+    drop-shadow(0 0 16px rgba(239,68,68,0.8))
+    drop-shadow(0 0 8px rgba(100,116,139,0.9))
+    drop-shadow(0 2px 10px rgba(0,0,0,0.9)) !important;
+}
+
+/* Armor clank hit — sparks */
+.armor-spark {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fbbf24;
+  box-shadow: 0 0 6px rgba(251,191,36,0.9);
+  pointer-events: none;
+  z-index: 30;
+  animation: armorSpark 0.3s ease-out forwards;
+}
+
+@keyframes armorSpark {
+  0%   { transform: translate(0,0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--sx), var(--sy)) scale(0.2); opacity: 0; }
+}
+
+/* ══════════════════════════════════════════════════
+   BRUTE DEMON CSS ANIMATIONS
+   States: idle stomp, rage chomp eat, charge burst
+══════════════════════════════════════════════════ */
+
+.demon-entity.brute-idle {
+  animation: bruteStomp 0.7s ease-in-out infinite;
+}
+
+@keyframes bruteStomp {
+  0%   { transform: translateY(0px)  scaleY(1)    scaleX(1)    rotate(0deg);  }
+  20%  { transform: translateY(-6px) scaleY(1.04) scaleX(0.97) rotate(-2deg); }
+  40%  { transform: translateY(0px)  scaleY(0.96) scaleX(1.04) rotate(0deg);  }
+  60%  { transform: translateY(-4px) scaleY(1.03) scaleX(0.98) rotate(2deg);  }
+  80%  { transform: translateY(0px)  scaleY(0.98) scaleX(1.02) rotate(0deg);  }
+  100% { transform: translateY(0px)  scaleY(1)    scaleX(1)    rotate(0deg);  }
+}
+
+.demon-entity.brute-idle img {
+  filter:
+    drop-shadow(0 0 6px rgba(168,85,247,0.5))
+    drop-shadow(0 0 14px rgba(239,68,68,0.3))
+    drop-shadow(0 2px 10px rgba(0,0,0,0.9));
+  animation: bruteGlow 1.4s ease-in-out infinite;
+}
+
+@keyframes bruteGlow {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(168,85,247,0.4))  drop-shadow(0 2px 10px rgba(0,0,0,0.9)); }
+  50%       { filter: drop-shadow(0 0 16px rgba(168,85,247,0.8)) drop-shadow(0 0 28px rgba(239,68,68,0.4)) drop-shadow(0 2px 10px rgba(0,0,0,0.9)); }
+}
+
+.demon-entity.brute-eat {
+  animation: bruteChomp 0.3s ease-in-out infinite;
+}
+
+@keyframes bruteChomp {
+  0%   { transform: translateY(0px)  translateX(0px)  rotate(0deg)  scaleX(1);    }
+  25%  { transform: translateY(-5px) translateX(8px)  rotate(-5deg) scaleX(0.92); }
+  55%  { transform: translateY(4px)  translateX(-4px) rotate(4deg)  scaleX(1.08); }
+  100% { transform: translateY(0px)  translateX(0px)  rotate(0deg)  scaleX(1);    }
+}
+
+.demon-entity.brute-eat img {
+  filter:
+    drop-shadow(0 0 18px rgba(239,68,68,0.9))
+    drop-shadow(0 0 30px rgba(168,85,247,0.5))
+    brightness(1.3) !important;
+}
+
+/* Charge mode — speed burst with red trail */
+.demon-entity.brute-charging {
+  animation: bruteCharge 0.2s ease-in-out infinite;
+}
+
+@keyframes bruteCharge {
+  0%   { transform: translateY(0px)  scaleX(1.15) scaleY(0.92); }
+  50%  { transform: translateY(-5px) scaleX(1.2)  scaleY(0.88); }
+  100% { transform: translateY(0px)  scaleX(1.15) scaleY(0.92); }
+}
+
+.demon-entity.brute-charging img {
+  filter:
+    drop-shadow(-10px 0 8px rgba(239,68,68,0.9))
+    drop-shadow(-20px 0 14px rgba(239,68,68,0.4))
+    drop-shadow(0 0 12px rgba(168,85,247,0.6)) !important;
+}
+
+/* ══════════════════════════════════════════════════
+   SHARED HIT FLASHES per demon type
+══════════════════════════════════════════════════ */
+
+/* Bat hit — dark flash */
+.demon-entity.type-bat.hit img {
+  filter: brightness(3) saturate(0) hue-rotate(300deg) drop-shadow(0 0 10px rgba(239,68,68,0.8)) !important;
+}
+
+/* Ice hit — white shatter */
+.demon-entity.type-ice.hit img {
+  filter: brightness(4) saturate(0) drop-shadow(0 0 14px rgba(103,232,249,1)) !important;
+}
+
+/* Armored hit — gold spark flash */
+.demon-entity.type-armored.hit img {
+  filter: brightness(3) saturate(0.5) hue-rotate(30deg) drop-shadow(0 0 12px rgba(251,191,36,0.9)) !important;
+}
+
+/* Brute hit — purple pain flash */
+.demon-entity.type-brute.hit img {
+  filter: brightness(3) saturate(0) hue-rotate(270deg) drop-shadow(0 0 12px rgba(168,85,247,0.9)) !important;
+}
+
+/* ══════════════════════════════════════════════════
+   FROZEN STATE per demon type
+══════════════════════════════════════════════════ */
+
+.demon-entity.frozen img {
+  animation: frozenPulse 1s ease-in-out infinite !important;
+}
+
+@keyframes frozenPulse {
+  0%, 100% { filter: hue-rotate(160deg) brightness(1.2) saturate(0.6) drop-shadow(0 0 8px rgba(103,232,249,0.7)); }
+  50%       { filter: hue-rotate(190deg) brightness(1.5) saturate(0.3) drop-shadow(0 0 18px rgba(103,232,249,1)); }
+}

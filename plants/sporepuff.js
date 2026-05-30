@@ -199,7 +199,7 @@ PlantRegistry.register({
 
     if (!target) return;
 
-    Demons.damage(target, stats.damage);
+    Demons.damage(target, stats.damage, "psychic");
     setTimeout(() => {
       confuseDemon(target, stats.confuseDuration);
     }, 400);

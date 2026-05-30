@@ -164,7 +164,34 @@ PlantRegistry.register({
     plantData.maxHp = stats.hp;
     plantData.hp = stats.hp;
     plantData.raging = false;
-    plantData.lastAttackTime = 0; // Allow immediate first attack when placed
+    plantData.lastAttackTime = 0;
+
+    const cell = Grid.getCellEl(row, col);
+    if (cell) {
+      // Smoke wisps from head
+      ["s1", "s2", "s3"].forEach((cls) => {
+        const s = document.createElement("div");
+        s.className = `lb2-smoke ${cls}`;
+        cell.appendChild(s);
+      });
+
+      // Lava drips from fists
+      ["left", "right"].forEach((cls) => {
+        const d = document.createElement("div");
+        d.className = `lb2-drip ${cls}`;
+        cell.appendChild(d);
+      });
+
+      // Crack lines
+      const cracks = document.createElement("div");
+      cracks.className = "lb2-cracks";
+      cell.appendChild(cracks);
+    }
+
+    requestAnimationFrame(() => {
+      const img = Grid.getCellEl(row, col)?.querySelector(".plant-entity");
+      if (img) img.classList.add("lb2-idle");
+    });
   },
 
   onTick(row, col, plantData) {
@@ -208,15 +235,68 @@ PlantRegistry.register({
     if (isRage && !plantData.raging) {
       plantData.raging = true;
       showRageEffect(row, col);
+      // Switch to rage CSS state
+      const rageImg = Grid.getCellEl(row, col)?.querySelector(".plant-entity");
+      if (rageImg) {
+        rageImg.classList.remove("lb2-idle");
+        rageImg.classList.add("lb2-rage");
+      }
     } else if (!isRage && plantData.raging) {
       plantData.raging = false;
+      const rageImg = Grid.getCellEl(row, col)?.querySelector(".plant-entity");
+      if (rageImg) {
+        rageImg.classList.remove("lb2-rage");
+        rageImg.classList.add("lb2-idle");
+      }
     }
 
     const rageMult = plantData.raging ? 2 : 1;
 
     // Slam damage to closest demon
     const target = demonsAhead[0];
-    Demons.damage(target, stats.damage * rageMult);
+    Demons.damage(target, stats.damage * rageMult, "fire");
+
+    // Slam animation
+    const cell = Grid.getCellEl(row, col);
+    const img = cell?.querySelector(".plant-entity");
+    if (img && !plantData.slamming) {
+      plantData.slamming = true;
+      const wasRaging = plantData.raging;
+      img.classList.remove("lb2-idle", "lb2-rage");
+      img.classList.add("lb2-slam");
+
+      // Lava geysers in projectiles-layer space
+      const projLayer = document.getElementById("projectiles-layer");
+      if (projLayer && cell) {
+        const cellRect = cell.getBoundingClientRect();
+        const layerRect = projLayer.getBoundingClientRect();
+        const baseX = cellRect.right - layerRect.left;
+        const baseY = cellRect.bottom - layerRect.top;
+
+        // 5 geysers spread forward
+        for (let g = 0; g < 5; g++) {
+          const geyser = document.createElement("div");
+          const height = 20 + Math.random() * 30;
+          geyser.className = "lb2-geyser";
+          geyser.style.cssText = `
+            left:${baseX + g * 18 + Math.random() * 10}px;
+            bottom:${layerRect.height - baseY}px;
+            height:${height}px;
+            animation-delay:${g * 0.06}s;
+          `;
+          projLayer.appendChild(geyser);
+          setTimeout(() => geyser.remove(), 600 + g * 60);
+        }
+      }
+
+      setTimeout(() => {
+        if (img.isConnected) {
+          img.classList.remove("lb2-slam");
+          img.classList.add(wasRaging ? "lb2-rage" : "lb2-idle");
+          plantData.slamming = false;
+        }
+      }, 500);
+    }
 
     // Lava pool DoT on all demons in cell range
     showLavaSlam(row, col);
@@ -224,9 +304,27 @@ PlantRegistry.register({
   },
 
   onRemove(row, col) {
-    // Remove lava pool visuals
     const cell = Grid.getCellEl(row, col);
-    if (cell) cell.querySelector(".lava-pool")?.remove();
+    if (cell) {
+      cell.querySelector(".lava-pool")?.remove();
+      cell.querySelectorAll(".lb2-smoke").forEach(e => e.remove());
+      cell.querySelectorAll(".lb2-drip").forEach(e => e.remove());
+      cell.querySelector(".lb2-cracks")?.remove();
+    }
+  },
+
+  onDamage(row, col, plantData) {
+    const img = Grid.getCellEl(row, col)?.querySelector(".plant-entity");
+    if (!img) return;
+    const wasRaging = plantData.raging;
+    img.classList.remove("lb2-idle", "lb2-rage", "lb2-slam");
+    img.classList.add("lb2-damaged");
+    setTimeout(() => {
+      if (img.isConnected) {
+        img.classList.remove("lb2-damaged");
+        img.classList.add(wasRaging ? "lb2-rage" : "lb2-idle");
+      }
+    }, 500);
   },
 });
 
@@ -235,7 +333,7 @@ function applyLavaDot(demons, stats, rageMult) {
   demons.forEach((d) => {
     for (let i = 0; i < ticks; i++) {
       setTimeout(() => {
-        if (!d.dead) Demons.damage(d, stats.dotDamage * rageMult);
+        if (!d.dead) Demons.damage(d, stats.dotDamage * rageMult, "fire");
       }, i * stats.dotInterval);
     }
   });

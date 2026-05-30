@@ -1,0 +1,170 @@
+/* ══════════════════════════════════════════════════
+   VOLT LOTUS CSS ANIMATIONS
+   States: idle crackle, lightning discharge, overcharge, damaged
+══════════════════════════════════════════════════ */
+
+/* ── Idle: electric crackle with petal shimmer ───── */
+.plant-entity.vl-idle {
+  animation:
+    vlCrackle 1.6s ease-in-out infinite,
+    vlElectricGlow 2s ease-in-out infinite,
+    plantPlace 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-origin: bottom center;
+}
+
+@keyframes vlCrackle {
+  0%   { transform: translate(-50%, -50%) rotate(-1deg) scaleY(1)    translateY(0px);  }
+  15%  { transform: translate(-50%, -50%) rotate(1.5deg) scaleY(1.02) translateY(-2px); }
+  30%  { transform: translate(-50%, -50%) rotate(-2deg) scaleY(0.99) translateY(1px);  }
+  50%  { transform: translate(-50%, -50%) rotate(1deg)  scaleY(1.03) translateY(-3px); }
+  70%  { transform: translate(-50%, -50%) rotate(-1.5deg) scaleY(1.01) translateY(-1px); }
+  85%  { transform: translate(-50%, -50%) rotate(2deg)  scaleY(0.98) translateY(2px);  }
+  100% { transform: translate(-50%, -50%) rotate(-1deg) scaleY(1)    translateY(0px);  }
+}
+
+@keyframes vlElectricGlow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(250,204,21,0.5))  drop-shadow(0 0 8px rgba(96,165,250,0.3))  drop-shadow(0 2px 6px rgba(0,0,0,0.7)); }
+  25%       { filter: drop-shadow(0 0 10px rgba(250,204,21,0.8)) drop-shadow(0 0 18px rgba(96,165,250,0.5))  drop-shadow(0 2px 6px rgba(0,0,0,0.7)); }
+  60%       { filter: drop-shadow(0 0 6px rgba(250,204,21,0.6))  drop-shadow(0 0 12px rgba(147,197,253,0.4)) drop-shadow(0 2px 6px rgba(0,0,0,0.7)); }
+}
+
+/* Static sparks around the cell */
+.vl-spark {
+  position: absolute;
+  width: 2px;
+  border-radius: 1px;
+  background: #fde047;
+  box-shadow: 0 0 4px rgba(250,204,21,0.9), 0 0 8px rgba(250,204,21,0.4);
+  pointer-events: none;
+  z-index: 8;
+  transform-origin: bottom center;
+  animation: vlSparkFlicker 0s ease-in-out infinite;
+}
+
+/* Each spark gets different position + timing via inline style */
+@keyframes vlSparkFlicker {
+  0%, 100% { opacity: 0;   transform: scaleY(0.3) rotate(var(--r, 0deg)); }
+  30%       { opacity: 0.9; transform: scaleY(1)   rotate(var(--r, 0deg)); }
+  60%       { opacity: 0.4; transform: scaleY(0.6) rotate(var(--r, 0deg)); }
+  80%       { opacity: 1;   transform: scaleY(1.2) rotate(var(--r, 0deg)); }
+}
+
+/* Eye glow */
+.vl-eyes {
+  position: absolute;
+  top: 32%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 14%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 8%;
+  pointer-events: none;
+  z-index: 9;
+}
+
+.vl-eye {
+  width: 35%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, #bfdbfe 50%, #3b82f6 100%);
+  box-shadow: 0 0 8px rgba(191,219,254,0.9), 0 0 16px rgba(96,165,250,0.6);
+  animation: vlEyeFlash 1.6s ease-in-out infinite;
+}
+.vl-eye:last-child { animation-delay: 0.2s; }
+
+@keyframes vlEyeFlash {
+  0%, 100% { opacity: 0.85; box-shadow: 0 0 6px rgba(191,219,254,0.8), 0 0 12px rgba(96,165,250,0.5); }
+  40%       { opacity: 1;    box-shadow: 0 0 14px rgba(255,255,255,1), 0 0 28px rgba(96,165,250,0.8); }
+  42%       { opacity: 0.5; }
+  44%       { opacity: 1;    box-shadow: 0 0 14px rgba(255,255,255,1), 0 0 28px rgba(96,165,250,0.8); }
+}
+
+/* Gem on headband */
+.vl-gem {
+  position: absolute;
+  top: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #6ee7b7, #059669);
+  box-shadow: 0 0 8px rgba(16,185,129,0.9), 0 0 16px rgba(16,185,129,0.5);
+  pointer-events: none;
+  z-index: 10;
+  animation: vlGemPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes vlGemPulse {
+  0%, 100% { transform: translateX(-50%) scale(1);    box-shadow: 0 0 6px rgba(16,185,129,0.7); }
+  50%       { transform: translateX(-50%) scale(1.35); box-shadow: 0 0 14px rgba(16,185,129,1), 0 0 24px rgba(16,185,129,0.5); }
+}
+
+/* ── Discharge: violent shake + lightning spike ───── */
+.plant-entity.vl-discharge {
+  animation: vlDischarge 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  transform-origin: bottom center;
+  filter:
+    drop-shadow(0 0 16px rgba(250,204,21,1))
+    drop-shadow(0 0 30px rgba(255,255,255,0.6))
+    brightness(1.6);
+}
+
+@keyframes vlDischarge {
+  0%   { transform: translate(-50%, -50%) scaleX(1)    scaleY(1)    rotate(0deg)   translateX(0px);  }
+  15%  { transform: translate(-50%, -50%) scaleX(0.82) scaleY(1.15) rotate(-4deg)  translateX(-6px); }
+  40%  { transform: translate(-50%, -50%) scaleX(1.2)  scaleY(0.86) rotate(3deg)   translateX(8px);  }
+  65%  { transform: translate(-50%, -50%) scaleX(0.94) scaleY(1.05) rotate(-1deg)  translateX(-2px); }
+  100% { transform: translate(-50%, -50%) scaleX(1)    scaleY(1)    rotate(0deg)   translateX(0px);  }
+}
+
+/* Lightning origin burst at plant */
+.vl-origin-burst {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(250,204,21,0.7) 40%, transparent 70%);
+  box-shadow: 0 0 20px rgba(250,204,21,0.9), 0 0 40px rgba(250,204,21,0.4);
+  pointer-events: none;
+  z-index: 20;
+  animation: vlOriginBurst 0.3s ease-out forwards;
+}
+
+@keyframes vlOriginBurst {
+  0%   { transform: scale(0.2); opacity: 1; }
+  60%  { transform: scale(1.8); opacity: 0.7; }
+  100% { transform: scale(1);   opacity: 0; }
+}
+
+/* ── Overcharge: whole-plant gold flare ──────────── */
+.plant-entity.vl-overcharge {
+  animation: vlOverchargeAnim 0.5s ease-out forwards;
+  transform-origin: bottom center;
+  filter:
+    drop-shadow(0 0 24px rgba(250,204,21,1))
+    drop-shadow(0 0 48px rgba(255,255,255,0.8))
+    brightness(2.2)
+    saturate(1.5);
+}
+
+@keyframes vlOverchargeAnim {
+  0%   { transform: translate(-50%, -50%) scale(1);    }
+  20%  { transform: translate(-50%, -50%) scale(1.22); }
+  50%  { transform: translate(-50%, -50%) scale(0.92); }
+  75%  { transform: translate(-50%, -50%) scale(1.08); }
+  100% { transform: translate(-50%, -50%) scale(1);    }
+}
+
+/* ── Damaged: blue-white electric shock flash ─────── */
+.plant-entity.vl-damaged {
+  animation:
+    plantShake 0.3s ease-in-out infinite,
+    vlDamageFlash 0.12s ease-out 4;
+}
+
+@keyframes vlDamageFlash {
+  0%   { filter: drop-shadow(0 0 16px #fff) brightness(4)   saturate(0); }
+  50%  { filter: drop-shadow(0 0 8px rgba(250,204,21,0.8)) brightness(1.6) saturate(0.5); }
+  100% { filter: drop-shadow(0 0 16px #fff) brightness(4)   saturate(0); }
+}

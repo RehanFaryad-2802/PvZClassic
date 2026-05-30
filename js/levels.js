@@ -1,9 +1,3 @@
-/* js/levels.js
-   World and level definitions.
-   Each level defines: waves, demons per wave,
-   available sun, grid rows, unlock conditions.
-*/
-
 const Levels = (() => {
   // ── World Definitions ──────────────────────────
   const WORLDS = [
@@ -15,7 +9,28 @@ const Levels = (() => {
       bgClass: "world-1",
       unlocked: true,
       levelCount: 30,
-      demons: ["imp", "bat"],
+      demons: [
+        "imp",
+        "bat",
+        "imp_axe",
+        "imp_shield",
+        "imp_heavy",
+        "imp_king",
+        "ice",
+        "armored",
+        "brute",
+      ],
+      demonUnlockByLevel: {
+        imp: 1, // from level 1
+        bat: 3, // from level 3
+        imp_axe: 5, // axe imp from level 5
+        imp_shield: 8, // shield imp from level 8
+        imp_heavy: 12, // heavy imp from level 12
+        imp_king: 14, // king from level 15
+        ice: 14, // ice demon from level 10
+        armored: 14, // armored demon from level 20
+        brute: 14, // brute demon from level 25
+      },
     },
     {
       id: 2,
@@ -125,18 +140,100 @@ const Levels = (() => {
       name: "Imp",
       image: "assets/demons/demon1_imp.png",
       hp: 80,
-      speed: 50, // px per second
-      damage: 40, // damage per bite tick
-      biteRate: 800, // ms between bites
-      special: "dodge", // 15% chance to dodge projectile
+      speed: 80,
+      damage: 40,
+      biteRate: 800,
+      special: "dodge",
       reward: "imp",
+    },
+    imp_axe: {
+      id: "imp_axe",
+      name: "Axe Imp",
+      image: "assets/demons/var2.png",
+      hp: 60,
+      speed: 70,
+      damage: 40,
+      biteRate: 800,
+      special: "dodge",
+      reward: "imp",
+      damageModifiers: {
+        physical: 0,
+        ice: 1.0,
+        fire: 1.0,
+        electric: 1.0,
+        psychic: 1.0,
+        beam: 1.0,
+      },
+    },
+    imp_shield: {
+      id: "imp_shield",
+      name: "Shield Imp",
+      image: "assets/demons/var1.png",
+      hp: 96, // 20% more than base (80 * 1.2)
+      speed: 80,
+      damage: 40,
+      biteRate: 800,
+      special: "dodge",
+      reward: "imp",
+      damageModifiers: {
+        physical: 0.7, // 30% less from everything
+        ice: 0.7,
+        fire: 0.7,
+        electric: 0.7,
+        psychic: 1.4, // BUT psychic deals 40% MORE
+        beam: 0.7,
+      },
+    },
+    imp_heavy: {
+      id: "imp_heavy",
+      name: "Heavy Imp",
+      image: "assets/demons/var3.png",
+      hp: 160, // 100% more than base (80 * 2)
+      speed: 80,
+      damage: 40,
+      biteRate: 800,
+      special: "dodge",
+      reward: "imp",
+      damageModifiers: {
+        physical: 1.4, // 40% MORE from physical
+        ice: 1.0, // ice-pea is physical+ice so BOTH apply — handled in damage()
+        fire: 1.0,
+        electric: 1.0,
+        psychic: 1.0,
+        beam: 1.0,
+      },
+    },
+    imp_king: {
+      id: "imp_king",
+      name: "Imp King",
+      image: "assets/demons/var4.png",
+      hp: 100, // 70% less than base (80 * 0.3)
+      speed: 80,
+      damage: 0, // king does NOT attack plants
+      biteRate: 99999,
+      special: [],
+      reward: "imp",
+      // King config — all tunable
+      kingConfig: {
+        STOP_COL: 8, // stops at column index 1
+        SPAWN_INTERVAL: 5000, // ms between spawns
+        SPAWN_TYPES: ["bat", "bat", "imp", "imp_axe"], // what spawns
+        // positions relative to king: up, down, front1, front2
+        SPAWN_OFFSETS: [
+          { rowDelta: -1, colDelta: 0 }, // one row up
+          { rowDelta: 1, colDelta: 0 }, // one row down
+          { rowDelta: 0, colDelta: -1 }, // one col ahead (left)
+          { rowDelta: 0, colDelta: -2 }, // two cols ahead
+        ],
+      },
+      damageModifiers: {},
     },
     bat: {
       id: "bat",
       name: "Shadow Bat",
       image: "assets/demons/demon3_bat.png",
       hp: 60,
-      speed: 65,
+      speed: 80,
       damage: 8,
       biteRate: 800,
       special: "flying", // skips row 1 plant (front row)
@@ -230,75 +327,122 @@ const Levels = (() => {
     const difficulty = levelIdx + 1; // 1-based difficulty
     const isElite = (levelIdx + 1) % 5 === 0; // every 5th level is elite
 
-    // Scale HP and count with difficulty
-    const hpMult = 1 + (difficulty - 1) * 0.18;
+    const LEVEL_CFG = {
+      // Waves per level
+      MIN_WAVES: 3, // minimum waves any level has
+      MAX_WAVES: 8, // cap — never more than this
+      WAVES_PER_LEVELS: 3, // every N levels = +1 wave
+
+      // Demons per wave (normal waves)
+      BASE_DEMONS_PER_WAVE: 1, // wave 1 starts with this many
+      DEMONS_PER_DIFFICULTY: 3, // every N difficulty = +1 demon per wave
+      MAX_DEMONS_PER_WAVE: 8, // cap per normal wave
+
+      // Last wave (final wave of each level)
+      LAST_WAVE_ROWS: 5, // always fills all 5 rows minimum
+      LAST_WAVE_EXTRA_PER: 3, // every N difficulty = +1 extra demon on last wave
+      LAST_WAVE_HP_MULT: 1.3, // last wave demons are tougher
+      LAST_WAVE_EXTRA_HP_MULT: 1.5, // extra demons even tougher
+
+      // HP scaling per level
+      HP_SCALE_PER_LEVEL: 0.18, // each level adds 18% more HP
+
+      // Speed
+      ELITE_SPEED_MULT: 1.0, // elite level speed
+      NORMAL_SPEED_MULT: 0.55, // normal level speed
+      LAST_WAVE_SPEED_MULT: 0.6, // last wave speed
+
+      // Wave pool progression (which demons appear per wave)
+      // wave 0 = only first demon type
+      // wave 1+ = first 2 types
+      // wave 2+ = all available
+      POOL_EXPAND_WAVE_1: 1,
+      POOL_EXPAND_WAVE_2: 2,
+
+      // Spawn delay between demons in same wave (ms)
+      SPAWN_DELAY_NORMAL: 2000, // ms between each demon in normal wave
+      SPAWN_DELAY_LAST: 800, // ms between each demon in last wave
+      SPAWN_DELAY_EXTRA: 1500, // ms between extra demons in last wave
+
+      // Wave trigger delay (ms before next wave starts)
+      WAVE_DELAY: 3000,
+    };
+    const C = LEVEL_CFG; // shorthand
+    const hpMult = 1 + (difficulty - 1) * C.HP_SCALE_PER_LEVEL;
     const waves = [];
-    const totalWaves = Math.min(3 + Math.floor(difficulty / 2), 8);
+    const totalWaves = Math.min(
+      C.MIN_WAVES + Math.floor(difficulty / C.WAVES_PER_LEVELS),
+      C.MAX_WAVES,
+    );
     const waveCount = totalWaves;
+
+    // Filter demons available at this difficulty
+    const unlockMap = world.demonUnlockByLevel || {};
+    const available = (world.demons || []).filter((dType) => {
+      const minLevel = unlockMap[dType];
+      return minLevel === undefined || difficulty >= minLevel;
+    });
+    const safeAvailable = available.length > 0 ? available : [world.demons[0]];
 
     for (let w = 0; w < totalWaves; w++) {
       const demons = [];
-      const available = world.demons;
-
-      // Last wave of every level = one demon per row (5 rows)
       const isLastWave = w === totalWaves - 1;
 
-      // Demon count: w+1 normally, but last wave fills all 5 rows
-      // Higher difficulty = more demons per wave
-      const baseCount = isLastWave ? 5 : w + 1 + Math.floor(difficulty / 3);
-      const demonCount = Math.min(
-        baseCount,
-        isLastWave ? 5 + Math.floor(difficulty / 2) : 8,
-      );
-
-      // Pool gets harder each wave
-      let pool = [available[0]];
-      if (w >= 1 && available.length > 1) pool = available.slice(0, 2);
-      if (w >= 2) pool = available;
-      if (isElite) pool = available;
+      // ── Pool: which demon types can appear this wave ──
+      let pool = [safeAvailable[0]];
+      if (w >= C.POOL_EXPAND_WAVE_1 && safeAvailable.length > 1)
+        pool = safeAvailable.slice(0, 2);
+      if (w >= C.POOL_EXPAND_WAVE_2) pool = safeAvailable;
+      if (isElite) pool = safeAvailable;
 
       if (isLastWave) {
-        // Fill every row — guaranteed one demon per row minimum
-        const rowsToFill = 5 + Math.floor(difficulty / 3); // higher level = multiple per row
-        const usedRows = [];
-
-        for (let r = 0; r < 5; r++) {
-          usedRows.push(r);
+        // ── Last wave: one demon per row guaranteed ──
+        for (let r = 0; r < C.LAST_WAVE_ROWS; r++) {
           const type = pool[Math.floor(Math.random() * pool.length)];
           const base = DEMON_STATS[type];
+          if (!base) continue;
           demons.push({
             type,
-            hp: Math.floor(base.hp * hpMult * 1.3), // last wave demons are tougher
-            speed: base.speed * (isElite ? 1.0 : 0.6),
+            hp: Math.floor(base.hp * hpMult * C.LAST_WAVE_HP_MULT),
+            speed:
+              base.speed *
+              (isElite ? C.ELITE_SPEED_MULT : C.LAST_WAVE_SPEED_MULT),
             damage: base.damage,
             biteRate: base.biteRate,
             special: base.special,
             row: r,
-            spawnDelay: r * 800, // stagger per row
+            spawnDelay: r * C.SPAWN_DELAY_LAST,
           });
         }
 
-        // Higher levels add extra demons on top of the 5
-        const extras = Math.floor(difficulty / 3);
+        // Extra demons for higher difficulties
+        const extras = Math.floor(difficulty / C.LAST_WAVE_EXTRA_PER);
         for (let e = 0; e < extras; e++) {
           const type = pool[Math.floor(Math.random() * pool.length)];
           const base = DEMON_STATS[type];
+          if (!base) continue;
           demons.push({
             type,
-            hp: Math.floor(base.hp * hpMult * 1.5),
-            speed: base.speed * 0.65,
+            hp: Math.floor(base.hp * hpMult * C.LAST_WAVE_EXTRA_HP_MULT),
+            speed: base.speed * C.LAST_WAVE_SPEED_MULT,
             damage: base.damage,
             biteRate: base.biteRate,
             special: base.special,
             row: Math.floor(Math.random() * 5),
-            spawnDelay: 5000 + e * 1500, // come after first wave
+            spawnDelay: 5000 + e * C.SPAWN_DELAY_EXTRA,
           });
         }
       } else {
-        // Normal wave — random rows, no row guarantee
+        // ── Normal wave ──
+        const demonCount = Math.min(
+          C.BASE_DEMONS_PER_WAVE +
+            w +
+            Math.floor(difficulty / C.DEMONS_PER_DIFFICULTY),
+          C.MAX_DEMONS_PER_WAVE,
+        );
+
         const usedRows = [];
         for (let d = 0; d < demonCount; d++) {
-          // Try to avoid same row twice in early waves
           let row;
           if (d < 5 && usedRows.length < 5) {
             do {
@@ -311,20 +455,22 @@ const Levels = (() => {
 
           const type = pool[Math.floor(Math.random() * pool.length)];
           const base = DEMON_STATS[type];
+          if (!base) continue;
           demons.push({
             type,
             hp: Math.floor(base.hp * hpMult),
-            speed: base.speed * (isElite ? 0.9 : 0.55),
+            speed:
+              base.speed * (isElite ? C.ELITE_SPEED_MULT : C.NORMAL_SPEED_MULT),
             damage: base.damage,
             biteRate: base.biteRate,
             special: base.special,
             row,
-            spawnDelay: d * 2000,
+            spawnDelay: d * C.SPAWN_DELAY_NORMAL,
           });
         }
       }
 
-      waves.push({ demons, waveDelay: 3000, triggerOnKill: w > 0 });
+      waves.push({ demons, waveDelay: C.WAVE_DELAY, triggerOnKill: w > 0 });
     }
 
     // Sky drops sun for all levels by default

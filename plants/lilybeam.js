@@ -186,7 +186,7 @@ PlantRegistry.register({
       if (d.dead || d.row !== row) return;
       const dRect = d.el.getBoundingClientRect();
       if (dRect.left <= cellRect.left) return;
-      Demons.damage(d, stats.damage);
+      Demons.damage(d, stats.damage, "beam");
       Demons.freeze(d, stats.freezeDuration);
     });
 

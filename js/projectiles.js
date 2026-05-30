@@ -133,7 +133,7 @@ const Projectiles = (() => {
     // Armor reduction (Iron Warlord)
     if (demon.special === "armor") dmg = Math.floor(dmg * 0.6);
 
-    Demons.damage(demon, dmg);
+    Demons.damage(demon, dmg, proj.type === "ice-pea" ? "ice" : proj.damageType || "physical");
     Effects.showDamageNumber(dmg, demon.x + demon.width / 2, demon.y);
 
     // Ice slow
