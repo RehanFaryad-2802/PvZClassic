@@ -6,7 +6,7 @@
 PlantRegistry.register({
   id: "voltlotus",
   name: "Volt Lotus",
-  image: "assets/plants/voltlotus/voltlotus.png",
+  image: "assets/plants/voltlotus.png",
   cost: 50,
   fireDistance: 9,
   cooldown: 7000,

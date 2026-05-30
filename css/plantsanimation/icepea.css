@@ -1,0 +1,116 @@
+/* ══════════════════════════════════════════════════
+   ICE PEASHOOTER CSS ANIMATIONS
+   States: idle crystal float, shoot freeze, damaged
+══════════════════════════════════════════════════ */
+
+/* ── Idle: slow crystal shimmer float ────────────── */
+.plant-entity.ip-idle {
+  animation:
+    ipFloat 2.6s ease-in-out infinite,
+    ipShimmer 3s ease-in-out infinite,
+    plantPlace 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-origin: bottom center;
+}
+
+@keyframes ipFloat {
+  0%   { transform: translate(-50%, -50%) translateY(0px)  rotate(-1deg) scaleY(1);    }
+  30%  { transform: translate(-50%, -50%) translateY(-4px) rotate(0deg)  scaleY(1.02); }
+  60%  { transform: translate(-50%, -50%) translateY(-2px) rotate(1deg)  scaleY(0.99); }
+  100% { transform: translate(-50%, -50%) translateY(0px)  rotate(-1deg) scaleY(1);    }
+}
+
+@keyframes ipShimmer {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(103,232,249,0.5)) drop-shadow(0 2px 6px rgba(0,0,0,0.6)); }
+  50%       { filter: drop-shadow(0 0 12px rgba(103,232,249,0.9)) drop-shadow(0 0 20px rgba(147,197,253,0.5)) drop-shadow(0 2px 6px rgba(0,0,0,0.6)); }
+}
+
+/* ── Shoot: ice charge then fire recoil ──────────── */
+.plant-entity.ip-shoot {
+  animation: ipShoot 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  transform-origin: bottom center;
+  filter:
+    drop-shadow(0 0 14px rgba(103,232,249,1))
+    drop-shadow(0 0 28px rgba(147,197,253,0.7))
+    brightness(1.4);
+}
+
+@keyframes ipShoot {
+  0%   { transform: translate(-50%, -50%) scaleX(1)    scaleY(1)    translateX(0px);  }
+  20%  { transform: translate(-50%, -50%) scaleX(0.8)  scaleY(1.1)  translateX(-7px); }
+  50%  { transform: translate(-50%, -50%) scaleX(1.18) scaleY(0.9)  translateX(8px);  }
+  75%  { transform: translate(-50%, -50%) scaleX(0.95) scaleY(1.03) translateX(-2px); }
+  100% { transform: translate(-50%, -50%) scaleX(1)    scaleY(1)    translateX(0px);  }
+}
+
+/* Ice muzzle flash — crystal burst not circle */
+.ip-muzzle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+  z-index: 18;
+  animation: ipMuzzle 0.22s ease-out forwards;
+}
+
+/* Four crystal spikes radiating outward */
+.ip-muzzle::before,
+.ip-muzzle::after {
+  content: "";
+  position: absolute;
+  background: rgba(103,232,249,0.9);
+  border-radius: 1px;
+  box-shadow: 0 0 6px rgba(103,232,249,0.8);
+}
+
+/* Horizontal spike */
+.ip-muzzle::before {
+  width: 20px;
+  height: 3px;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+}
+
+/* Vertical spike */
+.ip-muzzle::after {
+  width: 3px;
+  height: 20px;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+}
+
+@keyframes ipMuzzle {
+  0%   { transform: scale(0.3) rotate(0deg);  opacity: 1; }
+  50%  { transform: scale(1.4) rotate(20deg); opacity: 0.8; }
+  100% { transform: scale(0.6) rotate(45deg); opacity: 0; }
+}
+
+/* Ambient ice ring always present on cell */
+.ip-aura {
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  border: 1px solid rgba(103,232,249,0.2);
+  pointer-events: none;
+  z-index: 4;
+  animation: ipAuraPulse 2s ease-in-out infinite;
+}
+
+@keyframes ipAuraPulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(103,232,249,0.2), inset 0 0 8px rgba(103,232,249,0.05); transform: scale(0.95); opacity: 0.6; }
+  50%       { box-shadow: 0 0 16px rgba(103,232,249,0.5), inset 0 0 16px rgba(103,232,249,0.1); transform: scale(1.05); opacity: 1; }
+}
+
+/* ── Damaged: blue shatter flash ─────────────────── */
+.plant-entity.ip-damaged {
+  animation:
+    plantShake 0.3s ease-in-out infinite,
+    ipDamageFlash 0.15s ease-out 3;
+}
+
+@keyframes ipDamageFlash {
+  0%   { filter: drop-shadow(0 0 12px #fff) brightness(3) saturate(0); }
+  50%  { filter: drop-shadow(0 0 6px rgba(103,232,249,0.8)) brightness(1.5) saturate(0.5); }
+  100% { filter: drop-shadow(0 0 12px #fff) brightness(3) saturate(0); }
+}

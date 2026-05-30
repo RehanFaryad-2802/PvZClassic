@@ -1,0 +1,73 @@
+/* ══════════════════════════════════════════════════
+   PEASHOOTER CSS ANIMATIONS
+   States: idle breathe, shoot recoil, take damage
+══════════════════════════════════════════════════ */
+
+/* ── Idle: slow breathe + slight lean forward ────── */
+.plant-entity.ps-idle {
+  animation:
+    psBreathe 2.2s ease-in-out infinite,
+    plantPlace 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-origin: bottom center;
+}
+
+@keyframes psBreathe {
+  0%   { transform: translate(-50%, -50%) scaleY(1)    rotate(0deg);  }
+  30%  { transform: translate(-50%, -50%) scaleY(1.04) rotate(-1deg); }
+  60%  { transform: translate(-50%, -50%) scaleY(0.97) rotate(1deg);  }
+  100% { transform: translate(-50%, -50%) scaleY(1)    rotate(0deg);  }
+}
+
+/* ── Shoot: snap back then forward recoil ────────── */
+.plant-entity.ps-shoot {
+  animation: psShoot 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  transform-origin: bottom center;
+  filter:
+    drop-shadow(0 0 6px rgba(34,197,94,0.8))
+    drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+}
+
+@keyframes psShoot {
+  0%   { transform: translate(-50%, -50%) scaleX(1)    translateX(0px);  }
+  20%  { transform: translate(-50%, -50%) scaleX(0.82) translateX(-6px); }
+  55%  { transform: translate(-50%, -50%) scaleX(1.12) translateX(4px);  }
+  80%  { transform: translate(-50%, -50%) scaleX(0.96) translateX(-2px); }
+  100% { transform: translate(-50%, -50%) scaleX(1)    translateX(0px);  }
+}
+
+/* Muzzle flash — positioned in projectiles-layer coordinate space */
+.ps-muzzle {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, #86efac 40%, transparent 70%);
+  box-shadow: 0 0 12px rgba(34,197,94,0.9);
+  pointer-events: none;
+  z-index: 8;
+  animation: psMuzzle 0.18s ease-out forwards;
+}
+
+@keyframes psMuzzle {
+  0%   { transform: scale(0.3); opacity: 1; }
+  60%  { transform: scale(1.4); opacity: 0.8; }
+  100% { transform: scale(0.8); opacity: 0; }
+}
+
+/* ── Damaged: red flash + squish ─────────────────── */
+.plant-entity.ps-damaged {
+  animation:
+    plantShake 0.3s ease-in-out infinite,
+    psDamageFlash 0.15s ease-out 3;
+  filter:
+    drop-shadow(0 0 8px rgba(239,68,68,0.9))
+    brightness(1.6)
+    saturate(0.3)
+    hue-rotate(100deg);
+}
+
+@keyframes psDamageFlash {
+  0%   { filter: drop-shadow(0 0 10px red) brightness(2.5) saturate(0) hue-rotate(100deg); }
+  50%  { filter: drop-shadow(0 0 4px red)  brightness(1.3) saturate(0.3) hue-rotate(80deg); }
+  100% { filter: drop-shadow(0 0 10px red) brightness(2.5) saturate(0) hue-rotate(100deg); }
+}

@@ -1,0 +1,85 @@
+/* ══════════════════════════════════════════════════
+   BONK CHOY CSS ANIMATIONS
+   States: idle guard, punch attack, take damage
+══════════════════════════════════════════════════ */
+
+/* ── Idle: fighter stance bob ────────────────────── */
+.plant-entity.bc-idle {
+  animation:
+    bcGuard 1.4s ease-in-out infinite,
+    plantPlace 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-origin: bottom center;
+}
+
+@keyframes bcGuard {
+  0%   { transform: translate(-50%, -50%) scaleY(1)    translateY(0px)  rotate(0deg);  }
+  25%  { transform: translate(-50%, -50%) scaleY(1.03) translateY(-3px) rotate(-1deg); }
+  50%  { transform: translate(-50%, -50%) scaleY(0.97) translateY(2px)  rotate(0deg);  }
+  75%  { transform: translate(-50%, -50%) scaleY(1.03) translateY(-2px) rotate(1deg);  }
+  100% { transform: translate(-50%, -50%) scaleY(1)    translateY(0px)  rotate(0deg);  }
+}
+
+/* ── Punch: lunge right then snap back ───────────── */
+.plant-entity.bc-punch {
+  animation: bcPunch 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  transform-origin: bottom center;
+  filter:
+    drop-shadow(0 0 10px rgba(168,85,247,0.9))
+    drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+}
+
+@keyframes bcPunch {
+  0%   { transform: translate(-50%, -50%) scaleX(1)    translateX(0px)  rotate(0deg);  }
+  15%  { transform: translate(-50%, -50%) scaleX(0.78) translateX(-8px) rotate(-4deg); }
+  45%  { transform: translate(-50%, -50%) scaleX(1.22) translateX(14px) rotate(3deg);  }
+  70%  { transform: translate(-50%, -50%) scaleX(0.92) translateX(-3px) rotate(-1deg); }
+  100% { transform: translate(-50%, -50%) scaleX(1)    translateX(0px)  rotate(0deg);  }
+}
+
+/* Impact shockwave — spawned in effects layer at demon position */
+.bc-impact {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(251,191,36,0.95) 0%, rgba(168,85,247,0.6) 50%, transparent 70%);
+  box-shadow: 0 0 16px rgba(251,191,36,0.8), 0 0 30px rgba(168,85,247,0.4);
+  pointer-events: none;
+  z-index: 28;
+  animation: bcImpact 0.35s ease-out forwards;
+}
+
+@keyframes bcImpact {
+  0%   { transform: scale(0.3) rotate(0deg);   opacity: 1; }
+  50%  { transform: scale(1.6) rotate(15deg);  opacity: 0.9; }
+  100% { transform: scale(0.8) rotate(-5deg);  opacity: 0; }
+}
+
+/* Shockwave ring expanding outward */
+.bc-shockwave {
+  position: absolute;
+  border-radius: 50%;
+  border: 3px solid rgba(251,191,36,0.8);
+  box-shadow: 0 0 8px rgba(251,191,36,0.5);
+  pointer-events: none;
+  z-index: 27;
+  animation: bcShockwave 0.4s ease-out forwards;
+}
+
+@keyframes bcShockwave {
+  0%   { transform: scale(0.3); opacity: 1; }
+  100% { transform: scale(3);   opacity: 0; }
+}
+
+/* ── Damaged: squish + purple pain flash ─────────── */
+.plant-entity.bc-damaged {
+  animation:
+    plantShake 0.3s ease-in-out infinite,
+    bcDamageFlash 0.15s ease-out 3;
+}
+
+@keyframes bcDamageFlash {
+  0%   { filter: drop-shadow(0 0 12px red) brightness(2.5) saturate(0)   hue-rotate(270deg); }
+  50%  { filter: drop-shadow(0 0 5px red)  brightness(1.3) saturate(0.4) hue-rotate(200deg); }
+  100% { filter: drop-shadow(0 0 12px red) brightness(2.5) saturate(0)   hue-rotate(270deg); }
+}

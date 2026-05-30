@@ -1,0 +1,22 @@
+﻿# Create .gitignore with media files
+@"
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.wmv
+*.flv
+*.webm
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.webp
+videos/
+images/
+assets/
+pics/
+git ls-files | findstr assets
+sprites/
+"@ | Out-File -FilePath .gitignore -Encoding utf8

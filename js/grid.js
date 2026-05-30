@@ -132,13 +132,22 @@ const Grid = (() => {
 
     const cell = getCellEl(row, col);
     if (cell) {
-      cell.classList.remove("occupied");
-      cell
-        .querySelectorAll(".plant-entity, .plant-hp-bar")
-        .forEach((el) => el.remove());
+      // Remove all state classes including selected ring
+      cell.classList.remove("occupied", "selected", "plant-selected", "active", "highlighted");
+      // Remove all child elements (plant image/video + hp bar + any overlays)
+      cell.innerHTML = "";
     }
 
     grid[row][col] = null;
+
+    // Deactivate shovel after use and reset tray selection
+    if (shovelActive) {
+      setShovel(false);
+      if (typeof UI !== "undefined") {
+        UI.setShovelActive(false);
+        UI.setSelectedTrayCard(null);
+      }
+    }
   }
 
   function getPlant(row, col) {

@@ -6,10 +6,7 @@
 PlantRegistry.register({
   id: "sunflower",
   name: "Sunflower",
-  image: "assets/plants/sunflower/sunflower.png",
-  video: "assets/plants/sunflower/sunflower.webm",
-  videoAttack: "assets/plants/sunflower/produceSunflower.webm",
-  videoDamage: "assets/plants/sunflower/damageSunflower.webm",
+  image: "assets/plants/sunflower.png",
   cost: 50,
   cooldown: 7000,
   fireDistance: 0,
@@ -47,35 +44,56 @@ PlantRegistry.register({
     plantData.maxHp = stats.hp;
     plantData.hp = stats.hp;
     plantData.cooldown = stats.cooldown;
-    plantData.videoIdle = this.video;
-    plantData.videoAttack = this.videoAttack;
-    plantData.videoDamage = this.videoDamage;
+
+    // Add idle animation + glow elements to cell
+    const cell = Grid.getCellEl(row, col);
+    if (cell) {
+      // Rotating ray ring behind plant
+      const rays = document.createElement("div");
+      rays.className = "sunflower-rays";
+      cell.appendChild(rays);
+
+      // Ambient glow
+      const glow = document.createElement("div");
+      glow.className = "sunflower-glow";
+      cell.appendChild(glow);
+    }
+
+    // Start idle bob on the image
+    requestAnimationFrame(() => {
+      const img = Grid.getCellEl(row, col)?.querySelector(".plant-entity");
+      if (img) img.classList.add("sunflower-idle");
+    });
   },
 
   onTick(row, col, plantData) {
-    const arena = document.getElementById("grid-container");
-    if (!arena) return;
     const cell = Grid.getCellEl(row, col);
     if (!cell) return;
 
     const level = plantData && plantData.level ? plantData.level : 1;
     const stats = this.getStats(level);
+    const img = cell.querySelector(".plant-entity");
 
-    const videoEl = cell.querySelector("video.plant-entity");
-    if (videoEl && plantData.videoAttack && !plantData.producing) {
-      plantData.producing = true; // lock so it doesn't fire twice
+    // Trigger produce animation on the image
+    if (img && !plantData.producing) {
+      plantData.producing = true;
 
-      videoEl.src = plantData.videoAttack;
-      videoEl.currentTime = 0;
-      videoEl.play().catch(() => {});
+      // Switch from idle bob → produce burst
+      img.classList.remove("sunflower-idle");
+      img.classList.add("sf-producing");
 
-      // Switch back to idle after produce animation (~3.5s)
+      // Burst ring on cell
+      const burst = document.createElement("div");
+      burst.className = "sunflower-burst";
+      cell.appendChild(burst);
+      setTimeout(() => burst.remove(), 700);
+
+      // Return to idle after produce animation
       setTimeout(() => {
-        if (videoEl) {
-          videoEl.src = plantData.videoIdle;
-          videoEl.currentTime = 0;
-          videoEl.play().catch(() => {});
-          plantData.producing = false; // unlock
+        if (img && img.isConnected) {
+          img.classList.remove("sf-producing");
+          img.classList.add("sunflower-idle");
+          plantData.producing = false;
         }
       }, 2800);
     }
@@ -99,7 +117,30 @@ PlantRegistry.register({
     }, 1700); // 1.7s = when animation shows sun being released
   },
 
-  onRemove(row, col) {},
+  onRemove(row, col) {
+    // Clean up rays and glow elements
+    const cell = Grid.getCellEl(row, col);
+    if (cell) {
+      cell.querySelector(".sunflower-rays")?.remove();
+      cell.querySelector(".sunflower-glow")?.remove();
+    }
+  },
+
+  onDamage(row, col, plantData) {
+    const img = Grid.getCellEl(row, col)?.querySelector(".plant-entity");
+    if (!img) return;
+    // Flash damage state briefly
+    img.classList.remove("sunflower-idle", "sf-producing");
+    img.classList.add("sf-damaged");
+    setTimeout(() => {
+      if (img.isConnected) {
+        img.classList.remove("sf-damaged");
+        img.classList.add(
+          plantData.producing ? "sf-producing" : "sunflower-idle",
+        );
+      }
+    }, 500);
+  },
 });
 
 // ── Sun token spawner ─────────────────────────────

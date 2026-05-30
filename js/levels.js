@@ -124,9 +124,8 @@ const Levels = (() => {
       id: "imp",
       name: "Imp",
       image: "assets/demons/demon1_imp.png",
-      animation: "assets/demons/demon1_imp/demon1_imp.webm",
       hp: 80,
-      speed: 100, // px per second
+      speed: 50, // px per second
       damage: 40, // damage per bite tick
       biteRate: 800, // ms between bites
       special: "dodge", // 15% chance to dodge projectile
@@ -136,7 +135,6 @@ const Levels = (() => {
       id: "bat",
       name: "Shadow Bat",
       image: "assets/demons/demon3_bat.png",
-      animation: "assets/demons/demon3_bat/demon3_bat.webm",
       hp: 60,
       speed: 65,
       damage: 8,

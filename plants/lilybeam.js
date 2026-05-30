@@ -6,7 +6,7 @@
 PlantRegistry.register({
   id: "lilybeam",
   name: "Lily Beam",
-  image: "assets/plants/lilybeam/lilybeam.png",
+  image: "assets/plants/lilybeam.png",
   cost: 50,
   // cost: 200,
   fireDistance: 9,
@@ -137,7 +137,35 @@ PlantRegistry.register({
     plantData.shieldReady = true;
     plantData.shieldTimer = 0;
     plantData.shieldCooldown = stats.shieldCooldown;
-    // Show shield ring
+
+    // Build cell decorations
+    const cell = Grid.getCellEl(row, col);
+    if (cell) {
+      const antDot = document.createElement("div");
+      antDot.className = "lb-antenna-dot";
+      cell.appendChild(antDot);
+
+      const eyes = document.createElement("div");
+      eyes.className = "lb-eyes";
+      const eyeL = document.createElement("div");
+      eyeL.className = "lb-eye";
+      const eyeR = document.createElement("div");
+      eyeR.className = "lb-eye";
+      eyes.appendChild(eyeL);
+      eyes.appendChild(eyeR);
+      cell.appendChild(eyes);
+
+      const circuit = document.createElement("div");
+      circuit.className = "lb-circuit";
+      cell.appendChild(circuit);
+    }
+
+    requestAnimationFrame(() => {
+      const img = Grid.getCellEl(row, col)?.querySelector(".plant-entity");
+      if (img) img.classList.add("lb-idle");
+    });
+
+    // Shield ring
     showShieldEffect(row, col, true);
   },
 
@@ -146,8 +174,6 @@ PlantRegistry.register({
     const cellEl = Grid.getCellEl(row, col);
     if (!cellEl) return;
     const cellRect = cellEl.getBoundingClientRect();
-    const arenaEl = document.getElementById("screen-battle");
-    const arenaRect = arenaEl ? arenaEl.getBoundingClientRect() : null;
     const gridEl = document.getElementById("grid-container");
     const gridRect = gridEl ? gridEl.getBoundingClientRect() : null;
 
@@ -164,11 +190,70 @@ PlantRegistry.register({
       Demons.freeze(d, stats.freezeDuration);
     });
 
+    // Charge → fire animation sequence
+    const img = cellEl.querySelector(".plant-entity");
+    if (img && !plantData.firing) {
+      plantData.firing = true;
+      img.classList.remove("lb-idle");
+      img.classList.add("lb-charge");
+
+      setTimeout(() => {
+        if (!img.isConnected) return;
+        img.classList.remove("lb-charge");
+        img.classList.add("lb-fire");
+
+        // Muzzle flash in projectiles-layer space
+        const projLayer = document.getElementById("projectiles-layer");
+        if (projLayer) {
+          const layerRect = projLayer.getBoundingClientRect();
+          const muzzle = document.createElement("div");
+          muzzle.className = "lb-muzzle";
+          muzzle.style.cssText = `
+            left:${cellRect.right - layerRect.left}px;
+            top:${cellRect.top - layerRect.top + cellRect.height * 0.5 - 7}px;
+            width:${(gridRect ? gridRect.right : cellRect.right + 400) - cellRect.right}px;
+          `;
+          projLayer.appendChild(muzzle);
+          setTimeout(() => muzzle.remove(), 250);
+        }
+
+        setTimeout(() => {
+          if (img.isConnected) {
+            img.classList.remove("lb-fire");
+            img.classList.add("lb-idle");
+            plantData.firing = false;
+          }
+        }, 350);
+      }, 400);
+    }
+
     // Visual beam effect
     showBeamEffect(row, col);
   },
 
-  onRemove(row, col) {},
+  onRemove(row, col) {
+    const cell = Grid.getCellEl(row, col);
+    if (cell) {
+      cell.querySelector(".lb-antenna-dot")?.remove();
+      cell.querySelector(".lb-eyes")?.remove();
+      cell.querySelector(".lb-circuit")?.remove();
+      cell.querySelector(".lb-shield-ring")?.remove();
+    }
+  },
+
+  onDamage(row, col, plantData) {
+    const img = Grid.getCellEl(row, col)?.querySelector(".plant-entity");
+    if (!img) return;
+    img.classList.remove("lb-idle", "lb-charge", "lb-fire");
+    img.classList.add("lb-damaged");
+    setTimeout(() => {
+      if (img.isConnected) {
+        img.classList.remove("lb-damaged");
+        img.classList.add("lb-idle");
+        plantData.firing = false;
+      }
+    }, 500);
+  },
 
   // Called from grid.js when plant takes damage
   onDamage(row, col, plantData) {
@@ -221,19 +306,11 @@ function showBeamEffect(row, col) {
 function showShieldEffect(row, col, active) {
   const cell = Grid.getCellEl(row, col);
   if (!cell) return;
-  let shield = cell.querySelector(".lily-shield");
+  let shield = cell.querySelector(".lb-shield-ring");
   if (active) {
     if (!shield) {
       shield = document.createElement("div");
-      shield.className = "lily-shield";
-      shield.style.cssText = `
-        position:absolute;inset:-4px;
-        border-radius:50%;
-        border:3px solid rgba(103,232,249,0.8);
-        box-shadow:0 0 12px rgba(103,232,249,0.6);
-        pointer-events:none;z-index:10;
-        animation:shieldPulse 2s ease-in-out infinite;
-      `;
+      shield.className = "lb-shield-ring";
       cell.appendChild(shield);
     }
   } else {
@@ -247,15 +324,33 @@ function showShieldBreak(row, col) {
   if (!cell || !layer) return;
   const r = cell.getBoundingClientRect();
   const lr = layer.getBoundingClientRect();
-  const el = document.createElement("div");
-  el.textContent = "🛡️💥";
-  el.style.cssText = `
+
+  // Absorb burst ring
+  const absorb = document.createElement("div");
+  absorb.className = "lb-shield-absorb";
+  absorb.style.cssText = `
     position:absolute;
+    left:${r.left - lr.left - 10}px;
+    top:${r.top - lr.top - 10}px;
+    width:${r.width + 20}px;
+    height:${r.height + 20}px;
+  `;
+  layer.appendChild(absorb);
+
+  // BLOCKED! text
+  const txt = document.createElement("div");
+  txt.textContent = "BLOCKED!";
+  txt.style.cssText = `
+    position:absolute;
+    font-family:var(--font-display);
+    font-size:13px;font-weight:900;
+    color:#22d3ee;
+    text-shadow:0 0 8px rgba(34,211,238,0.9);
     left:${r.left - lr.left}px;
-    top:${r.top - lr.top - 20}px;
-    font-size:20px;pointer-events:none;z-index:30;
+    top:${r.top - lr.top - 24}px;
+    pointer-events:none;z-index:30;
     animation:floatUp 0.8s ease-out forwards;
   `;
-  layer.appendChild(el);
-  setTimeout(() => el.remove(), 800);
+  layer.appendChild(txt);
+  setTimeout(() => { absorb.remove(); txt.remove(); }, 800);
 }

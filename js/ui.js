@@ -447,27 +447,14 @@ const UI = (() => {
   function openPlantPicker(worldId, levelIdx) {
     pendingBattleWorld = worldId;
     pendingBattleLevel = levelIdx;
-    selectedPlants = [];
 
-    // Get temp plants for this level
     const tempPlants = Levels.getTempPlants(worldId, levelIdx);
-
-    // Get all owned plants
     const owned = Player.getOwnedPlants();
-    const totalAvailable = owned.length + tempPlants.length;
+    const ownedIds = owned.map((p) => p.id);
 
-    // If 9 or fewer plants total — skip picker, go straight to battle
-    if (totalAvailable <= MAX_PICKS) {
-      const ownedIds = owned.map((p) => p.id);
-      Core.startBattle(worldId, levelIdx, ownedIds, tempPlants);
-      return;
-    }
-
-    // Otherwise show picker
-    document.getElementById("picker-max").textContent = MAX_PICKS;
-    buildPickerAvailable(tempPlants);
-    buildPickerSelected();
-    showScreen("screen-plantpicker");
+    // Always skip picker — send ALL owned plants straight to battle
+    selectedPlants = [...ownedIds];
+    Core.startBattle(worldId, levelIdx, ownedIds, tempPlants);
   }
 
   function buildPickerAvailable(tempPlants = []) {
@@ -1459,9 +1446,10 @@ const UI = (() => {
       .getElementById("btn-back-levelselect")
       .addEventListener("click", () => showScreen("screen-worldmap"));
     // Picker back
-    document
-      .getElementById("btn-back-picker")
-      .addEventListener("click", () => openLevelSelect(selectedWorldId));
+    const backPickerBtn = document.getElementById("btn-back-picker");
+    if (backPickerBtn) {
+      backPickerBtn.addEventListener("click", () => openLevelSelect(selectedWorldId));
+    }
     // Collection back
     document
       .getElementById("btn-back-collection")
@@ -1476,24 +1464,14 @@ const UI = (() => {
       .addEventListener("click", () => showScreen("screen-menu"));
 
     // Start battle
-    document
-      .getElementById("btn-start-battle")
-      .addEventListener("click", () => {
-        if (selectedPlants.length < 5) {
-          showToast("Select all 5 plants before starting! 🌿");
-          return;
-        }
-        const tempPlants = Levels.getTempPlants(
-          pendingBattleWorld,
-          pendingBattleLevel,
-        );
-        Core.startBattle(
-          pendingBattleWorld,
-          pendingBattleLevel,
-          [...selectedPlants],
-          tempPlants,
-        );
+    // btn-start-battle kept for safety but picker screen is no longer shown
+    const startBattleBtn = document.getElementById("btn-start-battle");
+    if (startBattleBtn) {
+      startBattleBtn.addEventListener("click", () => {
+        const tempPlants = Levels.getTempPlants(pendingBattleWorld, pendingBattleLevel);
+        Core.startBattle(pendingBattleWorld, pendingBattleLevel, [...selectedPlants], tempPlants);
       });
+    }
 
     // Pause / resume
     document

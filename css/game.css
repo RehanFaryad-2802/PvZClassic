@@ -3,6 +3,12 @@
    Battle screen: HUD, plant tray, arena, grid,
    demons, projectiles, effects, lawnmowers
 ═══════════════════════════════════════════════════ */
+@import url('plantsanimation/sunflower.css');
+@import url('plantsanimation/peashooter.css');
+@import url('plantsanimation/bonkchoy.css');
+@import url('plantsanimation/icepea.css');
+@import url('plantsanimation/sporepuff.css');
+@import url('plantsanimation/lilybeam.css');
 
 /* ─── Battle HUD ─────────────────────────────────── */
 .battle-hud {

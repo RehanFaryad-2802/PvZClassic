@@ -6,7 +6,7 @@
 PlantRegistry.register({
   id: "lavaburst",
   name: "Lava Burst",
-  image: "assets/plants/lavaburst/lavaburst.png",
+  image: "assets/plants/lavaburst.png",
   cost: 350,
   fireDistance: 2,
   hitCount: 3,
