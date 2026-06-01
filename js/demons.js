@@ -147,12 +147,15 @@ const Demons = (() => {
     sprite.style.cssText = "width:100%;height:100%;object-fit:contain;";
 
     // HP bar
+    // HP bar
     const hpWrap = document.createElement("div");
-    hpWrap.className = "demon-hp-bar";
+    hpWrap.className = "demon-hp-wrap";
     const hpFill = document.createElement("div");
     hpFill.className = "demon-hp-fill";
     hpFill.style.width = "100%";
     hpWrap.appendChild(hpFill);
+
+    const hpLabel = null; // HP number hidden — bar only
 
     // Shield indicator (only if shield special)
     let shieldEl = null;
@@ -169,14 +172,17 @@ const Demons = (() => {
     }
 
     wrap.appendChild(sprite);
-    wrap.appendChild(hpWrap);
     layer.appendChild(wrap);
+    const effectsEl = document.getElementById("effects-layer");
+    if (effectsEl) effectsEl.appendChild(hpWrap);
 
     // CSS idle animation per type
     wrap.classList.add(`type-${cfg.type}`);
 
     if (cfg.type === "imp" || cfg.type.startsWith("imp_")) {
       wrap.classList.add("imp-walk");
+      if (cfg.type === "imp_heavy") wrap.style.transform = "scale(1.15)";
+      if (cfg.type === "imp_king") wrap.style.transform = "scale(1.25)";
     } else if (cfg.type === "bat") {
       wrap.classList.add("bat-idle");
     } else if (cfg.type === "ice") {
@@ -199,6 +205,8 @@ const Demons = (() => {
       imgEl: sprite,
       video: sprite, // reference for switching animation
       hpFill,
+      hpLabel,
+      hpWrap,
       shieldEl,
       hp: cfg.hp,
       maxHp: cfg.hp,
@@ -279,6 +287,19 @@ const Demons = (() => {
         if (d.hitFlashTimer <= 0) d.el.classList.remove("hit");
       }
 
+      // ── Slow timer ──
+      if (d.slowed && !d.frozen) {
+        d.slowTimer -= dtMs;
+        if (d.slowTimer <= 0) {
+          d.slowed = false;
+          d.slowTimer = 0;
+          d.currentSpeed = d.speed;
+          d.el.classList.remove("slowed");
+          d.el.style.animationDuration = "";
+          if (d.imgEl) d.imgEl.style.animationDuration = "";
+        }
+      }
+
       // ── Freeze timer ──
       if (d.frozen) {
         d.frozenTimer -= dtMs;
@@ -287,6 +308,9 @@ const Demons = (() => {
           d.frozenTimer = 0;
           d.currentSpeed = d.speed;
           d.el.classList.remove("frozen");
+          // Resume all animations
+          d.el.style.animationPlayState = "";
+          if (d.imgEl) d.imgEl.style.animationPlayState = "";
         }
       }
 
@@ -315,7 +339,12 @@ const Demons = (() => {
         }
       }
 
-      if (!d.charging) {
+      // CHARGE special — only triggers for demons that have it, only when HP low
+      if (
+        hasSpecial(d, "charge") &&
+        !d.charging &&
+        d.hp / d.maxHp < CFG.CHARGE_THRESH
+      ) {
         d.charging = true;
         d.currentSpeed = d.speed * CFG.CHARGE_MULT;
         if (d.type === "imp" || d.type.startsWith("imp_")) {
@@ -325,14 +354,6 @@ const Demons = (() => {
           d.el.classList.remove("brute-idle", "brute-eat");
           d.el.classList.add("brute-charging");
         }
-      }
-      if (
-        hasSpecial(d, "charge") &&
-        !d.charging &&
-        d.hp / d.maxHp < CFG.CHARGE_THRESH
-      ) {
-        d.charging = true;
-        d.currentSpeed = d.speed * CFG.CHARGE_MULT;
       }
 
       // ── BERSERK — recalc speed & biteRate based on missing HP ──
@@ -368,6 +389,24 @@ const Demons = (() => {
       d.el.style.height = demonSize + "px";
       d.width = demonSize;
       d.height = demonSize;
+
+      // ── Sync HP bar — pinned to bottom edge of the row, tracks X only ──
+      if (d.hpWrap) {
+        const effectsEl = document.getElementById("effects-layer");
+        const eRect = effectsEl ? effectsEl.getBoundingClientRect() : null;
+        const rowEl = document.querySelector(`.grid-row[data-row="${d.row}"]`);
+        const dRect = d.el.getBoundingClientRect();
+        if (eRect && rowEl) {
+          const rowRect = rowEl.getBoundingClientRect();
+          // X follows demon, Y is pinned to bottom of row
+          const barLeft = dRect.left - eRect.left + dRect.width * 0.1;
+          const barTop = rowRect.bottom - eRect.top - 7;
+          const barW = dRect.width * 0.8;
+          d.hpWrap.style.left = barLeft + "px";
+          d.hpWrap.style.top = barTop + "px";
+          d.hpWrap.style.width = barW + "px";
+        }
+      }
 
       // ── Update Y from live row position ──
       const rowEl = document.querySelector(`.grid-row[data-row="${d.row}"]`);
@@ -483,7 +522,16 @@ const Demons = (() => {
   }
 
   function updateHpBar(d) {
-    if (d.hpFill) d.hpFill.style.width = (d.hp / d.maxHp) * 100 + "%";
+    if (!d.hpFill || !d.hpWrap) return;
+    // Re-attach if detached
+    const effectsEl = document.getElementById("effects-layer");
+    if (effectsEl && !d.hpWrap.parentNode) {
+      effectsEl.appendChild(d.hpWrap);
+    }
+    const pct = d.hp / d.maxHp;
+    d.hpFill.style.width = pct * 100 + "%";
+    d.hpFill.style.background =
+      pct > 0.5 ? "#22c55e" : pct > 0.25 ? "#f59e0b" : "#ef4444";
   }
 
   function triggerLawnmower(demon) {
@@ -548,6 +596,7 @@ const Demons = (() => {
     }
 
     demon.hp = Math.max(0, demon.hp - finalDmg);
+    updateHpBar(demon);
     updateHpBar(demon);
 
     // HIT FLASH
@@ -662,7 +711,10 @@ const Demons = (() => {
       animation:floatUp 0.8s ease-out forwards;
     `;
     effectsEl.appendChild(el);
-    setTimeout(() => el.remove(), 800);
+    setTimeout(() => {
+      el.remove();
+      if (demon.hpWrap) demon.hpWrap.remove();
+    }, 500);
   }
 
   function showArmorSparks(demon) {
@@ -727,19 +779,21 @@ const Demons = (() => {
     const effectsEl = document.getElementById("effects-layer");
     if (effectsEl) {
       effectsEl.appendChild(el);
-      setTimeout(() => el.remove(), 800);
+      setTimeout(() => {
+        el.remove();
+        if (demon.hpWrap) demon.hpWrap.remove();
+      }, 500);
     }
   }
 
-  // ── Freeze (from projectile/plant) ───────────────────────────────────────
   function freeze(demon, duration) {
     if (demon.dead) return;
     demon.frozen = true;
     demon.frozenTimer = duration;
-    demon.currentSpeed = demon.speed * 0.3;
+    demon.currentSpeed = 0;
+    demon.el.classList.remove("slowed");
     demon.el.classList.add("frozen");
   }
-
   // ── Getters ───────────────────────────────────────────────────────────────
   function getActive() {
     return demons.filter((d) => !d.dead);
@@ -828,6 +882,10 @@ const Demons = (() => {
   function playDeathAnimation(demon) {
     const type = demon.lastDamageType || "physical";
     const el = demon.el;
+    if (demon.hpWrap) {
+      demon.hpWrap.remove();
+      demon.hpWrap = null;
+    }
     const imgEl = demon.imgEl;
     const effectsEl = document.getElementById("effects-layer");
     const demonLayerEl = document.getElementById("demons-layer");
@@ -871,7 +929,10 @@ const Demons = (() => {
           setTimeout(() => shard.remove(), 600);
         });
       }
-      setTimeout(() => el.remove(), 500);
+      setTimeout(() => {
+        el.remove();
+        if (demon.hpWrap) demon.hpWrap.remove();
+      }, 500);
     } else if (type === "ice") {
       // ── Freeze solid then shatter in blue ──
       if (imgEl) {
@@ -917,7 +978,10 @@ const Demons = (() => {
         effectsEl.appendChild(ring);
         setTimeout(() => ring.remove(), 600);
       }
-      setTimeout(() => el.remove(), 800);
+      setTimeout(() => {
+        el.remove();
+        if (demon.hpWrap) demon.hpWrap.remove();
+      }, 500);
     } else if (type === "fire") {
       // ── Burns up — rises and dissolves in flames ──
       if (imgEl) {
@@ -960,7 +1024,10 @@ const Demons = (() => {
         effectsEl.appendChild(scorch);
         setTimeout(() => scorch.remove(), 1200);
       }
-      setTimeout(() => el.remove(), 700);
+      setTimeout(() => {
+        el.remove();
+        if (demon.hpWrap) demon.hpWrap.remove();
+      }, 500);
     } else if (type === "electric") {
       // ── Electrocuted — stiff jolt then disintegrates ──
       if (imgEl) {
@@ -1020,7 +1087,10 @@ const Demons = (() => {
         effectsEl.appendChild(burst);
         setTimeout(() => burst.remove(), 500);
       }
-      setTimeout(() => el.remove(), 600);
+      setTimeout(() => {
+        el.remove();
+        if (demon.hpWrap) demon.hpWrap.remove();
+      }, 500);
     } else if (type === "psychic") {
       // ── Confused spin then dissolve in purple ──
       if (imgEl) {
@@ -1047,7 +1117,10 @@ const Demons = (() => {
           setTimeout(() => ring.remove(), 800);
         }
       }
-      setTimeout(() => el.remove(), 700);
+      setTimeout(() => {
+        el.remove();
+        if (demon.hpWrap) demon.hpWrap.remove();
+      }, 500);
     } else if (type === "beam") {
       // ── Flash white then vaporizes ──
       if (imgEl) {
@@ -1069,7 +1142,10 @@ const Demons = (() => {
         effectsEl.appendChild(flash);
         setTimeout(() => flash.remove(), 500);
       }
-      setTimeout(() => el.remove(), 500);
+      setTimeout(() => {
+        el.remove();
+        if (demon.hpWrap) demon.hpWrap.remove();
+      }, 500);
     } else {
       // ── Default fallback ──
       if (imgEl) {
@@ -1077,7 +1153,10 @@ const Demons = (() => {
         imgEl.style.opacity = "0";
         imgEl.style.transform = "scale(0.5) rotate(20deg)";
       }
-      setTimeout(() => el.remove(), 350);
+      setTimeout(() => {
+        el.remove();
+        if (demon.hpWrap) demon.hpWrap.remove();
+      }, 500);
     }
   }
   // ── Imp King logic ────────────────────────────────────────────────────────
@@ -1230,6 +1309,15 @@ const Demons = (() => {
     });
     king.kingMinions = [];
   }
+
+  function slow(demon, duration, speedMult = 0.4) {
+    if (demon.dead || demon.frozen) return; // frozen already stops fully
+    demon.slowed = true;
+    demon.slowTimer = duration;
+    demon.slowedSpeed = demon.speed * speedMult;
+    demon.currentSpeed = demon.slowedSpeed;
+    demon.el.classList.add("slowed");
+  }
   return {
     init,
     spawn,
@@ -1237,6 +1325,7 @@ const Demons = (() => {
     damage,
     kill,
     freeze,
+    slow,
     getActive,
     getAll,
     getCount,

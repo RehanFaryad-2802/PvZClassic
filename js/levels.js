@@ -207,9 +207,9 @@ const Levels = (() => {
       id: "imp_king",
       name: "Imp King",
       image: "assets/demons/var4.png",
-      hp: 100, // 70% less than base (80 * 0.3)
+      hp: 250,
       speed: 80,
-      damage: 0, // king does NOT attack plants
+      damage: 0,
       biteRate: 99999,
       special: [],
       reward: "imp",
@@ -255,7 +255,7 @@ const Levels = (() => {
       name: "Iron Warlord",
       image: "assets/demons/demon2_armored.png",
       hp: 400,
-      speed: 16,
+      speed: 80,
       damage: 20,
       biteRate: 1500,
       special: "armor", // 40% dmg reduction
@@ -266,7 +266,7 @@ const Levels = (() => {
       name: "Brute Demon",
       image: "assets/demons/demon5_brute.png",
       hp: 280,
-      speed: 22,
+      speed: 80,
       damage: 25,
       biteRate: 1100,
       special: "charge", // doubles speed when HP < 30%
@@ -280,6 +280,7 @@ const Levels = (() => {
     { worldId: 1, levelIdx: 0, plantId: "peashooter" }, // W1 Level 1
     { worldId: 1, levelIdx: 1, plantId: "sunflower" }, // W1 Level 2
     { worldId: 1, levelIdx: 6, plantId: "icepea" }, // W1 Level 7
+    { worldId: 1, levelIdx: 9, plantId: "glacierbud" }, // W1 Level 10
     { worldId: 1, levelIdx: 12, plantId: "bonkchoy" }, // W1 Level 13
     { worldId: 1, levelIdx: 0, plantId: "peashooter" },
     { worldId: 1, levelIdx: 1, plantId: "sunflower" },
@@ -384,6 +385,15 @@ const Levels = (() => {
     });
     const safeAvailable = available.length > 0 ? available : [world.demons[0]];
 
+    // Track rows used across early waves so wave 2 can avoid them
+    const wave0UsedRows = [];
+    const wave1UsedRows = [];
+
+    // Only base/normal demons for early waves (no variants, no specials)
+    const BASE_TYPES = ["imp", "bat"];
+    const basePool = safeAvailable.filter((t) => BASE_TYPES.includes(t));
+    const safeBasePool = basePool.length > 0 ? basePool : [safeAvailable[0]];
+
     for (let w = 0; w < totalWaves; w++) {
       const demons = [];
       const isLastWave = w === totalWaves - 1;
@@ -395,7 +405,101 @@ const Levels = (() => {
       if (w >= C.POOL_EXPAND_WAVE_2) pool = safeAvailable;
       if (isElite) pool = safeAvailable;
 
-      if (isLastWave) {
+      // ══════════════════════════════════════════════
+      // WAVE 0 — exactly 1 demon, random row, base type only
+      // ══════════════════════════════════════════════
+      if (w === 0 && !isLastWave) {
+        const type = safeBasePool[0]; // always first base type (imp)
+        const base = DEMON_STATS[type];
+        if (base) {
+          const row = Math.floor(Math.random() * 5);
+          wave0UsedRows.push(row);
+          demons.push({
+            type,
+            hp: Math.floor(base.hp * hpMult),
+            speed: base.speed * C.NORMAL_SPEED_MULT,
+            damage: base.damage,
+            biteRate: base.biteRate,
+            special: base.special,
+            row,
+            spawnDelay: 0,
+          });
+        }
+
+        // ══════════════════════════════════════════════
+        // WAVE 1 — exactly 2 demons, different rows from wave 0, base types only
+        // ══════════════════════════════════════════════
+      } else if (w === 1 && !isLastWave) {
+        // Pick 2 rows that were NOT used in wave 0
+        const availRows = [0, 1, 2, 3, 4].filter(
+          (r) => !wave0UsedRows.includes(r),
+        );
+        // Shuffle available rows
+        for (let i = availRows.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [availRows[i], availRows[j]] = [availRows[j], availRows[i]];
+        }
+        const pickedRows = availRows.slice(0, 2);
+
+        pickedRows.forEach((row, i) => {
+          // Alternate between available base types
+          const type = safeBasePool[i % safeBasePool.length];
+          const base = DEMON_STATS[type];
+          if (!base) return;
+          wave1UsedRows.push(row);
+          demons.push({
+            type,
+            hp: Math.floor(base.hp * hpMult),
+            speed: base.speed * C.NORMAL_SPEED_MULT,
+            damage: base.damage,
+            biteRate: base.biteRate,
+            special: base.special,
+            row,
+            spawnDelay: i * C.SPAWN_DELAY_NORMAL,
+          });
+        });
+
+        // ══════════════════════════════════════════════
+        // WAVE 2 — exactly 3 demons: 2 in new rows + 1 repeat row, base types
+        // ══════════════════════════════════════════════
+      } else if (w === 2 && !isLastWave) {
+        const usedSoFar = [...wave0UsedRows, ...wave1UsedRows];
+        const freshRows = [0, 1, 2, 3, 4].filter((r) => !usedSoFar.includes(r));
+
+        // Shuffle fresh rows
+        for (let i = freshRows.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [freshRows[i], freshRows[j]] = [freshRows[j], freshRows[i]];
+        }
+
+        // 2 fresh rows + 1 repeat from wave 0 or 1
+        const repeatRow =
+          usedSoFar[Math.floor(Math.random() * usedSoFar.length)];
+        const wave2Rows = [
+          ...(freshRows.length >= 2 ? freshRows.slice(0, 2) : freshRows),
+          repeatRow,
+        ];
+
+        wave2Rows.forEach((row, i) => {
+          const type = safeBasePool[i % safeBasePool.length];
+          const base = DEMON_STATS[type];
+          if (!base) return;
+          demons.push({
+            type,
+            hp: Math.floor(base.hp * hpMult),
+            speed: base.speed * C.NORMAL_SPEED_MULT,
+            damage: base.damage,
+            biteRate: base.biteRate,
+            special: base.special,
+            row,
+            spawnDelay: i * C.SPAWN_DELAY_NORMAL,
+          });
+        });
+
+        // ══════════════════════════════════════════════
+        // WAVE 3+ — original logic, no change
+        // ══════════════════════════════════════════════
+      } else if (isLastWave) {
         // ── Last wave: one demon per row guaranteed ──
         for (let r = 0; r < C.LAST_WAVE_ROWS; r++) {
           const type = pool[Math.floor(Math.random() * pool.length)];
@@ -433,7 +537,7 @@ const Levels = (() => {
           });
         }
       } else {
-        // ── Normal wave ──
+        // ── Normal wave (w >= 3) ──
         const demonCount = Math.min(
           C.BASE_DEMONS_PER_WAVE +
             w +

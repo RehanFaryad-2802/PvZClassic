@@ -15,7 +15,6 @@
 *.webp
 videos/
 images/
-assets/
 pics/
 git ls-files | findstr assets
 sprites/

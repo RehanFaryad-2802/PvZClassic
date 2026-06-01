@@ -527,3 +527,331 @@
   0%, 100% { filter: hue-rotate(160deg) brightness(1.2) saturate(0.6) drop-shadow(0 0 8px rgba(103,232,249,0.7)); }
   50%       { filter: hue-rotate(190deg) brightness(1.5) saturate(0.3) drop-shadow(0 0 18px rgba(103,232,249,1)); }
 }
+/* ══════════════════════════════════════════════════
+   DEMON HP BAR + LABEL
+══════════════════════════════════════════════════ */
+
+/* Demon HP bar — matches plant bar style */
+.demon-hp-wrap {
+  position: absolute;
+  height: 5px;
+  background: rgba(0,0,0,0.55);
+  border-radius: 3px;
+  border: 1px solid rgba(0,0,0,0.5);
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.demon-hp-fill {
+  height: 100%;
+  width: 100%;
+  border-radius: 3px;
+  background: #22c55e;
+  transition: width 0.15s ease-out, background 0.3s;
+}
+
+.demon-hp-fill {
+  height: 100%;
+  width: 100%;
+  border-radius: 3px;
+  background: #22c55e;
+  transition: width 0.15s ease-out, background 0.3s;
+}
+/* ══════════════════════════════════════════════════
+   FROZEN / SLOWED DEMON ANIMATION STATES
+══════════════════════════════════════════════════ */
+
+/* ── Frozen: all animations stop completely ──────── */
+.demon-entity.frozen,
+.demon-entity.frozen * {
+  animation-play-state: paused !important;
+}
+
+.demon-entity.frozen img,
+.demon-entity.frozen video {
+  animation-play-state: paused !important;
+  filter:
+    hue-rotate(160deg)
+    brightness(1.3)
+    saturate(0.6)
+    drop-shadow(0 0 10px rgba(103,232,249,0.9))
+    drop-shadow(0 0 20px rgba(103,232,249,0.4)) !important;
+}
+
+/* Ice crystals forming on frozen demon */
+.demon-entity.frozen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(186,230,253,0.15) 0%,
+    rgba(103,232,249,0.08) 50%,
+    transparent 70%);
+  box-shadow:
+    inset 0 0 16px rgba(103,232,249,0.3),
+    0 0 12px rgba(103,232,249,0.4);
+  pointer-events: none;
+  z-index: 25;
+  animation: frozenOverlayPulse 1s ease-in-out infinite !important;
+  animation-play-state: running !important;
+}
+
+@keyframes frozenOverlayPulse {
+  0%, 100% { opacity: 0.7; }
+  50%       { opacity: 1; }
+}
+
+/* ── Slowed: animations run at 30% speed ─────────── */
+.demon-entity.slowed,
+.demon-entity.slowed * {
+  animation-duration: calc(var(--base-dur, 1s) * 3.3) !important;
+}
+
+.demon-entity.slowed img,
+.demon-entity.slowed video {
+  filter:
+    hue-rotate(140deg)
+    brightness(1.1)
+    saturate(0.8)
+    drop-shadow(0 0 6px rgba(103,232,249,0.5)) !important;
+}
+
+/* Slow overlay — lighter blue tint */
+.demon-entity.slowed::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(103,232,249,0.08);
+  pointer-events: none;
+  z-index: 24;
+}
+/* ══════════════════════════════════════════════════
+   IMP VARIANT UNIQUE ANIMATIONS
+   imp_axe / imp_shield / imp_heavy / imp_king
+══════════════════════════════════════════════════ */
+
+/* ── IMP AXE — aggressive stride ──────────────────── */
+.demon-entity.type-imp_axe.imp-walk {
+  animation: impAxeWalk 0.4s ease-in-out infinite;
+}
+@keyframes impAxeWalk {
+  0%   { transform: translateY(0px)  rotate(0deg)  scaleX(1);    }
+  20%  { transform: translateY(-7px) rotate(-4deg) scaleX(0.95); }
+  40%  { transform: translateY(0px)  rotate(0deg)  scaleX(1);    }
+  60%  { transform: translateY(-5px) rotate(4deg)  scaleX(0.95); }
+  80%  { transform: translateY(-8px) rotate(-2deg) scaleX(1.02); }
+  100% { transform: translateY(0px)  rotate(0deg)  scaleX(1);    }
+}
+
+.demon-entity.type-imp_axe img,
+.demon-entity.type-imp_axe video {
+  animation: impAxeGlow 1.2s ease-in-out infinite;
+}
+@keyframes impAxeGlow {
+  0%, 100% { filter: drop-shadow(0 0 5px rgba(239,68,68,0.5))  drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
+  50%       { filter: drop-shadow(0 0 14px rgba(239,68,68,0.95)) drop-shadow(0 0 22px rgba(239,68,68,0.4)) drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
+}
+
+/* Axe eat — overhead axe chop */
+.demon-entity.type-imp_axe.imp-eat {
+  animation: impAxeChop 0.3s ease-in-out infinite;
+}
+@keyframes impAxeChop {
+  0%   { transform: translateY(0px)  translateX(0px)  rotate(0deg)  scaleY(1);    }
+  20%  { transform: translateY(-10px) translateX(5px) rotate(-8deg) scaleY(1.05); }
+  50%  { transform: translateY(3px)  translateX(8px)  rotate(5deg)  scaleY(0.92); }
+  75%  { transform: translateY(-2px) translateX(3px)  rotate(-3deg) scaleY(1.02); }
+  100% { transform: translateY(0px)  translateX(0px)  rotate(0deg)  scaleY(1);    }
+}
+.demon-entity.type-imp_axe.imp-eat img,
+.demon-entity.type-imp_axe.imp-eat video {
+  filter:
+    drop-shadow(0 0 18px rgba(239,68,68,1))
+    drop-shadow(-4px 0 10px rgba(239,68,68,0.6))
+    drop-shadow(0 2px 8px rgba(0,0,0,0.8)) !important;
+}
+
+/* Axe hit — red spark flash */
+.demon-entity.type-imp_axe.hit img,
+.demon-entity.type-imp_axe.hit video {
+  filter: brightness(4) saturate(0.3) hue-rotate(350deg) drop-shadow(0 0 14px rgba(239,68,68,1)) !important;
+  animation: impAxeHit 0.14s ease-out 1 !important;
+}
+@keyframes impAxeHit {
+  0%   { transform: scaleX(0.82) scaleY(1.12) rotate(-4deg); }
+  50%  { transform: scaleX(1.08) scaleY(0.94) rotate(2deg);  }
+  100% { transform: scaleX(1)    scaleY(1)    rotate(0deg);  }
+}
+
+
+/* ── IMP SHIELD — defensive shuffle ───────────────── */
+.demon-entity.type-imp_shield.imp-walk {
+  animation: impShieldWalk 0.55s ease-in-out infinite;
+}
+@keyframes impShieldWalk {
+  0%   { transform: translateY(0px)  rotate(0deg)   scaleX(1)    translateX(0px);  }
+  25%  { transform: translateY(-3px) rotate(-1.5deg) scaleX(0.97) translateX(-2px); }
+  50%  { transform: translateY(0px)  rotate(0deg)   scaleX(1)    translateX(0px);  }
+  75%  { transform: translateY(-4px) rotate(1.5deg) scaleX(0.97) translateX(-2px); }
+  100% { transform: translateY(0px)  rotate(0deg)   scaleX(1)    translateX(0px);  }
+}
+
+.demon-entity.type-imp_shield img,
+.demon-entity.type-imp_shield video {
+  animation: impShieldGlow 1.6s ease-in-out infinite;
+}
+@keyframes impShieldGlow {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(96,165,250,0.5))  drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
+  50%       { filter: drop-shadow(0 0 16px rgba(96,165,250,0.95)) drop-shadow(0 0 28px rgba(147,197,253,0.4)) drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
+}
+
+/* Shield eat — lean and bash */
+.demon-entity.type-imp_shield.imp-eat {
+  animation: impShieldBash 0.4s ease-in-out infinite;
+}
+@keyframes impShieldBash {
+  0%   { transform: translateY(0px)  translateX(0px)  rotate(0deg);  }
+  30%  { transform: translateY(-2px) translateX(10px) rotate(-3deg); }
+  55%  { transform: translateY(3px)  translateX(-3px) rotate(2deg);  }
+  100% { transform: translateY(0px)  translateX(0px)  rotate(0deg);  }
+}
+.demon-entity.type-imp_shield.imp-eat img,
+.demon-entity.type-imp_shield.imp-eat video {
+  filter:
+    drop-shadow(0 0 16px rgba(96,165,250,0.9))
+    drop-shadow(4px 0 10px rgba(147,197,253,0.6))
+    drop-shadow(0 2px 8px rgba(0,0,0,0.8)) !important;
+}
+
+/* Shield hit — blue crack flash */
+.demon-entity.type-imp_shield.hit img,
+.demon-entity.type-imp_shield.hit video {
+  filter: brightness(3) saturate(0.4) hue-rotate(200deg) drop-shadow(0 0 14px rgba(96,165,250,1)) !important;
+  animation: impShieldHit 0.14s ease-out 1 !important;
+}
+@keyframes impShieldHit {
+  0%   { transform: scaleX(1.1) scaleY(0.9);  }
+  50%  { transform: scaleX(0.9) scaleY(1.08); }
+  100% { transform: scaleX(1)   scaleY(1);    }
+}
+
+
+/* ── IMP HEAVY — slow stomp ────────────────────────── */
+.demon-entity.type-imp_heavy.imp-walk {
+  animation: impHeavyWalk 0.75s ease-in-out infinite;
+}
+@keyframes impHeavyWalk {
+  0%   { transform: translateY(0px)  scaleY(1)    scaleX(1)    rotate(0deg);  }
+  25%  { transform: translateY(-4px) scaleY(1.03) scaleX(0.96) rotate(-1deg); }
+  50%  { transform: translateY(0px)  scaleY(0.97) scaleX(1.04) rotate(0deg);  }
+  75%  { transform: translateY(-3px) scaleY(1.02) scaleX(0.97) rotate(1deg);  }
+  100% { transform: translateY(0px)  scaleY(1)    scaleX(1)    rotate(0deg);  }
+}
+
+.demon-entity.type-imp_heavy img,
+.demon-entity.type-imp_heavy video {
+  animation: impHeavyGlow 1.8s ease-in-out infinite;
+}
+@keyframes impHeavyGlow {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(0,0,0,0.8))    drop-shadow(0 0 4px rgba(239,68,68,0.3))  drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
+  50%       { filter: drop-shadow(0 0 14px rgba(30,30,30,0.9)) drop-shadow(0 0 10px rgba(239,68,68,0.6)) drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
+}
+
+/* Heavy eat — slow crushing chomp */
+.demon-entity.type-imp_heavy.imp-eat {
+  animation: impHeavyCrush 0.5s ease-in-out infinite;
+}
+@keyframes impHeavyCrush {
+  0%   { transform: translateY(0px)  translateX(0px)  rotate(0deg)  scaleY(1);    }
+  30%  { transform: translateY(-6px) translateX(6px)  rotate(-3deg) scaleY(1.04); }
+  60%  { transform: translateY(4px)  translateX(-3px) rotate(2deg)  scaleY(0.94); }
+  100% { transform: translateY(0px)  translateX(0px)  rotate(0deg)  scaleY(1);    }
+}
+.demon-entity.type-imp_heavy.imp-eat img,
+.demon-entity.type-imp_heavy.imp-eat video {
+  filter:
+    drop-shadow(0 0 16px rgba(239,68,68,0.8))
+    drop-shadow(0 0 28px rgba(0,0,0,0.9))
+    brightness(1.2) !important;
+}
+
+/* Heavy hit — ground shake flash */
+.demon-entity.type-imp_heavy.hit img,
+.demon-entity.type-imp_heavy.hit video {
+  filter: brightness(3.5) saturate(0) drop-shadow(0 0 12px rgba(200,50,50,0.9)) !important;
+  animation: impHeavyHit 0.18s ease-out 1 !important;
+}
+@keyframes impHeavyHit {
+  0%   { transform: scaleX(0.88) scaleY(1.1);  }
+  40%  { transform: scaleX(1.12) scaleY(0.88); }
+  70%  { transform: scaleX(0.96) scaleY(1.04); }
+  100% { transform: scaleX(1)    scaleY(1);    }
+}
+
+
+/* ── IMP KING — regal strut (while moving) ─────────── */
+.demon-entity.type-imp_king.imp-walk {
+  animation: impKingStrut 0.65s ease-in-out infinite;
+}
+@keyframes impKingStrut {
+  0%   { transform: translateY(0px)  rotate(0deg)   scaleY(1);    }
+  20%  { transform: translateY(-6px) rotate(-2deg)  scaleY(1.03); }
+  40%  { transform: translateY(-2px) rotate(0deg)   scaleY(0.98); }
+  60%  { transform: translateY(-8px) rotate(2deg)   scaleY(1.04); }
+  80%  { transform: translateY(-3px) rotate(0deg)   scaleY(0.98); }
+  100% { transform: translateY(0px)  rotate(0deg)   scaleY(1);    }
+}
+
+/* King moving glow */
+.demon-entity.type-imp_king:not(.king-stopped) img,
+.demon-entity.type-imp_king:not(.king-stopped) video {
+  animation: impKingGlow 1.4s ease-in-out infinite;
+}
+@keyframes impKingGlow {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(234,179,8,0.7))  drop-shadow(0 -4px 12px rgba(234,179,8,0.4)) drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
+  50%       { filter: drop-shadow(0 0 20px rgba(234,179,8,1))   drop-shadow(0 -6px 20px rgba(251,191,36,0.6)) drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
+}
+
+/* King stopped idle — separate from king-aura, targets img */
+.demon-entity.type-imp_king.king-stopped img,
+.demon-entity.type-imp_king.king-stopped video {
+  animation: impKingRageGlow 1s ease-in-out infinite;
+}
+@keyframes impKingRageGlow {
+  0%, 100% { filter: drop-shadow(0 0 12px rgba(234,179,8,0.8))  drop-shadow(0 0 24px rgba(239,68,68,0.3)) drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
+  50%       { filter: drop-shadow(0 0 28px rgba(234,179,8,1))    drop-shadow(0 0 40px rgba(239,68,68,0.6)) drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
+}
+
+/* King eat — throne rage chomp */
+.demon-entity.type-imp_king.imp-eat {
+  animation: impKingRage 0.4s ease-in-out infinite;
+}
+@keyframes impKingRage {
+  0%   { transform: translateY(0px)  translateX(0px)  rotate(0deg)  scale(1);     }
+  20%  { transform: translateY(-5px) translateX(6px)  rotate(-4deg) scale(1.04);  }
+  50%  { transform: translateY(3px)  translateX(-3px) rotate(3deg)  scale(0.96);  }
+  75%  { transform: translateY(-3px) translateX(4px)  rotate(-2deg) scale(1.02);  }
+  100% { transform: translateY(0px)  translateX(0px)  rotate(0deg)  scale(1);     }
+}
+.demon-entity.type-imp_king.imp-eat img,
+.demon-entity.type-imp_king.imp-eat video {
+  filter:
+    drop-shadow(0 0 22px rgba(234,179,8,1))
+    drop-shadow(0 0 36px rgba(239,68,68,0.7))
+    brightness(1.4) !important;
+}
+
+/* King hit — crown burst gold flash */
+.demon-entity.type-imp_king.hit img,
+.demon-entity.type-imp_king.hit video {
+  filter: brightness(5) saturate(0.6) hue-rotate(30deg) drop-shadow(0 0 20px rgba(251,191,36,1)) !important;
+  animation: impKingHit 0.16s ease-out 1 !important;
+}
+@keyframes impKingHit {
+  0%   { transform: scaleX(0.85) scaleY(1.15) rotate(-2deg); }
+  40%  { transform: scaleX(1.1)  scaleY(0.92) rotate(2deg);  }
+  70%  { transform: scaleX(0.97) scaleY(1.03) rotate(-1deg); }
+  100% { transform: scaleX(1)    scaleY(1)    rotate(0deg);  }
+}

@@ -9,15 +9,7 @@ const Effects = (() => {
   }
 
   function showDamageNumber(amount, x, y) {
-    const layer = getLayer();
-    if (!layer) return;
-    const el = document.createElement("div");
-    el.className = "effect-hit";
-    el.textContent = `-${amount}`;
-    el.style.left = x - 12 + "px";
-    el.style.top = y - 10 + "px";
-    layer.appendChild(el);
-    setTimeout(() => el.remove(), 700);
+    // Disabled — damage numbers hidden
   }
 
   function showFloatText(text, x, y, type = "") {

@@ -130,6 +130,7 @@ const BlockHunt = (() => {
     picker.className = "bh-result";
     picker.id = "bh-diff-picker";
     picker.innerHTML = `
+    <button class="btn-back" style="align-self:flex-start;margin-bottom:8px" id="bh-pick-back">← Back</button>
     <h2 style="font-size:36px">Choose Difficulty</h2>
     ${DIFFICULTIES.map(
       (d, i) => `
@@ -147,6 +148,11 @@ const BlockHunt = (() => {
         picker.remove();
         startGame(parseInt(btn.dataset.diff));
       });
+    });
+    picker.querySelector("#bh-pick-back").addEventListener("click", () => {
+      picker.remove();
+      if (!_devMode && typeof UI !== "undefined")
+        UI.showScreen("screen-minigames");
     });
   }
 

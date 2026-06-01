@@ -127,6 +127,7 @@ const SharpShooters = (() => {
     picker.className = "bh-result";
     picker.id = "ss-diff-picker";
     picker.innerHTML = `
+      <button class="btn-back" style="align-self:flex-start;margin-bottom:8px" id="ss-pick-back">← Back</button>
       <h2 style="font-size:32px">🎯 Choose Difficulty</h2>
       ${DIFFICULTIES.map((d,i) => `
         <button class="btn-menu" data-diff="${i}" style="width:290px;text-align:center">
@@ -136,6 +137,10 @@ const SharpShooters = (() => {
           </span>
         </button>`).join("")}
     `;
+    picker.querySelector("#ss-pick-back").addEventListener("click", () => {
+      picker.remove();
+      if (!_devMode && typeof UI !== "undefined") UI.showScreen("screen-minigames");
+    });
     container.appendChild(picker);
     picker.querySelectorAll("[data-diff]").forEach(btn => {
       btn.addEventListener("click", () => { picker.remove(); startGame(parseInt(btn.dataset.diff)); });
@@ -396,8 +401,9 @@ const SharpShooters = (() => {
     clearInterval(gameTimer); clearInterval(spawnTimer);
     cancelAnimationFrame(rafId); clearTimeout(frenzyTimeout); clearTimeout(freezeTimeout);
     state=null; activeDemons=[];
-    if (arena)  arena.innerHTML  = "";
-    if (screen) screen.innerHTML = "";
+    if (arena) arena.innerHTML = "";
+    // Rebuild UI so re-entering the game works
+    buildUI();
   }
 
   return { init, startGame: showDifficultyPicker, stop: stopGame, stopGame };

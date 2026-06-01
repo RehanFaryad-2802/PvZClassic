@@ -2,7 +2,8 @@
   "name": "PvZ3 – Plants vs Demons",
   "short_name": "PvZ3",
   "description": "Plants vs Demons – tower defense game",
-  "start_url": "/index.html",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "fullscreen",
   "orientation": "landscape",
   "background_color": "#0a0010",
@@ -11,12 +12,14 @@
     {
       "src": "assets/plants/sunflower.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "assets/plants/sunflower.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
   "categories": ["games"],

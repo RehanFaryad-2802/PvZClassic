@@ -1,6 +1,5 @@
 /* js/minigames/bomb_ball.js */
 const BombBall = (() => {
-
   const CONFIG = {
     COLS: 6,
     FALL_DURATION_BASE: 2200,
@@ -14,36 +13,71 @@ const BombBall = (() => {
     SLOWMO_DURATION: 3000,
     SHIELD_HITS: 1,
     BOMB_TYPES: {
-      normal: { emoji:"💣", points:1,  color:"#ff6a00" },
-      gold:   { emoji:"✨", points:3,  color:"#fbbf24" },
-      ice:    { emoji:"❄️", points:2,  color:"#38bdf8" },
-      poison: { emoji:"☠️", points:-1, color:"#a855f7" },
+      normal: { emoji: "💣", points: 1, color: "#ff6a00" },
+      gold: { emoji: "✨", points: 3, color: "#fbbf24" },
+      ice: { emoji: "❄️", points: 2, color: "#38bdf8" },
+      poison: { emoji: "☠️", points: -1, color: "#a855f7" },
     },
     POWERUP_TYPES: {
-      slowmo: { emoji:"⏱️", label:"Slow-Mo!"   },
-      shield: { emoji:"🛡️", label:"Shield!"    },
-      double: { emoji:"×2",  label:"2× Points!" },
+      slowmo: { emoji: "⏱️", label: "Slow-Mo!" },
+      shield: { emoji: "🛡️", label: "Shield!" },
+      double: { emoji: "×2", label: "2× Points!" },
     },
   };
 
   const DIFFICULTIES = [
-    { name:"Easy",   pips:1, fallMult:1.0,  spawnMult:1.0,  poisonChance:0,    reward:{seeds:1,  coins:6}  },
-    { name:"Medium", pips:2, fallMult:0.78, spawnMult:0.75, poisonChance:0.08, reward:{seeds:2,  coins:14} },
-    { name:"Hard",   pips:3, fallMult:0.58, spawnMult:0.55, poisonChance:0.15, reward:{seeds:4,  coins:25} },
-    { name:"Expert", pips:4, fallMult:0.42, spawnMult:0.38, poisonChance:0.22, reward:{seeds:6,  coins:40} },
-    { name:"Insane", pips:5, fallMult:0.30, spawnMult:0.28, poisonChance:0.30, reward:{seeds:10, coins:60} },
+    {
+      name: "Easy",
+      pips: 1,
+      fallMult: 1.0,
+      spawnMult: 1.0,
+      poisonChance: 0,
+      reward: { seeds: 1, coins: 6 },
+    },
+    {
+      name: "Medium",
+      pips: 2,
+      fallMult: 0.78,
+      spawnMult: 0.75,
+      poisonChance: 0.08,
+      reward: { seeds: 2, coins: 14 },
+    },
+    {
+      name: "Hard",
+      pips: 3,
+      fallMult: 0.58,
+      spawnMult: 0.55,
+      poisonChance: 0.15,
+      reward: { seeds: 4, coins: 25 },
+    },
+    {
+      name: "Expert",
+      pips: 4,
+      fallMult: 0.42,
+      spawnMult: 0.38,
+      poisonChance: 0.22,
+      reward: { seeds: 6, coins: 40 },
+    },
+    {
+      name: "Insane",
+      pips: 5,
+      fallMult: 0.3,
+      spawnMult: 0.28,
+      poisonChance: 0.3,
+      reward: { seeds: 10, coins: 60 },
+    },
   ];
 
-  let screen      = null;
-  let arena       = null;
-  let state       = null;
-  let spawnTimer  = null;
-  let roundTimer  = null;
+  let screen = null;
+  let arena = null;
+  let state = null;
+  let spawnTimer = null;
+  let roundTimer = null;
   let slowmoTimer = null;
   let currentDiff = 0;
   let activeBombs = [];
   let doubleActive = false;
-  let _devMode    = false;
+  let _devMode = false;
 
   // ── Init ─────────────────────────────────────────
   // Normal:   BombBall.init()
@@ -51,10 +85,10 @@ const BombBall = (() => {
   function init(container, diffIdx, callbacks) {
     if (container) {
       _devMode = true;
-      screen   = container;
+      screen = container;
     } else {
       _devMode = false;
-      screen   = document.getElementById("screen-bombball");
+      screen = document.getElementById("screen-bombball");
     }
     buildUI();
     if (_devMode) startGame(diffIdx || 0);
@@ -101,7 +135,8 @@ const BombBall = (() => {
 
     document.getElementById("bb-back").addEventListener("click", () => {
       stopGame();
-      if (!_devMode && typeof UI !== "undefined") UI.showScreen("screen-minigames");
+      if (!_devMode && typeof UI !== "undefined")
+        UI.showScreen("screen-minigames");
     });
 
     document.getElementById("bb-catch-zone").addEventListener("click", (e) => {
@@ -115,38 +150,83 @@ const BombBall = (() => {
     picker.className = "bh-result";
     picker.id = "bb-diff-picker";
     picker.innerHTML = `
+      <button class="btn-back" style="align-self:flex-start;margin-bottom:8px" id="bb-pick-back">← Back</button>
       <h2 style="font-size:32px">💣 Choose Difficulty</h2>
-      ${DIFFICULTIES.map((d,i) => `
+      ${DIFFICULTIES.map(
+        (d, i) => `
         <button class="btn-menu" data-diff="${i}" style="width:290px;text-align:center">
           ${"🔥".repeat(d.pips)} ${d.name}
           <span style="font-size:13px;color:var(--gold,#fbbf24);display:block">
             ${d.fallMult < 0.5 ? "Fast" : d.fallMult < 0.8 ? "Medium" : "Slow"} bombs ·
-            ☠️ ${Math.round(d.poisonChance*100)}% · 🌱${d.reward.seeds} 🪙${d.reward.coins}
+            ☠️ ${Math.round(d.poisonChance * 100)}% · 🌱${d.reward.seeds} 🪙${d.reward.coins}
           </span>
-        </button>`).join("")}
+        </button>`,
+      ).join("")}
     `;
+    picker.querySelector("#bb-pick-back").addEventListener("click", () => {
+      picker.remove();
+      if (!_devMode && typeof UI !== "undefined")
+        UI.showScreen("screen-minigames");
+    });
     container.appendChild(picker);
-    picker.querySelectorAll("[data-diff]").forEach(btn => {
-      btn.addEventListener("click", () => { picker.remove(); startGame(parseInt(btn.dataset.diff)); });
+    picker.querySelectorAll("[data-diff]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        picker.remove();
+        startGame(parseInt(btn.dataset.diff));
+      });
     });
   }
 
   function startGame(diffIdx = 0) {
-    currentDiff  = Math.min(diffIdx, DIFFICULTIES.length-1);
-    const diff   = DIFFICULTIES[currentDiff];
+    currentDiff = Math.min(diffIdx, DIFFICULTIES.length - 1);
+    const diff = DIFFICULTIES[currentDiff];
 
-    state = { score:0, round:1, lives:CONFIG.MAX_LIVES, shield:0, running:false, timeLeft:CONFIG.ROUND_DURATION };
+    state = {
+      score: 0,
+      round: 1,
+      lives: CONFIG.MAX_LIVES,
+      shield: 0,
+      running: false,
+      timeLeft: CONFIG.ROUND_DURATION,
+    };
     doubleActive = false;
-    activeBombs  = [];
+    activeBombs = [];
 
     const badge = document.getElementById("bb-diff-badge");
-    if (badge) badge.innerHTML = DIFFICULTIES.map((_,i) =>
-      `<div class="bh-diff-pip${i<=currentDiff?" active":""}"></div>`).join("");
+    if (badge)
+      badge.innerHTML = DIFFICULTIES.map(
+        (_, i) =>
+          `<div class="bh-diff-pip${i <= currentDiff ? " active" : ""}"></div>`,
+      ).join("");
     const nameEl = document.getElementById("bb-diff-name");
     if (nameEl) nameEl.textContent = diff.name;
 
     updateHUD();
     startRound();
+  }
+
+  let rafId = null;
+  let lastTs = null;
+
+  function tick(ts) {
+    if (!state || !state.running) return;
+    const dt = lastTs ? (ts - lastTs) / 1000 : 0;
+    lastTs = ts;
+    const arenaH = arena.clientHeight;
+
+    for (let i = activeBombs.length - 1; i >= 0; i--) {
+      const b = activeBombs[i];
+      if (b.frozen) continue;
+      b.y += b.speed * dt;
+      b.el.style.top = b.y + "px";
+      if (b.y > arenaH) {
+        b.el.remove();
+        activeBombs.splice(i, 1);
+        const isPU = b.type.startsWith("pu_");
+        if (!isPU && b.type !== "poison") onMiss();
+      }
+    }
+    rafId = requestAnimationFrame(tick);
   }
 
   function startRound() {
@@ -157,11 +237,20 @@ const BombBall = (() => {
     arena.innerHTML = "";
     activeBombs    = [];
     doubleActive   = false;
+    lastTs = null;
+    cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(tick);
     updateHUD();
 
-    const diff    = DIFFICULTIES[currentDiff];
-    const fallDur = Math.max(CONFIG.FALL_DURATION_MIN, Math.round(CONFIG.FALL_DURATION_BASE * diff.fallMult));
-    const spawnMs = Math.max(CONFIG.SPAWN_INTERVAL_MIN, Math.round(CONFIG.SPAWN_INTERVAL_BASE * diff.spawnMult));
+    const diff = DIFFICULTIES[currentDiff];
+    const fallDur = Math.max(
+      CONFIG.FALL_DURATION_MIN,
+      Math.round(CONFIG.FALL_DURATION_BASE * diff.fallMult),
+    );
+    const spawnMs = Math.max(
+      CONFIG.SPAWN_INTERVAL_MIN,
+      Math.round(CONFIG.SPAWN_INTERVAL_BASE * diff.spawnMult),
+    );
 
     clearInterval(roundTimer);
     const roundStart = Date.now();
@@ -171,24 +260,31 @@ const BombBall = (() => {
       const tEl = document.getElementById("bb-time");
       const fEl = document.getElementById("bb-timer-fill");
       if (tEl) tEl.textContent = Math.ceil(state.timeLeft);
-      if (fEl) fEl.style.width = (state.timeLeft / CONFIG.ROUND_DURATION) * 100 + "%";
+      if (fEl)
+        fEl.style.width = (state.timeLeft / CONFIG.ROUND_DURATION) * 100 + "%";
 
       if (state.timeLeft <= 0) {
         clearInterval(roundTimer);
         clearInterval(spawnTimer);
-        activeBombs.forEach(b => { clearTimeout(b.timeoutId); b.el.remove(); });
-        activeBombs    = [];
-        state.running  = false;
+        activeBombs.forEach((b) => {
+          clearTimeout(b.timeoutId);
+          b.el.remove();
+        });
+        activeBombs = [];
+        state.running = false;
         state.round++;
         setTimeout(() => startRound(), 600);
       }
     }, 80);
 
     clearInterval(spawnTimer);
-    spawnTimer = setInterval(() => { if (state.running) spawnBomb(fallDur, diff); }, spawnMs);
+    spawnTimer = setInterval(() => {
+      if (state.running) spawnBomb(fallDur, diff);
+    }, spawnMs);
   }
 
   function spawnBomb(fallDur, diff) {
+    const arenaHeight = arena.clientHeight || 400;
     const cols = CONFIG.COLS;
     const col  = Math.floor(Math.random() * cols);
     const xPct = (col / cols) * 100 + (100 / cols / 2);
@@ -202,41 +298,34 @@ const BombBall = (() => {
       type = "poison";
     } else {
       const rr = Math.random();
-      type = rr < 0.60 ? "normal" : rr < 0.85 ? "ice" : "gold";
+      type = rr < 0.6 ? "normal" : rr < 0.85 ? "ice" : "gold";
     }
 
-    const isPU  = type.startsWith("pu_");
-    const puKey = isPU ? type.replace("pu_","") : null;
-    const cfg   = isPU ? CONFIG.POWERUP_TYPES[puKey] : CONFIG.BOMB_TYPES[type];
+    const isPU = type.startsWith("pu_");
+    const puKey = isPU ? type.replace("pu_", "") : null;
+    const cfg = isPU ? CONFIG.POWERUP_TYPES[puKey] : CONFIG.BOMB_TYPES[type];
     const color = isPU ? "#22c55e" : cfg.color;
 
     const el = document.createElement("div");
     el.className = "bb-bomb";
     el.textContent = cfg.emoji;
-    el.style.cssText = `left:${xPct}%;top:-60px;--fall-dur:${fallDur}ms;--bomb-color:${color};animation:bbFall var(--fall-dur) linear forwards;`;
+    el.style.cssText = `left:${xPct}%;top:-60px;position:absolute;font-size:44px;width:72px;height:72px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;filter:drop-shadow(0 0 8px ${color});padding:12px;box-sizing:border-box;transform:translate(-50%,0);`;
     el.dataset.type = type;
 
     el.addEventListener("click", (e) => { e.stopPropagation(); catchBomb(el, type); });
+    el.addEventListener("touchstart", (e) => { e.preventDefault(); e.stopPropagation(); catchBomb(el, type); }, { passive: false });
     arena.appendChild(el);
 
-    const tid = setTimeout(() => {
-      if (el.parentNode) {
-        el.remove();
-        activeBombs = activeBombs.filter(b => b.el !== el);
-        if (!isPU && type !== "poison") onMiss();
-      }
-    }, fallDur + 60);
-
-    activeBombs.push({ el, timeoutId:tid, col, type });
+    activeBombs.push({ el, col, type, y: -60, speed: arenaHeight / (fallDur / 1000) });
   }
 
   function catchBomb(el, type) {
     if (!state.running) return;
-    clearTimeout(activeBombs.find(b => b.el === el)?.timeoutId);
-    activeBombs = activeBombs.filter(b => b.el !== el);
+    clearTimeout(activeBombs.find((b) => b.el === el)?.timeoutId);
+    activeBombs = activeBombs.filter((b) => b.el !== el);
 
-    const isPU  = type.startsWith("pu_");
-    const puKey = isPU ? type.replace("pu_","") : null;
+    const isPU = type.startsWith("pu_");
+    const puKey = isPU ? type.replace("pu_", "") : null;
 
     if (isPU) {
       activatePowerup(puKey);
@@ -247,19 +336,29 @@ const BombBall = (() => {
       if (doubleActive && pts > 0) pts *= 2;
       state.score = Math.max(0, state.score + pts);
       updateHUD();
-      showCatchFX(el, pts > 0 ? `+${pts}` : `${pts}`, pts > 0 ? (type==="gold"?"#fbbf24":"#22c55e") : "#ef4444");
+      showCatchFX(
+        el,
+        pts > 0 ? `+${pts}` : `${pts}`,
+        pts > 0 ? (type === "gold" ? "#fbbf24" : "#22c55e") : "#ef4444",
+      );
     }
     el.remove();
   }
 
   function onMiss() {
-    if (state.shield > 0) { state.shield--; showPowerupLabel("🛡️ Blocked!"); updateHUD(); return; }
+    if (state.shield > 0) {
+      state.shield--;
+      showPowerupLabel("🛡️ Blocked!");
+      updateHUD();
+      return;
+    }
     state.lives--;
     updateHUD();
     arena.classList.add("bb-shake");
     setTimeout(() => arena.classList.remove("bb-shake"), 400);
     if (state.lives <= 0) {
-      clearInterval(roundTimer); clearInterval(spawnTimer);
+      clearInterval(roundTimer);
+      clearInterval(spawnTimer);
       state.running = false;
       setTimeout(() => endGame(), 600);
     }
@@ -267,10 +366,13 @@ const BombBall = (() => {
 
   function activatePowerup(key) {
     if (key === "slowmo") {
-      arena.querySelectorAll(".bb-bomb").forEach(b => { b.style.animationDuration = "6000ms"; });
+      activeBombs.forEach(b => { b.speed *= 0.3; b.frozen = false; });
       clearTimeout(slowmoTimer);
       showPowerupLabel("⏱️ Slow-Mo!");
-      slowmoTimer = setTimeout(() => showPowerupLabel(""), CONFIG.SLOWMO_DURATION);
+      slowmoTimer = setTimeout(
+        () => showPowerupLabel(""),
+        CONFIG.SLOWMO_DURATION,
+      );
     } else if (key === "shield") {
       state.shield += CONFIG.SHIELD_HITS;
       showPowerupLabel(`🛡️ Shield x${state.shield}!`);
@@ -278,7 +380,9 @@ const BombBall = (() => {
     } else if (key === "double") {
       doubleActive = true;
       showPowerupLabel("×2 Points!");
-      setTimeout(() => { doubleActive = false; }, 5000);
+      setTimeout(() => {
+        doubleActive = false;
+      }, 5000);
     }
   }
 
@@ -290,12 +394,12 @@ const BombBall = (() => {
   }
 
   function showCatchFX(bombEl, label, color) {
-    const rect      = bombEl.getBoundingClientRect();
+    const rect = bombEl.getBoundingClientRect();
     const arenaRect = arena.getBoundingClientRect();
     const fx = document.createElement("div");
     fx.className = "bb-catch-fx";
     fx.textContent = label;
-    fx.style.cssText = `left:${rect.left-arenaRect.left+rect.width/2}px;top:${rect.top-arenaRect.top}px;color:${color};`;
+    fx.style.cssText = `left:${rect.left - arenaRect.left + rect.width / 2}px;top:${rect.top - arenaRect.top}px;color:${color};`;
     arena.appendChild(fx);
     setTimeout(() => fx.remove(), 700);
   }
@@ -304,12 +408,21 @@ const BombBall = (() => {
     if (!state.running) return;
     const arenaRect = arena.getBoundingClientRect();
     const threshold = arenaRect.height * 0.35;
-    let nearest = null, nearestDist = Infinity;
-    activeBombs.forEach(b => {
+    let nearest = null,
+      nearestDist = Infinity;
+    activeBombs.forEach((b) => {
       const rect = b.el.getBoundingClientRect();
-      if (rect.bottom - arenaRect.top >= arenaRect.height - threshold) {
-        const dist = Math.abs(rect.left + rect.width/2 - arenaRect.left - (e.clientX - arenaRect.left));
-        if (dist < nearestDist) { nearestDist = dist; nearest = b; }
+      if (rect.bottom - arenaRect.top >= 0) {
+        const dist = Math.abs(
+          rect.left +
+            rect.width / 2 -
+            arenaRect.left -
+            (e.clientX - arenaRect.left),
+        );
+        if (dist < nearestDist) {
+          nearestDist = dist;
+          nearest = b;
+        }
       }
     });
     if (nearest) catchBomb(nearest.el, nearest.type);
@@ -320,35 +433,52 @@ const BombBall = (() => {
     const r = document.getElementById("bb-round");
     const l = document.getElementById("bb-lives");
     if (s) s.textContent = state.score;
-    if (r) r.textContent = `${Math.min(state.round,CONFIG.TOTAL_ROUNDS)}/${CONFIG.TOTAL_ROUNDS}`;
-    if (l) l.textContent = "❤️".repeat(Math.max(0,state.lives)) + "🖤".repeat(Math.max(0,CONFIG.MAX_LIVES-state.lives)) + (state.shield>0?" 🛡️".repeat(state.shield):"");
+    if (r)
+      r.textContent = `${Math.min(state.round, CONFIG.TOTAL_ROUNDS)}/${CONFIG.TOTAL_ROUNDS}`;
+    if (l)
+      l.textContent =
+        "❤️".repeat(Math.max(0, state.lives)) +
+        "🖤".repeat(Math.max(0, CONFIG.MAX_LIVES - state.lives)) +
+        (state.shield > 0 ? " 🛡️".repeat(state.shield) : "");
   }
 
   function endGame() {
     clearInterval(roundTimer); clearInterval(spawnTimer); clearTimeout(slowmoTimer);
+    cancelAnimationFrame(rafId);
     state.running = false;
 
-    const diff   = DIFFICULTIES[currentDiff];
+    const diff = DIFFICULTIES[currentDiff];
     const reward = diff.reward;
-    const won    = state.score > 0;
+    const won = state.score > 0;
     let plantName = "";
 
     if (won) {
-      if (typeof Seeds        !== "undefined") { const sr = Seeds.giveRandomSeeds(reward.seeds); plantName = sr ? (typeof PlantRegistry!=="undefined"?PlantRegistry.get(sr.plantId)?.name||"":"") : ""; }
-      if (typeof Player       !== "undefined") Player.addCoins(reward.coins);
-      if (typeof UI           !== "undefined") UI.updateCoinDisplays();
+      if (typeof Seeds !== "undefined") {
+        const sr = Seeds.giveRandomSeeds(reward.seeds);
+        plantName = sr
+          ? typeof PlantRegistry !== "undefined"
+            ? PlantRegistry.get(sr.plantId)?.name || ""
+            : ""
+          : "";
+      }
+      if (typeof Player !== "undefined") Player.addCoins(reward.coins);
+      if (typeof UI !== "undefined") UI.updateCoinDisplays();
     }
 
     const container = document.getElementById("bb-container");
-    const overlay   = document.createElement("div");
+    const overlay = document.createElement("div");
     overlay.className = "bh-result";
     overlay.innerHTML = `
-      <h2>${state.score>=CONFIG.TOTAL_ROUNDS*3?"🏆 Perfect!":won?"⭐ Nice Catch!":"💀 All Missed!"}</h2>
+      <h2>${state.score >= CONFIG.TOTAL_ROUNDS * 3 ? "🏆 Perfect!" : won ? "⭐ Nice Catch!" : "💀 All Missed!"}</h2>
       <div class="bh-score-final">Score: ${state.score} pts</div>
-      ${won?`<div class="bh-seeds-earned">🌱 +${reward.seeds} seeds${plantName?" → "+plantName:""}</div>
-             <div class="bh-seeds-earned" style="color:var(--gold,#fbbf24)">🪙 +${reward.coins} coins</div>`:""}
+      ${
+        won
+          ? `<div class="bh-seeds-earned">🌱 +${reward.seeds} seeds${plantName ? " → " + plantName : ""}</div>
+             <div class="bh-seeds-earned" style="color:var(--gold,#fbbf24)">🪙 +${reward.coins} coins</div>`
+          : ""
+      }
       <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px">
-        ${currentDiff<DIFFICULTIES.length-1?`<button class="btn-primary" id="bb-harder" style="max-width:200px">Harder: ${DIFFICULTIES[currentDiff+1].name} 🔥</button>`:""}
+        ${currentDiff < DIFFICULTIES.length - 1 ? `<button class="btn-primary" id="bb-harder" style="max-width:200px">Harder: ${DIFFICULTIES[currentDiff + 1].name} 🔥</button>` : ""}
         <button class="btn-primary"   id="bb-replay" style="max-width:200px">🔄 Replay</button>
         <button class="btn-secondary" id="bb-change" style="max-width:200px">📋 Change Diff</button>
         <button class="btn-secondary" id="bb-exit"   style="max-width:200px">🏠 Menu</button>
@@ -356,21 +486,33 @@ const BombBall = (() => {
     `;
     container.appendChild(overlay);
 
-    const harderBtn = document.getElementById("bb-harder");
-    if (harderBtn) harderBtn.addEventListener("click", () => { overlay.remove(); startGame(currentDiff+1); });
-    document.getElementById("bb-replay").addEventListener("click", () => { overlay.remove(); startGame(currentDiff); });
-    document.getElementById("bb-change").addEventListener("click", () => { overlay.remove(); showDifficultyPicker(); });
-    document.getElementById("bb-exit").addEventListener("click",   () => {
+    const harderBtn = overlay.querySelector("#bb-harder");
+    if (harderBtn)
+      harderBtn.addEventListener("click", () => {
+        overlay.remove();
+        startGame(currentDiff + 1);
+      });
+    overlay.querySelector("#bb-replay").addEventListener("click", () => {
+      overlay.remove();
+      startGame(currentDiff);
+    });
+    overlay.querySelector("#bb-change").addEventListener("click", () => {
+      overlay.remove();
+      showDifficultyPicker();
+    });
+    overlay.querySelector("#bb-exit").addEventListener("click", () => {
       stopGame();
-      if (!_devMode && typeof UI !== "undefined") UI.showScreen("screen-minigames");
+      if (!_devMode && typeof UI !== "undefined")
+        UI.showScreen("screen-minigames");
     });
   }
 
   function stopGame() {
     clearInterval(roundTimer); clearInterval(spawnTimer); clearTimeout(slowmoTimer);
-    state = null; activeBombs = [];
+    cancelAnimationFrame(rafId);
+    state = null; activeBombs = []; 
     if (arena) arena.innerHTML = "";
-    if (screen) screen.innerHTML = "";
+    buildUI();
   }
 
   return { init, startGame: showDifficultyPicker, stop: stopGame, stopGame };

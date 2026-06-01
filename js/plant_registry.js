@@ -47,6 +47,12 @@ const PlantRegistry = (() => {
     if (timers[id]) delete timers[id][`${row},${col}`];
   }
 
+  // Called when a plant takes damage — forwards to plant def
+  function onDamage(id, row, col, plantData) {
+    const def = plants[id];
+    if (def && def.onDamage) def.onDamage(row, col, plantData);
+  }
+
   // Main tick — called every frame for all planted plants
   function tick(dt) {
     const grid = Grid.getGrid();
@@ -76,7 +82,8 @@ const PlantRegistry = (() => {
         if (!timers[cell.plantId][key]) {
           timers[cell.plantId][key] = {
             elapsed: 0,
-            cooldown: def.fireRate || 2000,
+            // fireRate:0 means check every frame (use 100ms minimum)
+            cooldown: def.fireRate > 0 ? def.fireRate : 100,
           };
         }
         const t = timers[cell.plantId][key];
@@ -139,7 +146,11 @@ const PlantRegistry = (() => {
       if (d.dead || d.row !== row) return false;
       const dRect = d.el.getBoundingClientRect();
       if (dRect.left <= cellRect.left) return false;
+      // Demon must have entered the arena (left edge must be within grid bounds)
       if (dRect.left > gridRect.right) return false;
+      // Extra: demon center must be inside or touching the grid right edge
+      const dCenter = dRect.left + dRect.width / 2;
+      if (dCenter > gridRect.right + cellW * 0.5) return false;
       return dRect.left - cellRect.right <= maxDist;
     });
   }
@@ -163,6 +174,9 @@ const PlantRegistry = (() => {
       const dRect = d.el.getBoundingClientRect();
       if (dRect.left <= cellRect.left) return false;
       if (dRect.left > gridRect.right) return false;
+      // Demon must be meaningfully inside the arena, not just barely crossing the edge
+      const dCenter = dRect.left + dRect.width / 2;
+      if (dCenter > gridRect.right + cellW * 0.5) return false;
       return dRect.left - cellRect.right <= maxDist;
     });
 
@@ -183,19 +197,10 @@ const PlantRegistry = (() => {
     getAll,
     onPlace,
     onRemove,
+    onDamage,
     tick,
     clearTimers,
     isDemonInRange,
     getDemonsInRange,
   };
-  // return {
-  //   register,
-  //   get,
-  //   getAll,
-  //   onPlace,
-  //   onRemove,
-  //   tick,
-  //   clearTimers,
-  //   isDemonInRange,
-  // };
 })();

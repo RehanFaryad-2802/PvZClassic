@@ -1,0 +1,90 @@
+/* ══════════════════════════════════════════════════
+   GLACIER BUD CSS ANIMATIONS
+   States: idle crackle, burst trigger, damaged
+══════════════════════════════════════════════════ */
+
+/* ── Idle: electric ice crackle pulse ───────────── */
+.plant-entity.gb-idle {
+  animation:
+    gbPulse 1.8s ease-in-out infinite,
+    gbCrackle 2.4s ease-in-out infinite,
+    plantPlace 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-origin: bottom center;
+}
+
+@keyframes gbPulse {
+  0%   { transform: translate(-50%, -50%) scaleY(1)    translateY(0px);  }
+  30%  { transform: translate(-50%, -50%) scaleY(1.04) translateY(-3px); }
+  60%  { transform: translate(-50%, -50%) scaleY(0.98) translateY(1px);  }
+  100% { transform: translate(-50%, -50%) scaleY(1)    translateY(0px);  }
+}
+
+@keyframes gbCrackle {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(103,232,249,0.6))  drop-shadow(0 0 12px rgba(14,165,233,0.3))  drop-shadow(0 2px 6px rgba(0,0,0,0.7)); }
+  40%       { filter: drop-shadow(0 0 14px rgba(103,232,249,0.95)) drop-shadow(0 0 26px rgba(186,230,253,0.5)) drop-shadow(0 2px 6px rgba(0,0,0,0.7)); }
+  42%       { filter: drop-shadow(0 0 4px rgba(103,232,249,0.3))  drop-shadow(0 2px 6px rgba(0,0,0,0.7)); }
+  44%       { filter: drop-shadow(0 0 14px rgba(103,232,249,0.95)) drop-shadow(0 0 26px rgba(186,230,253,0.5)) drop-shadow(0 2px 6px rgba(0,0,0,0.7)); }
+}
+
+/* Ambient ice aura ring */
+.gb-aura {
+  position: absolute;
+  inset: 0px;
+  border-radius: 50%;
+  border: 2px solid rgba(103,232,249,0.3);
+  box-shadow: 0 0 12px rgba(103,232,249,0.2), inset 0 0 10px rgba(103,232,249,0.05);
+  pointer-events: none;
+  z-index: 4;
+  animation: gbAuraPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes gbAuraPulse {
+  0%, 100% { transform: scale(0.9);  opacity: 0.5; border-color: rgba(103,232,249,0.2); }
+  50%       { transform: scale(1.08); opacity: 1;   border-color: rgba(103,232,249,0.7); }
+}
+
+/* ── Burst: explodes outward then vanishes ───────── */
+.plant-entity.gb-burst {
+  animation: gbBurstAnim 0.4s ease-out forwards;
+  transform-origin: center center;
+  filter:
+    drop-shadow(0 0 24px rgba(103,232,249,1))
+    drop-shadow(0 0 48px rgba(255,255,255,0.6))
+    brightness(2.5);
+}
+
+@keyframes gbBurstAnim {
+  0%   { transform: translate(-50%, -50%) scale(1);    opacity: 1; }
+  30%  { transform: translate(-50%, -50%) scale(1.35); opacity: 1; }
+  70%  { transform: translate(-50%, -50%) scale(0.7);  opacity: 0.6; }
+  100% { transform: translate(-50%, -50%) scale(0.1);  opacity: 0; }
+}
+
+/* ── Damaged: white-blue flash ───────────────────── */
+.plant-entity.gb-damaged {
+  animation:
+    plantShake 0.3s ease-in-out infinite,
+    gbDamageFlash 0.13s ease-out 3;
+}
+
+@keyframes gbDamageFlash {
+  0%   { filter: drop-shadow(0 0 14px #fff) brightness(4) saturate(0); }
+  50%  { filter: drop-shadow(0 0 6px rgba(103,232,249,0.8)) brightness(1.6) saturate(0.5); }
+  100% { filter: drop-shadow(0 0 14px #fff) brightness(4) saturate(0); }
+}
+
+/* ── Burst effect keyframes ──────────────────────── */
+@keyframes gbRing {
+  0%   { transform: scale(0.3); opacity: 1; }
+  100% { transform: scale(3);   opacity: 0; }
+}
+
+@keyframes gbShard {
+  0%   { transform: translate(0,0) rotate(var(--r)) scale(1);   opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) rotate(var(--r)) scale(0.2); opacity: 0; }
+}
+
+@keyframes gbFreezePulse {
+  0%   { transform: scale(0.4); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}

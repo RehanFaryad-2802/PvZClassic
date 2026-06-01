@@ -5,6 +5,7 @@
 ═══════════════════════════════════════════════════ */
 
 @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800&display=swap');
+@import url('inventory.css');
 
 /* ─── CSS Variables ─────────────────────────────── */
 :root {
@@ -833,63 +834,114 @@ html, body {
 /* ═══════════════════════════════════════════════════
    MINIGAMES HUB
 ═══════════════════════════════════════════════════ */
-.minigames-bg {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(160deg, #080020, #0f0030);
-}
-.minigames-container {
-  position: relative;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-  gap: 20px;
-}
 .minigames-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
-  overflow-y: scroll;
-  flex: 1;
-  padding-bottom: 40px;
-  max-height: calc(100vh - 120px);
-}
-.mg-card {
-  background: linear-gradient(135deg, #1a0040, #0d0030);
-  border: 2px solid var(--purple);
-  border-radius: 16px;
-  padding: 20px 16px;
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.2s;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  min-height: 130px;
-}
-.mg-card:hover, .mg-card:active {
-  border-color: var(--orange);
-  box-shadow: 0 0 16px rgba(255,106,0,0.3);
-  transform: scale(1.02);
-}
-.mg-card.locked {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.mg-card .mg-icon { font-size: 36px; }
-.mg-card .mg-name {
-  font-family: var(--font-display);
-  font-size: 18px;
-  letter-spacing: 1px;
-  color: var(--white);
-}
-.mg-card .mg-reward {
-  font-size: 12px;
-  color: var(--gold);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+  padding: 16px;
+  overflow-y: auto;
 }
 
+.mg-card {
+  background: rgba(255,255,255,0.05);
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.mg-card:not(.locked):hover {
+  transform: translateY(-4px);
+  border-color: var(--orange, #f97316);
+  box-shadow: 0 8px 32px rgba(249,115,22,0.3);
+}
+
+.mg-card.locked {
+  cursor: default;
+  opacity: 0.6;
+  filter: grayscale(0.5);
+}
+
+.mg-thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #111;
+  overflow: hidden;
+}
+
+.mg-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mg-thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+}
+
+.mg-lock-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+}
+
+.mg-play-btn {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  color: white;
+  background: rgba(0,0,0,0.35);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.mg-card:not(.locked):hover .mg-play-btn {
+  opacity: 1;
+}
+
+.mg-info {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mg-name {
+  font-family: var(--font-display, sans-serif);
+  font-size: 17px;
+  color: var(--white, #fff);
+  font-weight: 700;
+}
+
+.mg-desc {
+  font-size: 12px;
+  color: var(--gray, #9ca3af);
+  line-height: 1.4;
+}
+
+.mg-reward {
+  font-size: 12px;
+  color: var(--gold, #fbbf24);
+  margin-top: 2px;
+}
 /* ═══════════════════════════════════════════════════
    SEED SHOP
 ═══════════════════════════════════════════════════ */
@@ -908,7 +960,7 @@ html, body {
 }
 .shop-grid {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  /* grid-template-columns: repeat(12, 1fr); */
   gap: 14px;
   overflow-y: auto;
   flex: 0 0 1;

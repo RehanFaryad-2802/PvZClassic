@@ -6,7 +6,12 @@
   <meta name="theme-color" content="#0a0010" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>PvZ3 – Plants vs Demons</title>
-  <!-- <link rel="manifest" href="manifest.json" /> -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-fullscreen" />
+  <meta name="apple-mobile-web-app-title" content="PvZ3" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/game.css" />
   <link rel="stylesheet" href="css/minigames.css" />
@@ -49,7 +54,7 @@
       </div>
       <div class="menu-buttons">
         <button class="btn-menu" id="btn-play">🌱 Play</button>
-        <button class="btn-menu" id="btn-collection">🌿 Plant Collection</button>
+        <button class="btn-menu" id="btn-collection">📦 Invetory</button>
         <button class="btn-menu" id="btn-minigames">🎮 Minigames</button>
         <button class="btn-menu" id="btn-shop">🛒 Seed Shop</button>
       </div>
@@ -241,6 +246,8 @@
     <!-- Injected by minigames/sharp_shooters.js -->
   </div>
 
+  
+
   <!-- ══════════════════════════════════════════
        SCREEN: SEED SHOP
   ══════════════════════════════════════════ -->
@@ -251,6 +258,7 @@
         <button class="btn-back" id="btn-back-shop">← Back</button>
         <h2>Seed Shop</h2>
         <span class="coin-display">🪙 <span id="shop-coins">0</span></span>
+        <span class="loom-display">🔮 <span id="shop-looms">0</span></span>
       </div>
       <div class="shop-grid" id="shop-grid">
         <!-- Shop items injected -->
@@ -263,10 +271,12 @@
   ══════════════════════════════════════════ -->
   <div id="toast" class="toast hidden"></div>
 
-  <!-- ══════════════════════════════════════════
-       SCRIPTS — ORDER MATTERS
-  ══════════════════════════════════════════ -->
   <script src="js/player.js"></script>
+  <style>
+    * { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    body { overscroll-behavior: none; overflow: hidden; }
+    img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; }
+  </style>
   <script src="js/seeds.js"></script>
   <script src="js/coins.js"></script>
   <script src="js/levels.js"></script>
@@ -283,14 +293,24 @@
   <script src="plants/sporepuff.js"></script>
   <script src="plants/voltlotus.js"></script>
   <script src="plants/lavaburst.js"></script>
+  <script src="plants/glacierbud.js"></script>
   <script src="js/minigames/block_hunt.js"></script>
   <script src="js/minigames/bomb_ball.js"></script>
   <script src="js/minigames/sharp_shooters.js"></script>
+  <script src="js/shop.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/core.js"></script>
   <script>
     // Boot
     window.addEventListener('DOMContentLoaded', () => UI.init());
+    // Service worker for offline/APK
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+    // Prevent context menu on long press (important for APK)
+    window.addEventListener('contextmenu', e => e.preventDefault());
+    // Prevent pull-to-refresh
+    document.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
   </script>
 </body>
 </html>

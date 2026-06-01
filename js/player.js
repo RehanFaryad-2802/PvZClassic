@@ -42,6 +42,18 @@ const Player = (() => {
       sporepuff: { owned: false, level: 1, seeds: 0 },
       voltlotus: { owned: false, level: 1, seeds: 0 },
       lavaburst: { owned: false, level: 1, seeds: 0 },
+      glacierbud: { owned: false, level: 1, seeds: 0, unlockedByLevel: false },
+      acornblast: { owned: false, level: 1, seeds: 0 },
+      berryburst: { owned: false, level: 1, seeds: 0 },
+      cactusneedle: { owned: false, level: 1, seeds: 0 },
+      emberdoze: { owned: false, level: 1, seeds: 0 },
+      fightblossom: { owned: false, level: 1, seeds: 0 },
+      gumball: { owned: false, level: 1, seeds: 0 },
+      mossmellow: { owned: false, level: 1, seeds: 0 },
+      mushpuff: { owned: false, level: 1, seeds: 0 },
+      orchidart: { owned: false, level: 1, seeds: 0 },
+      rootboom: { owned: false, level: 1, seeds: 0 },
+      shadowspore: { owned: false, level: 1, seeds: 0 },
     },
     unlockedMinigames: [],
     totalLevelsBeaten: 0,
@@ -54,8 +66,18 @@ const Player = (() => {
       const raw = localStorage.getItem(SAVE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        // Merge with defaults to handle new fields in updates
         data = deepMerge(DEFAULT_SAVE, parsed);
+        // Patch: add any plants from DEFAULT_SAVE missing from saved data
+        for (const plantId in DEFAULT_SAVE.plants) {
+          if (!data.plants[plantId]) {
+            data.plants[plantId] = JSON.parse(
+              JSON.stringify(DEFAULT_SAVE.plants[plantId]),
+            );
+          }
+        }
+        // Patch: add looms and inventory if missing
+        if (data.looms === undefined) data.looms = 54;
+        if (!data.inventory) data.inventory = [];
       } else {
         data = JSON.parse(JSON.stringify(DEFAULT_SAVE));
       }
@@ -113,6 +135,50 @@ const Player = (() => {
   function spendCoins(amount) {
     if (data.coins < amount) return false;
     data.coins -= amount;
+    save();
+    return true;
+  }
+
+  function getLooms() {
+    return data.looms || 0;
+  }
+
+  function addLooms(amount) {
+    data.looms = (data.looms || 0) + Math.floor(amount);
+    save();
+  }
+
+  function spendLooms(amount) {
+    if ((data.looms || 0) < amount) return false;
+    data.looms -= amount;
+    save();
+    return true;
+  }
+
+  function getInventory() {
+    if (!data.inventory) data.inventory = [];
+    return data.inventory;
+  }
+
+  function addInventoryItem(itemId, quantity = 1) {
+    if (!data.inventory) data.inventory = [];
+    const existing = data.inventory.find((i) => i.id === itemId);
+    if (existing) {
+      existing.quantity += quantity;
+    } else {
+      data.inventory.push({ id: itemId, quantity });
+    }
+    save();
+  }
+
+  function removeInventoryItem(itemId, quantity = 1) {
+    if (!data.inventory) return false;
+    const existing = data.inventory.find((i) => i.id === itemId);
+    if (!existing || existing.quantity < quantity) return false;
+    existing.quantity -= quantity;
+    if (existing.quantity <= 0) {
+      data.inventory = data.inventory.filter((i) => i.id !== itemId);
+    }
     save();
     return true;
   }
@@ -312,6 +378,12 @@ const Player = (() => {
     getCoins,
     addCoins,
     spendCoins,
+    getLooms,
+    addLooms,
+    spendLooms,
+    getInventory,
+    addInventoryItem,
+    removeInventoryItem,
     getPlants,
     getPlant,
     getOwnedPlants,

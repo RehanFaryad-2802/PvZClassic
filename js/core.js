@@ -415,6 +415,16 @@ const Core = (() => {
 
     // Cleanup
     stopSkyDrops();
+    // Remove any leftover sun tokens still floating on screen
+    document
+      .querySelectorAll(".sun-token, .sky-sun, .sun-coin, .sun-orb")
+      .forEach((el) => el.remove());
+    const effectsLayer = document.getElementById("effects-layer");
+    if (effectsLayer) {
+      effectsLayer
+        .querySelectorAll(".sun-token, .sky-sun, .float-text")
+        .forEach((el) => el.remove());
+    }
     Grid.clear();
     Demons.clear();
     Projectiles.clear();

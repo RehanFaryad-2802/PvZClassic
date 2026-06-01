@@ -133,7 +133,13 @@ const Grid = (() => {
     const cell = getCellEl(row, col);
     if (cell) {
       // Remove all state classes including selected ring
-      cell.classList.remove("occupied", "selected", "plant-selected", "active", "highlighted");
+      cell.classList.remove(
+        "occupied",
+        "selected",
+        "plant-selected",
+        "active",
+        "highlighted",
+      );
       // Remove all child elements (plant image/video + hp bar + any overlays)
       cell.innerHTML = "";
     }
@@ -190,6 +196,10 @@ const Grid = (() => {
       p.hpBar.style.width = pct * 100 + "%";
       p.hpBar.className =
         "plant-hp-fill" + (pct <= 0.25 ? " low" : pct <= 0.5 ? " mid" : "");
+    }
+    // Forward damage to plant def for custom animations
+    if (typeof PlantRegistry !== "undefined") {
+      PlantRegistry.onDamage(p.plantId, row, col, p);
     }
 
     // Shake animation while being eaten
