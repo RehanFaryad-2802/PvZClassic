@@ -12,6 +12,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-fullscreen" />
   <meta name="apple-mobile-web-app-title" content="PvZ3" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="screen-orientation" content="landscape" />
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/game.css" />
   <link rel="stylesheet" href="css/minigames.css" />
@@ -58,7 +59,7 @@
         <button class="btn-menu" id="btn-minigames">🎮 Minigames</button>
         <button class="btn-menu" id="btn-shop">🛒 Seed Shop</button>
       </div>
-      <div class="menu-deco">
+      <div class="menu-deco" style="display: none;">
         <img src="assets/plants/sunflower.png" class="deco-plant p1" alt="" />
         <img src="assets/plants/peashooter.png" class="deco-plant p2" alt="" />
         <img src="assets/plants/bonkchoy.png" class="deco-plant p3" alt="" />
@@ -330,6 +331,9 @@
     }
     // Prevent context menu on long press
     window.addEventListener('contextmenu', e => e.preventDefault());
+    if (screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock('landscape').catch(() => {});
+    }
     // Prevent pull-to-refresh
     document.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
   </script>

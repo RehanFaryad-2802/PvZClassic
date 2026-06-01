@@ -38,6 +38,7 @@ html, body {
   overflow: hidden;
   background: var(--bg-dark);
   color: var(--white);
+  screen-orientation: landscape;
   font-family: var(--font-body);
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
