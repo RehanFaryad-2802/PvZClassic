@@ -1745,9 +1745,11 @@ const UI = (() => {
     const effectsLayer = document.getElementById("effects-layer");
     if (effectsLayer) {
       // Remove sun coin elements and any floating text
-      effectsLayer.querySelectorAll(
-        ".sun-coin, .sun-orb, .float-text, .floating-sun, [class*='sun-']"
-      ).forEach(el => el.remove());
+      effectsLayer
+        .querySelectorAll(
+          ".sun-coin, .sun-orb, .float-text, .floating-sun, [class*='sun-']",
+        )
+        .forEach((el) => el.remove());
     }
     // Also clear the coins layer if it exists separately
     const coinsLayer = document.getElementById("coins-layer");
@@ -1932,6 +1934,7 @@ const UI = (() => {
   }
 
   function init() {
+    checkForUpdates();
     initButtons();
     BlockHunt.init();
     BombBall.init();

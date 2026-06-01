@@ -65,8 +65,31 @@ const Player = (() => {
     try {
       const raw = localStorage.getItem(SAVE_KEY);
       if (raw) {
-        const parsed = JSON.parse(raw);
+        // Try decode (new format)
+        let parsed;
+        try {
+          const decoded = decodeURIComponent(escape(atob(raw)));
+          parsed = JSON.parse(decoded);
+        } catch (e) {
+          // Fallback: old plain JSON format
+          parsed = JSON.parse(raw);
+        }
+
+        // Verify checksum
+        if (parsed._cs) {
+          const { _cs, ...saveData } = parsed;
+          const expected = generateChecksum(saveData);
+          if (_cs !== expected) {
+            console.warn("PvZ3: Save tampered — resetting");
+            data = JSON.parse(JSON.stringify(DEFAULT_SAVE));
+            save();
+            return;
+          }
+          parsed = saveData;
+        }
+
         data = deepMerge(DEFAULT_SAVE, parsed);
+
         // Patch: add any plants from DEFAULT_SAVE missing from saved data
         for (const plantId in DEFAULT_SAVE.plants) {
           if (!data.plants[plantId]) {
@@ -88,7 +111,9 @@ const Player = (() => {
 
   function save() {
     try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+      const saveObj = { ...data, _cs: generateChecksum(data) };
+      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(saveObj))));
+      localStorage.setItem(SAVE_KEY, encoded);
     } catch (e) {
       console.warn("PvZ3: Could not save game", e);
     }
@@ -366,6 +391,17 @@ const Player = (() => {
     save();
   }
 
+  // ── Save Protection ────────────────────────
+  function generateChecksum(obj) {
+    const str = JSON.stringify(obj);
+    let hash = 5381;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) + hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return hash.toString(36);
+  }
+
   // Initialize immediately
   load();
 
@@ -403,3 +439,85 @@ const Player = (() => {
     isMinigameUnlocked,
   };
 })();
+
+// ── Update Checker ─────────────────────────
+const APP_VERSION = "1.0.0"; // Change this when you build new APK
+
+function checkForUpdates() {
+  fetch(
+    "https://rehanfaryad-2802.github.io/PvZClasic/version.json?t=" + Date.now(),
+  )
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.version !== APP_VERSION) {
+        showUpdatePopup(data.message, data.forceUpdate);
+      }
+    })
+    .catch(() => {}); // silently fail if offline
+}
+
+function showUpdatePopup(message, forceUpdate) {
+  // Remove existing if any
+  const existing = document.getElementById("update-popup");
+  if (existing) existing.remove();
+
+  const popup = document.createElement("div");
+  popup.id = "update-popup";
+  popup.style.cssText = `
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: sans-serif;
+  `;
+
+  popup.innerHTML = `
+    <div style="
+      background: #1a0a2e;
+      border: 2px solid #7c3aed;
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 320px;
+      text-align: center;
+      color: white;
+    ">
+      <div style="font-size: 48px; margin-bottom: 12px">🔄</div>
+      <h2 style="color: #a78bfa; margin: 0 0 12px">Update Available!</h2>
+      <p style="color: #d1d5db; margin: 0 0 24px; font-size: 14px">${message}</p>
+      <a href="https://rehanfaryad-2802.github.io/PvZClasic/PvZ3.apk" 
+         style="
+           display: block;
+           background: #7c3aed;
+           color: white;
+           padding: 12px 24px;
+           border-radius: 8px;
+           text-decoration: none;
+           font-weight: bold;
+           margin-bottom: 12px;
+         ">
+        ⬇️ Download Update
+      </a>
+      ${
+        !forceUpdate
+          ? `
+      <button onclick="document.getElementById('update-popup').remove()" style="
+        background: transparent;
+        border: 1px solid #6b7280;
+        color: #9ca3af;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 13px;
+      ">
+        Later
+      </button>`
+          : ""
+      }
+    </div>
+  `;
+
+  document.body.appendChild(popup);
+}
