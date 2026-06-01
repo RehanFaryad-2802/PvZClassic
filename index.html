@@ -302,12 +302,33 @@
   <script src="js/core.js"></script>
   <script>
     // Boot
-    window.addEventListener('DOMContentLoaded', () => UI.init());
+    window.addEventListener('DOMContentLoaded', () => {
+      UI.init();
+
+      // Fix mobile touch for name entry button
+      const startBtn = document.getElementById('btn-start-game');
+      if (startBtn) {
+        startBtn.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          startBtn.click();
+        }, { passive: false });
+      }
+
+      // Fix all buttons for mobile touch
+      document.addEventListener('touchend', (e) => {
+        const btn = e.target.closest('button, .btn-menu, .btn-primary, .btn-secondary, .btn-back');
+        if (btn) {
+          e.preventDefault();
+          btn.click();
+        }
+      }, { passive: false });
+    });
+
     // Service worker for offline/APK
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
-    // Prevent context menu on long press (important for APK)
+    // Prevent context menu on long press
     window.addEventListener('contextmenu', e => e.preventDefault());
     // Prevent pull-to-refresh
     document.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
