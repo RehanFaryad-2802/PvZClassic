@@ -98,7 +98,7 @@ const BombBall = (() => {
     screen.innerHTML = `
       <div class="bb-container" id="bb-container">
         <div class="bb-header">
-          <button class="btn-back" id="bb-back">← Back</button>
+          <button class="btn-back" id="bb-back">↶</button>
           <h2>💣 Bomb Ball</h2>
           <div class="bh-stats">
             <div class="bh-stat"><span class="stat-val" id="bb-score">0</span><span class="stat-lbl">Score</span></div>
@@ -150,7 +150,7 @@ const BombBall = (() => {
     picker.className = "bh-result";
     picker.id = "bb-diff-picker";
     picker.innerHTML = `
-      <button class="btn-back" style="align-self:flex-start;margin-bottom:8px" id="bb-pick-back">← Back</button>
+      <button class="btn-back" style="align-self:flex-start;margin-bottom:8px" id="bb-pick-back">↶</button>
       <h2 style="font-size:32px">💣 Choose Difficulty</h2>
       ${DIFFICULTIES.map(
         (d, i) => `
@@ -230,13 +230,16 @@ const BombBall = (() => {
   }
 
   function startRound() {
-    if (state.round > CONFIG.TOTAL_ROUNDS || state.lives <= 0) { endGame(); return; }
+    if (state.round > CONFIG.TOTAL_ROUNDS || state.lives <= 0) {
+      endGame();
+      return;
+    }
 
-    state.running  = true;
+    state.running = true;
     state.timeLeft = CONFIG.ROUND_DURATION;
     arena.innerHTML = "";
-    activeBombs    = [];
-    doubleActive   = false;
+    activeBombs = [];
+    doubleActive = false;
     lastTs = null;
     cancelAnimationFrame(rafId);
     rafId = requestAnimationFrame(tick);
@@ -286,8 +289,8 @@ const BombBall = (() => {
   function spawnBomb(fallDur, diff) {
     const arenaHeight = arena.clientHeight || 400;
     const cols = CONFIG.COLS;
-    const col  = Math.floor(Math.random() * cols);
-    const xPct = (col / cols) * 100 + (100 / cols / 2);
+    const col = Math.floor(Math.random() * cols);
+    const xPct = (col / cols) * 100 + 100 / cols / 2;
 
     let type;
     const r = Math.random();
@@ -312,11 +315,28 @@ const BombBall = (() => {
     el.style.cssText = `left:${xPct}%;top:-60px;position:absolute;font-size:44px;width:72px;height:72px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;filter:drop-shadow(0 0 8px ${color});padding:12px;box-sizing:border-box;transform:translate(-50%,0);`;
     el.dataset.type = type;
 
-    el.addEventListener("click", (e) => { e.stopPropagation(); catchBomb(el, type); });
-    el.addEventListener("touchstart", (e) => { e.preventDefault(); e.stopPropagation(); catchBomb(el, type); }, { passive: false });
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      catchBomb(el, type);
+    });
+    el.addEventListener(
+      "touchstart",
+      (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        catchBomb(el, type);
+      },
+      { passive: false },
+    );
     arena.appendChild(el);
 
-    activeBombs.push({ el, col, type, y: -60, speed: arenaHeight / (fallDur / 1000) });
+    activeBombs.push({
+      el,
+      col,
+      type,
+      y: -60,
+      speed: arenaHeight / (fallDur / 1000),
+    });
   }
 
   function catchBomb(el, type) {
@@ -366,7 +386,10 @@ const BombBall = (() => {
 
   function activatePowerup(key) {
     if (key === "slowmo") {
-      activeBombs.forEach(b => { b.speed *= 0.3; b.frozen = false; });
+      activeBombs.forEach((b) => {
+        b.speed *= 0.3;
+        b.frozen = false;
+      });
       clearTimeout(slowmoTimer);
       showPowerupLabel("⏱️ Slow-Mo!");
       slowmoTimer = setTimeout(
@@ -443,7 +466,9 @@ const BombBall = (() => {
   }
 
   function endGame() {
-    clearInterval(roundTimer); clearInterval(spawnTimer); clearTimeout(slowmoTimer);
+    clearInterval(roundTimer);
+    clearInterval(spawnTimer);
+    clearTimeout(slowmoTimer);
     cancelAnimationFrame(rafId);
     state.running = false;
 
@@ -508,9 +533,12 @@ const BombBall = (() => {
   }
 
   function stopGame() {
-    clearInterval(roundTimer); clearInterval(spawnTimer); clearTimeout(slowmoTimer);
+    clearInterval(roundTimer);
+    clearInterval(spawnTimer);
+    clearTimeout(slowmoTimer);
     cancelAnimationFrame(rafId);
-    state = null; activeBombs = []; 
+    state = null;
+    activeBombs = [];
     if (arena) arena.innerHTML = "";
     buildUI();
   }

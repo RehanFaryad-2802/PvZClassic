@@ -1,341 +1,399 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#0a0010" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <title>PvZ3 – Plants vs Demons</title>
-  <link rel="manifest" href="manifest.json" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-fullscreen" />
-  <meta name="apple-mobile-web-app-title" content="PvZ3" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="screen-orientation" content="landscape" />
-  <link rel="stylesheet" href="css/main.css" />
-  <link rel="stylesheet" href="css/game.css" />
-  <link rel="stylesheet" href="css/minigames.css" />
-</head>
-<body>
-
-  <!-- ══════════════════════════════════════════
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="theme-color" content="#0a0010" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>PvZ3 – Plants vs Demons</title>
+    <link rel="manifest" href="manifest.json" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-fullscreen"
+    />
+    <meta name="apple-mobile-web-app-title" content="PvZ3" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="screen-orientation" content="landscape" />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/game.css" />
+    <link rel="stylesheet" href="css/minigames.css" />
+  </head>
+  <body>
+    <!-- ══════════════════════════════════════════
        SCREEN: NAME ENTRY
   ══════════════════════════════════════════ -->
-  <div id="screen-name" class="screen active">
-    <div class="name-bg"></div>
-    <div class="name-container">
-      <div class="game-logo">
-        <span class="logo-pvz">PvZ</span><span class="logo-3">3</span>
-        <p class="logo-sub">Plants vs Demons</p>
+    <div id="screen-name" class="screen active">
+      <div class="name-bg"></div>
+      <div class="name-container">
+        <div class="game-logo">
+          <span class="logo-pvz">PvZ</span><span class="logo-3">Classic</span>
+          <p class="logo-sub">Plants vs Demons</p>
+        </div>
+        <div class="name-form">
+          <label for="player-name-input">Enter Your Name</label>
+          <input
+            type="text"
+            id="player-name-input"
+            maxlength="16"
+            placeholder="Hero Name..."
+            autocomplete="off"
+          />
+          <button id="btn-start-game" class="btn-primary">
+            ⚔️ Start Adventure
+          </button>
+        </div>
+        <div class="name-particles" id="name-particles"></div>
       </div>
-      <div class="name-form">
-        <label for="player-name-input">Enter Your Name</label>
-        <input type="text" id="player-name-input" maxlength="16" placeholder="Hero Name..." autocomplete="off" />
-        <button id="btn-start-game" class="btn-primary">⚔️ Start Adventure</button>
-      </div>
-      <div class="name-particles" id="name-particles"></div>
     </div>
-  </div>
 
-  <!-- ══════════════════════════════════════════
+    <!-- ══════════════════════════════════════════
        SCREEN: MAIN MENU
   ══════════════════════════════════════════ -->
-  <div id="screen-menu" class="screen">
-    <div class="menu-bg"></div>
-    <div class="menu-container">
-      <div class="menu-header">
-        <div class="game-logo small">
-          <span class="logo-pvz">PvZ</span><span class="logo-3">3</span>
+    <div id="screen-menu" class="screen">
+      <div class="menu-bg"></div>
+      <div class="menu-container">
+        <div class="menu-header">
+          <div class="game-logo small">
+            <span class="logo-pvz">PvZ</span><span class="logo-3">Classic</span>
+          </div>
+          <div class="player-info-bar">
+            <span id="menu-player-name">Hero</span>
+            <span class="coin-display">🪙 <span id="menu-coins">0</span></span>
+          </div>
         </div>
-        <div class="player-info-bar">
-          <span id="menu-player-name">Hero</span>
-          <span class="coin-display">🪙 <span id="menu-coins">0</span></span>
+        <div class="menu-buttons">
+          <button class="btn-menu" id="btn-play">🌱 Play</button>
+          <button class="btn-menu" id="btn-collection">📦 Invetory</button>
+          <button class="btn-menu" id="btn-minigames">🎮 Minigames</button>
+          <button class="btn-menu" id="btn-shop">🛒 Seed Shop</button>
         </div>
-      </div>
-      <div class="menu-buttons">
-        <button class="btn-menu" id="btn-play">🌱 Play</button>
-        <button class="btn-menu" id="btn-collection">📦 Invetory</button>
-        <button class="btn-menu" id="btn-minigames">🎮 Minigames</button>
-        <button class="btn-menu" id="btn-shop">🛒 Seed Shop</button>
-      </div>
-      <div class="menu-deco" style="display: none;">
-        <img src="assets/plants/sunflower.png" class="deco-plant p1" alt="" />
-        <img src="assets/plants/peashooter.png" class="deco-plant p2" alt="" />
-        <img src="assets/plants/bonkchoy.png" class="deco-plant p3" alt="" />
-        <img src="assets/plants/icepea.png" class="deco-plant p4" alt="" />
+        <div class="menu-deco" style="display: none">
+          <img src="assets/plants/sunflower.png" class="deco-plant p1" alt="" />
+          <img
+            src="assets/plants/peashooter.png"
+            class="deco-plant p2"
+            alt=""
+          />
+          <img src="assets/plants/bonkchoy.png" class="deco-plant p3" alt="" />
+          <img src="assets/plants/icepea.png" class="deco-plant p4" alt="" />
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- ══════════════════════════════════════════
+    <!-- ══════════════════════════════════════════
        SCREEN: WORLD MAP
   ══════════════════════════════════════════ -->
-  <div id="screen-worldmap" class="screen">
-    <div class="worldmap-bg"></div>
-    <div class="worldmap-container">
-      <div class="worldmap-header">
-        <button class="btn-back" id="btn-back-worldmap">← Back</button>
-        <h2>Choose World</h2>
-        <span class="coin-display">🪙 <span id="wm-coins">0</span></span>
-      </div>
-      <div class="worlds-grid" id="worlds-grid">
-        <!-- Worlds injected by levels.js -->
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════
-       SCREEN: LEVEL SELECT
-  ══════════════════════════════════════════ -->
-  <div id="screen-levelselect" class="screen">
-    <div class="levelselect-bg"></div>
-    <div class="levelselect-container">
-      <div class="levelselect-header">
-        <button class="btn-back" id="btn-back-levelselect">← Back</button>
-        <h2 id="levelselect-world-name">World 1</h2>
-        <span class="coin-display">🪙 <span id="ls-coins">0</span></span>
-      </div>
-      <div class="levels-grid" id="levels-grid">
-        <!-- Levels injected by levels.js -->
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════
-       SCREEN: PLANT PICKER (pre-battle)
-  ══════════════════════════════════════════ -->
-  <div id="screen-plantpicker" class="screen">
-    <div class="picker-bg"></div>
-    <div class="picker-container">
-      <div class="picker-header">
-        <button class="btn-back" id="btn-back-picker">← Back</button>
-        <h2>Choose Your Plants</h2>
-        <span class="picker-slots-info">Select up to <span id="picker-max">5</span></span>
-      </div>
-      <div class="picker-selected" id="picker-selected">
-        <!-- Selected plant slots -->
-      </div>
-      <div class="picker-available" id="picker-available">
-        <!-- All owned plants -->
-      </div>
-      <button class="btn-primary" id="btn-start-battle">⚔️ Battle!</button>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════
-       SCREEN: BATTLE
-  ══════════════════════════════════════════ -->
-  <div id="screen-battle" class="screen">
-    <!-- HUD -->
-    <div class="battle-hud">
-      <div class="hud-left">
-        <div class="sun-display">☀️ <span id="hud-sun">50</span></div>
-        <div class="hud-level-info">
-          <span id="hud-world">W1</span>-<span id="hud-level">L1</span>
+    <div id="screen-worldmap" class="screen">
+      <div class="worldmap-bg"></div>
+      <div class="worldmap-container">
+        <div class="worldmap-header">
+          <button class="btn-back" id="btn-back-worldmap">↶</button>
+          <h2>Choose World</h2>
+          <span class="coin-display">🪙 <span id="wm-coins">0</span></span>
+        </div>
+        <div class="worlds-grid" id="worlds-grid">
+          <!-- Worlds injected by levels.js -->
         </div>
       </div>
-      <div class="hud-center">
-        <div class="wave-display">Wave <span id="hud-wave">1</span>/<span id="hud-wave-total">3</span></div>
-      <div class="progress-bar"><div class="progress-fill" id="wave-progress"></div></div>
-      </div>
-      <div class="hud-right">
-        <span class="coin-display">🪙 <span id="hud-coins">0</span></span>
-        <button class="btn-pause" id="btn-pause">⏸</button>
-      </div>
     </div>
 
-    <!-- Plant tray -->
-    <div class="plant-tray" id="plant-tray">
-      <!-- Plant cards injected by ui.js -->
-    </div>
-
-    <!-- Game canvas area -->
-    <div class="battle-arena">
-      <div class="arena-bg" id="arena-bg"></div>
-      <div class="grid-container" id="grid-container">
-        <!-- 5 rows × 9 cols injected by grid.js -->
-      </div>
-      <div class="demons-layer" id="demons-layer"></div>
-      <div class="projectiles-layer" id="projectiles-layer"></div>
-      <div class="effects-layer" id="effects-layer"></div>
-    </div>
-
-    <!-- Lawnmowers (last defense) -->
-    <div class="lawnmowers-layer" id="lawnmowers-layer"></div>
-
-    <!-- Demon Preview overlay (shown before battle) -->
-    <div id="demon-preview-overlay" class="overlay hidden">
-      <div class="demon-preview-box">
-        <div class="dp-title">⚠️ Incoming Demons</div>
-        <div class="dp-subtitle">Prepare your defense!</div>
-        <div class="dp-demons" id="dp-demons-list"></div>
-        <div class="dp-countdown" id="dp-countdown">5</div>
-        <button class="btn-primary" id="dp-skip" style="max-width:200px;margin-top:8px">▶ Start Now</button>
+    <!-- ══════════════════════════════════════════
+       SCREEN: LEVEL SELECT
+  ══════════════════════════════════════════ -->
+    <div id="screen-levelselect" class="screen">
+      <div class="levelselect-bg"></div>
+      <div class="levelselect-container">
+        <div class="levelselect-header">
+          <button class="btn-back" id="btn-back-levelselect">↶</button>
+          <h2 id="levelselect-world-name">World 1</h2>
+          <span class="coin-display">🪙 <span id="ls-coins">0</span></span>
+        </div>
+        <div class="levels-grid" id="levels-grid">
+          <!-- Levels injected by levels.js -->
+        </div>
       </div>
     </div>
 
-    <!-- Pause overlay -->
-    <div id="pause-overlay" class="overlay hidden">
-      <div class="overlay-box">
-        <h2>Paused</h2>
-        <button class="btn-primary" id="btn-resume">▶ Resume</button>
-        <button class="btn-secondary" id="btn-quit-battle">🏠 Quit</button>
+    <!-- ══════════════════════════════════════════
+       SCREEN: PLANT PICKER (pre-battle)
+  ══════════════════════════════════════════ -->
+    <div id="screen-plantpicker" class="screen">
+      <div class="picker-bg"></div>
+      <div class="picker-container">
+        <div class="picker-header">
+          <button class="btn-back" id="btn-back-picker">↶</button>
+          <h2>Choose Your Plants</h2>
+          <span class="picker-slots-info"
+            >Select up to <span id="picker-max">5</span></span
+          >
+        </div>
+        <div class="picker-selected" id="picker-selected">
+          <!-- Selected plant slots -->
+        </div>
+        <div class="picker-available" id="picker-available">
+          <!-- All owned plants -->
+        </div>
+        <button class="btn-primary" id="btn-start-battle">⚔️ Battle!</button>
       </div>
     </div>
-  </div>
 
-  <!-- ══════════════════════════════════════════
+    <!-- ══════════════════════════════════════════
+       SCREEN: BATTLE
+  ══════════════════════════════════════════ -->
+    <div id="screen-battle" class="screen">
+      <!-- HUD -->
+      <div class="battle-hud">
+        <div class="hud-left">
+          <div class="sun-display">☀️ <span id="hud-sun">50</span></div>
+          <div class="hud-level-info">
+            <span id="hud-world">W1</span>-<span id="hud-level">L1</span>
+          </div>
+        </div>
+        <div class="hud-center">
+          <div class="wave-display">
+            Wave <span id="hud-wave">1</span>/<span id="hud-wave-total">3</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="wave-progress"></div>
+          </div>
+        </div>
+        <div class="hud-right">
+          <span class="coin-display">🪙 <span id="hud-coins">0</span></span>
+          <button class="btn-pause" id="btn-pause">⏸</button>
+        </div>
+      </div>
+
+      <!-- Plant tray -->
+      <div class="plant-tray" id="plant-tray">
+        <!-- Plant cards injected by ui.js -->
+      </div>
+
+      <!-- Game canvas area -->
+      <div class="battle-arena">
+        <div class="arena-bg" id="arena-bg"></div>
+        <div class="grid-container" id="grid-container">
+          <!-- 5 rows × 9 cols injected by grid.js -->
+        </div>
+        <div class="demons-layer" id="demons-layer"></div>
+        <div class="projectiles-layer" id="projectiles-layer"></div>
+        <div class="effects-layer" id="effects-layer"></div>
+      </div>
+
+      <!-- Lawnmowers (last defense) -->
+      <div class="lawnmowers-layer" id="lawnmowers-layer"></div>
+
+      <!-- Demon Preview overlay (shown before battle) -->
+      <div id="demon-preview-overlay" class="overlay hidden">
+        <div class="demon-preview-box">
+          <div class="dp-title">⚠️ Incoming Demons</div>
+          <div class="dp-subtitle">Prepare your defense!</div>
+          <div class="dp-demons" id="dp-demons-list"></div>
+          <div class="dp-countdown" id="dp-countdown">5</div>
+          <button
+            class="btn-primary"
+            id="dp-skip"
+            style="max-width: 200px; margin-top: 8px"
+          >
+            ▶ Start Now
+          </button>
+        </div>
+      </div>
+
+      <!-- Pause overlay -->
+      <div id="pause-overlay" class="overlay hidden">
+        <div class="overlay-box">
+          <h2>Paused</h2>
+          <button class="btn-primary" id="btn-resume">▶ Resume</button>
+          <button class="btn-secondary" id="btn-quit-battle">🏠 Quit</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
        SCREEN: BATTLE RESULT
   ══════════════════════════════════════════ -->
-  <div id="screen-result" class="screen">
-    <div class="result-bg"></div>
-    <div class="result-container">
-      <div class="result-title" id="result-title">Victory!</div>
-      <div class="result-rewards" id="result-rewards">
-        <!-- Coins, seeds etc. injected -->
-      </div>
-      <div class="result-buttons">
-        <button class="btn-primary" id="btn-result-next">Next Level ➡️</button>
-        <button class="btn-secondary" id="btn-result-menu">🏠 Menu</button>
+    <div id="screen-result" class="screen">
+      <div class="result-bg"></div>
+      <div class="result-container">
+        <div class="result-title" id="result-title">Victory!</div>
+        <div class="result-rewards" id="result-rewards">
+          <!-- Coins, seeds etc. injected -->
+        </div>
+        <div class="result-buttons">
+          <button class="btn-primary" id="btn-result-next">
+            Next Level ➡️
+          </button>
+          <button class="btn-secondary" id="btn-result-menu">🏠 Menu</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- ══════════════════════════════════════════
+    <!-- ══════════════════════════════════════════
        SCREEN: PLANT COLLECTION
   ══════════════════════════════════════════ -->
-  <div id="screen-collection" class="screen">
-    <div class="collection-bg"></div>
-    <div class="collection-container">
-      <div class="collection-header">
-        <button class="btn-back" id="btn-back-collection">← Back</button>
-        <h2>Plant Collection</h2>
-      </div>
-      <div class="collection-grid" id="collection-grid">
-        <!-- Plant cards injected -->
+    <div id="screen-collection" class="screen">
+      <div class="collection-bg"></div>
+      <div class="collection-container">
+        <div class="collection-header">
+          <button class="btn-back" id="btn-back-collection">↶</button>
+          <h2>Plant Collection</h2>
+        </div>
+        <div class="collection-grid" id="collection-grid">
+          <!-- Plant cards injected -->
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- ══════════════════════════════════════════
+    <!-- ══════════════════════════════════════════
        SCREEN: MINIGAMES HUB
   ══════════════════════════════════════════ -->
-  <div id="screen-minigames" class="screen">
-    <div class="minigames-bg"></div>
-    <div class="minigames-container">
-      <div class="minigames-header">
-        <button class="btn-back" id="btn-back-minigames">← Back</button>
-        <h2>Minigames</h2>
-        <span class="coin-display">🪙 <span id="mg-coins">0</span></span>
-      </div>
-      <div class="minigames-grid" id="minigames-grid">
-        <!-- Minigame cards injected -->
+    <div id="screen-minigames" class="screen">
+      <div class="minigames-bg"></div>
+      <div class="minigames-container">
+        <div class="minigames-header">
+          <button class="btn-back" id="btn-back-minigames">↶</button>
+          <h2>Minigames</h2>
+          <span class="coin-display">🪙 <span id="mg-coins">0</span></span>
+        </div>
+        <div class="minigames-grid" id="minigames-grid">
+          <!-- Minigame cards injected -->
+        </div>
       </div>
     </div>
-  </div>
 
-  <div id="screen-blockhunt" class="screen">
-    <!-- Injected by minigames/block_hunt.js -->
-  </div>
+    <div id="screen-blockhunt" class="screen">
+      <!-- Injected by minigames/block_hunt.js -->
+    </div>
 
-  <div id="screen-bombball" class="screen">
-    <!-- Injected by minigames/bomb_ball.js -->
-  </div>
+    <div id="screen-bombball" class="screen">
+      <!-- Injected by minigames/bomb_ball.js -->
+    </div>
 
-  <div id="screen-sharpshooters" class="screen">
-    <!-- Injected by minigames/sharp_shooters.js -->
-  </div>
+    <div id="screen-sharpshooters" class="screen">
+      <!-- Injected by minigames/sharp_shooters.js -->
+    </div>
 
-  
-
-  <!-- ══════════════════════════════════════════
+    <!-- ══════════════════════════════════════════
        SCREEN: SEED SHOP
   ══════════════════════════════════════════ -->
-  <div id="screen-shop" class="screen">
-    <div class="shop-bg"></div>
-    <div class="shop-container">
-      <div class="shop-header">
-        <button class="btn-back" id="btn-back-shop">← Back</button>
-        <h2>Seed Shop</h2>
-        <span class="coin-display">🪙 <span id="shop-coins">0</span></span>
-        <span class="loom-display">🔮 <span id="shop-looms">0</span></span>
-      </div>
-      <div class="shop-grid" id="shop-grid">
-        <!-- Shop items injected -->
+    <div id="screen-shop" class="screen">
+      <div class="shop-bg"></div>
+      <div class="shop-container">
+        <div class="shop-header">
+          <button class="btn-back" id="btn-back-shop">↶</button>
+          <h2>Seed Shop</h2>
+          <span class="coin-display">🪙 <span id="shop-coins">0</span></span>
+          <span class="loom-display">🔮 <span id="shop-looms">0</span></span>
+        </div>
+        <div class="shop-grid" id="shop-grid">
+          <!-- Shop items injected -->
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- ══════════════════════════════════════════
+    <!-- ══════════════════════════════════════════
        GLOBAL TOAST NOTIFICATION
   ══════════════════════════════════════════ -->
-  <div id="toast" class="toast hidden"></div>
+    <div id="toast" class="toast hidden"></div>
 
-  <script src="js/player.js"></script>
-  <style>
-    * { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-    body { overscroll-behavior: none; overflow: hidden; }
-    img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; }
-  </style>
-  <script src="js/seeds.js"></script>
-  <script src="js/coins.js"></script>
-  <script src="js/levels.js"></script>
-  <script src="js/grid.js"></script>
-  <script src="js/effects.js"></script>
-  <script src="js/projectiles.js"></script>
-  <script src="js/demons.js"></script>
-  <script src="js/plant_registry.js"></script>
-  <script src="plants/sunflower.js"></script>
-  <script src="plants/peashooter.js"></script>
-  <script src="plants/icepea.js"></script>
-  <script src="plants/bonkchoy.js"></script>
-  <script src="plants/lilybeam.js"></script>
-  <script src="plants/sporepuff.js"></script>
-  <script src="plants/voltlotus.js"></script>
-  <script src="plants/lavaburst.js"></script>
-  <script src="plants/glacierbud.js"></script>
-  <script src="js/minigames/block_hunt.js"></script>
-  <script src="js/minigames/bomb_ball.js"></script>
-  <script src="js/minigames/sharp_shooters.js"></script>
-  <script src="js/shop.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/core.js"></script>
-  <script>
-    // Boot
-    window.addEventListener('DOMContentLoaded', () => {
-      UI.init();
-
-      // Fix mobile touch for name entry button
-      const startBtn = document.getElementById('btn-start-game');
-      if (startBtn) {
-        startBtn.addEventListener('touchend', (e) => {
-          e.preventDefault();
-          startBtn.click();
-        }, { passive: false });
+    <script src="js/player.js"></script>
+    <style>
+      * {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
       }
+      body {
+        overscroll-behavior: none;
+        overflow: hidden;
+      }
+      img {
+        -webkit-user-drag: none;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+    </style>
+    <script src="js/seeds.js"></script>
+    <script src="js/coins.js"></script>
+    <script src="js/levels.js"></script>
+    <script src="js/grid.js"></script>
+    <script src="js/effects.js"></script>
+    <script src="js/projectiles.js"></script>
+    <script src="js/demons.js"></script>
+    <script src="js/plant_registry.js"></script>
+    <script src="plants/sunflower.js"></script>
+    <script src="plants/peashooter.js"></script>
+    <script src="plants/icepea.js"></script>
+    <script src="plants/bonkchoy.js"></script>
+    <script src="plants/lilybeam.js"></script>
+    <script src="plants/sporepuff.js"></script>
+    <script src="plants/voltlotus.js"></script>
+    <script src="plants/lavaburst.js"></script>
+    <script src="plants/glacierbud.js"></script>
+    <script src="js/minigames/block_hunt.js"></script>
+    <script src="js/minigames/bomb_ball.js"></script>
+    <script src="js/minigames/sharp_shooters.js"></script>
+    <script src="js/shop.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/core.js"></script>
+    <script>
+      // Boot
+      window.addEventListener("DOMContentLoaded", () => {
+        UI.init();
 
-      // Fix all buttons for mobile touch
-      document.addEventListener('touchend', (e) => {
-        const btn = e.target.closest('button, .btn-menu, .btn-primary, .btn-secondary, .btn-back');
-        if (btn) {
-          e.preventDefault();
-          btn.click();
+        // Fix mobile touch for name entry button
+        const startBtn = document.getElementById("btn-start-game");
+        if (startBtn) {
+          startBtn.addEventListener(
+            "touchend",
+            (e) => {
+              e.preventDefault();
+              startBtn.click();
+            },
+            { passive: false },
+          );
         }
-      }, { passive: false });
-    });
 
-    // Service worker for offline/APK
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
-    }
-    // Prevent context menu on long press
-    window.addEventListener('contextmenu', e => e.preventDefault());
-    if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock('landscape').catch(() => {});
-    }
-    // Prevent pull-to-refresh
-    document.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
-  </script>
-</body>
+        // Fix all buttons for mobile touch
+        document.addEventListener(
+          "touchend",
+          (e) => {
+            const btn = e.target.closest(
+              "button, .btn-menu, .btn-primary, .btn-secondary, .btn-back",
+            );
+            if (btn) {
+              e.preventDefault();
+              btn.click();
+            }
+          },
+          { passive: false },
+        );
+      });
+
+      // Service worker for offline/APK
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+      }
+      // Prevent context menu on long press
+      window.addEventListener("contextmenu", (e) => e.preventDefault());
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock("landscape").catch(() => {});
+      }
+      // Prevent pull-to-refresh
+      document.addEventListener(
+        "touchmove",
+        (e) => {
+          if (e.touches.length > 1) e.preventDefault();
+        },
+        { passive: false },
+      );
+    </script>
+  </body>
 </html>

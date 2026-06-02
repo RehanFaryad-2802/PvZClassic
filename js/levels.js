@@ -79,7 +79,7 @@ const Levels = (() => {
     {
       id: 6,
       name: "Jungle Abyss",
-      sub: "To the right of the Shadow Realm, a new world awaits",
+      sub: "Shadow Realm awaits",
       emoji: "🌴",
       bgClass: "world-6",
       unlocked: false,
@@ -90,7 +90,7 @@ const Levels = (() => {
     {
       id: 7,
       name: "Ice Age",
-      sub: "Beyond the Frozen Wastes, a new world emerges",
+      sub: "Beyond the Frozen!",
       emoji: "❄️",
       bgClass: "world-7",
       unlocked: false,
@@ -101,7 +101,7 @@ const Levels = (() => {
     {
       id: 8,
       name: "Spooky Mansion",
-      sub: "Keep going right and you'll find it",
+      sub: "Keep going you'll find!",
       emoji: "👻",
       bgClass: "world-8",
       unlocked: false,
@@ -112,7 +112,7 @@ const Levels = (() => {
     {
       id: 9,
       name: "Crystal Caverns",
-      sub: "You found the secret world! But can you beat it?",
+      sub: "Found the secret world!",
       emoji: "💎",
       bgClass: "world-9",
       unlocked: false,
@@ -123,7 +123,7 @@ const Levels = (() => {
     {
       id: 10,
       name: "Sky Castle",
-      sub: "The ultimate challenge awaits in the skies",
+      sub: "The ultimate challenge",
       emoji: "🏰",
       bgClass: "world-10",
       unlocked: false,

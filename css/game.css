@@ -124,6 +124,11 @@
 .tray-card .tray-cost {
   font-size: 10px;
   font-weight: 800;
+  position: absolute;
+  bottom: 0;
+  background: black;
+  width: 100%;
+  text-align: center;
   color: var(--gold);
   line-height: 1;
 }
@@ -208,16 +213,6 @@
 }
 .grid-cell:hover { background: rgba(255,255,255,0.15) !important; }
 
-/* World backgrounds */
-.grid-container {
-  position: absolute;
-  left: 72px; /* space for lawnmowers */
-  top: 0; bottom: 0;
-  right: 120px; /* buffer zone for demons to walk in */
-  display: grid;
-  grid-template-rows: repeat(5, 1fr);
-  z-index: 5;
-}
 .arena-bg.world-2 {
   background: linear-gradient(180deg, #001830 0%, #001020 60%, #000810 100%);
 }
@@ -232,7 +227,7 @@
   position: absolute;
   left: 72px; /* space for lawnmowers */
   top: 0; bottom: 0;
-  right: 120px; /* buffer zone for demons to walk in */
+  right: 50px; /* buffer zone for demons to walk in */
   display: grid;
   grid-template-rows: repeat(5, 1fr);
   z-index: 5;
@@ -611,7 +606,7 @@
   .grid-container { left: 44px; }
   .lawnmowers-layer { width: 44px; }
   .lawnmower { font-size: 16px; }
-  .tray-card { width: 54px; height: 58px; }
+  .tray-card { width: 0; height: 58px; }
   .tray-card img { width: 36px; height: 36px; }
   .wave-banner { font-size: 32px; }
 }
