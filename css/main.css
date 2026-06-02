@@ -1579,3 +1579,5 @@ html, body {
   .result-title { font-size: 36px; }
   .result-container { padding: 16px; gap: 12px; }
 }
+
+@import url('mobile.css');
