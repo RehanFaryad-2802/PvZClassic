@@ -99,7 +99,7 @@ const Player = (() => {
           }
         }
         // Patch: add looms and inventory if missing
-        if (data.looms === undefined) data.looms = 54;
+        if (data.looms === undefined) data.looms = 0;
         if (!data.inventory) data.inventory = [];
       } else {
         data = JSON.parse(JSON.stringify(DEFAULT_SAVE));
@@ -112,7 +112,9 @@ const Player = (() => {
   function save() {
     try {
       const saveObj = { ...data, _cs: generateChecksum(data) };
-      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(saveObj))));
+      const encoded = btoa(
+        unescape(encodeURIComponent(JSON.stringify(saveObj))),
+      );
       localStorage.setItem(SAVE_KEY, encoded);
     } catch (e) {
       console.warn("PvZ3: Could not save game", e);
@@ -396,7 +398,7 @@ const Player = (() => {
     const str = JSON.stringify(obj);
     let hash = 5381;
     for (let i = 0; i < str.length; i++) {
-      hash = ((hash << 5) + hash) + str.charCodeAt(i);
+      hash = (hash << 5) + hash + str.charCodeAt(i);
       hash |= 0;
     }
     return hash.toString(36);

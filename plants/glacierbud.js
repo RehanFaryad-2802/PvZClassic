@@ -9,11 +9,17 @@ PlantRegistry.register({
   id: "glacierbud",
   name: "Glacier Bud",
   image: "assets/plants/glacierbud.png",
-  cost: 75,
-  cooldown: 5000,
+  cost: 0, // free trap
+  cooldown: 16000, // base — overridden by getCooldown()
+
+  getCooldown() {
+    const pp = typeof Player !== "undefined" ? Player.getPlant("glacierbud") : null;
+    const level = pp ? pp.level : 1;
+    return this.getStats(level).cooldown;
+  },
   fireDistance: 0.1, // trigger range in cells
   hitCount: 1,
-  hp: 50,
+  hp: 5,
   fireRate: 100, // check frequently — it's a trap
   description: "Freezes the first demon that gets close, then vanishes.",
   category: ["trap", "one-use", "ice"],
@@ -26,21 +32,21 @@ PlantRegistry.register({
   },
 
   levelStats: {
-    1: { hp: 5, freezeDuration: 6000, cost: 75 },
-    2: { hp: 5, freezeDuration: 6500, cost: 75 },
-    3: { hp: 5, freezeDuration: 7000, cost: 70 },
-    4: { hp: 5, freezeDuration: 7500, cost: 70 },
-    5: { hp: 5, freezeDuration: 8000, cost: 65 },
-    6: { hp: 5, freezeDuration: 8500, cost: 65 },
-    7: { hp: 5, freezeDuration: 9000, cost: 60 },
-    8: { hp: 5, freezeDuration: 9500, cost: 60 },
-    9: { hp: 5, freezeDuration: 10000, cost: 55 },
-    10: { hp: 5, freezeDuration: 10400, cost: 55 },
-    11: { hp: 5, freezeDuration: 11400, cost: 50 },
-    12: { hp: 5, freezeDuration: 12500, cost: 50 },
-    13: { hp: 5, freezeDuration: 13700, cost: 45 },
-    14: { hp: 5, freezeDuration: 15000, cost: 40 },
-    15: { hp: 5, freezeDuration: 16500, cost: 35 },
+    1: { freezeDuration: 8000, cooldown: 16000 },
+    2: { freezeDuration: 8400, cooldown: 15200 },
+    3: { freezeDuration: 8800, cooldown: 14400 },
+    4: { freezeDuration: 9200, cooldown: 13600 },
+    5: { freezeDuration: 9600, cooldown: 12800 },
+    6: { freezeDuration: 10000, cooldown: 12000 },
+    7: { freezeDuration: 10500, cooldown: 11200 },
+    8: { freezeDuration: 11000, cooldown: 10400 },
+    9: { freezeDuration: 11500, cooldown: 9600 },
+    10: { freezeDuration: 12000, cooldown: 8800 },
+    11: { freezeDuration: 12600, cooldown: 8000 },
+    12: { freezeDuration: 13200, cooldown: 7200 },
+    13: { freezeDuration: 13800, cooldown: 6400 },
+    14: { freezeDuration: 14400, cooldown: 5700 },
+    15: { freezeDuration: 15000, cooldown: 5000 },
   },
 
   getStats(level) {
@@ -49,10 +55,19 @@ PlantRegistry.register({
   },
 
   onPlace(row, col, plantData) {
-    const stats = this.getStats(plantData.level);
-    plantData.maxHp = stats.hp;
-    plantData.hp = stats.hp;
+    const pp = typeof Player !== "undefined" ? Player.getPlant("glacierbud") : null;
+    const level = pp ? pp.level : 1;
+    const stats = this.getStats(level);
     plantData.triggered = false; // only fires once
+
+    // Apply level cooldown to the registry timer for this instance
+    const key = `${row},${col}`;
+    if (!PlantRegistry._timers) PlantRegistry._timers = {};
+    // Override cooldown in registry timer after placement
+    setTimeout(() => {
+      const t = PlantRegistry.timers?.["glacierbud"]?.[key];
+      if (t) t.cooldown = stats.cooldown;
+    }, 50);
 
     // Ice crystal ambient glow ring
     const cell = Grid.getCellEl(row, col);
@@ -79,7 +94,9 @@ PlantRegistry.register({
     // Use registry range check — same as all other plants
     if (!PlantRegistry.isDemonInRange(row, col, this.fireDistance)) return;
 
-    const stats = this.getStats(plantData.level);
+    const pp = typeof Player !== "undefined" ? Player.getPlant("glacierbud") : null;
+    const level = pp ? pp.level : 1;
+    const stats = this.getStats(level);
 
     // Get closest demon in range
     const targets = PlantRegistry.getDemonsInRange(

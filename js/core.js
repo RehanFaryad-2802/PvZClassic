@@ -225,7 +225,7 @@ const Core = (() => {
       if (trayCooldowns[id] > 0) {
         trayCooldowns[id] -= dt * 1000;
         const cdSec = Math.ceil(trayCooldowns[id] / 1000);
-        UI.updateTrayCard(id, sun, trayCooldowns[id] > 0, cdSec);
+        UI.updateTrayCard(id, sun, trayCooldowns[id] > 0, trayCooldowns[id]);
       } else {
         UI.updateTrayCard(id, sun, false, 0);
       }
@@ -282,7 +282,7 @@ const Core = (() => {
     if (placed) {
       spendSun(def.cost);
       // Use plant's own cooldown
-      trayCooldowns[selectedPlantId] = def.cooldown || 3000;
+      trayCooldowns[selectedPlantId] = (def.getCooldown ? def.getCooldown() : def.cooldown) || 3000;
       selectedPlantId = null;
       UI.setSelectedTrayCard(null);
     }

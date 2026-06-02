@@ -216,7 +216,7 @@ const Levels = (() => {
       // King config — all tunable
       kingConfig: {
         STOP_COL: 8, // stops at column index 1
-        SPAWN_INTERVAL: 5000, // ms between spawns
+        SPAWN_INTERVAL: 10000, // ms between spawns
         SPAWN_TYPES: ["bat", "bat", "imp", "imp_axe"], // what spawns
         // positions relative to king: up, down, front1, front2
         SPAWN_OFFSETS: [

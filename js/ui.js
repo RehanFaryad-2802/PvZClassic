@@ -558,7 +558,7 @@ const UI = (() => {
     tray.appendChild(shovel);
   }
 
-  function updateTrayCard(plantId, sunAvailable, onCooldown, cdSeconds) {
+  function updateTrayCard(plantId, sunAvailable, onCooldown, cdMs) {
     const card = document.querySelector(
       `.tray-card[data-plant-id="${plantId}"]`,
     );
@@ -577,7 +577,9 @@ const UI = (() => {
         cdOverlay.className = "cooldown-overlay";
         card.appendChild(cdOverlay);
       }
-      cdOverlay.textContent = cdSeconds > 0 ? cdSeconds : "";
+      const cdSec = cdMs / 1000;
+      cdOverlay.textContent =
+        cdMs > 0 ? (cdSec >= 20 ? Math.ceil(cdSec) : cdSec.toFixed(1)) : "";
     } else {
       if (cdOverlay) cdOverlay.remove();
     }

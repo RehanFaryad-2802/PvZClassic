@@ -1,0 +1,7 @@
+﻿node_modules/
+android/
+www/
+package-lock.json
+capacitor.config.json
+.gradle/
+*.apk
