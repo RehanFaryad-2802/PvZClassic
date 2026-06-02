@@ -779,6 +779,24 @@ const UI = (() => {
             </div>
           </div>
           <div class="inv-detail-cost">☀️ ${pp.level ? def.levelStats?.[level]?.cost || def.cost : def.cost} sun cost</div>
+
+          <div style="margin-top:8px;background:rgba(255,255,255,0.04);border-radius:8px;padding:8px">
+            <div style="font-size:10px;color:var(--gray);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Ability</div>
+            ${def.category ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">
+              ${def.category.map(c => `<span style="font-size:9px;background:rgba(168,85,247,0.2);border:1px solid rgba(168,85,247,0.4);border-radius:8px;padding:2px 7px;color:var(--purple-light)">${c}</span>`).join("")}
+            </div>` : ""}
+            ${def.levelStats?.[level] ? `
+              <div style="display:flex;flex-direction:column;gap:3px">
+                ${def.levelStats[level].damage !== undefined ? `<div style="font-size:10px;color:var(--white)">⚔️ Damage: <b style="color:var(--orange)">${def.levelStats[level].damage}</b></div>` : ""}
+                ${def.levelStats[level].fireRate !== undefined ? `<div style="font-size:10px;color:var(--white)">⚡ Speed: <b style="color:var(--gold)">${(def.levelStats[level].fireRate/1000).toFixed(1)}s</b></div>` : ""}
+                ${def.levelStats[level].freezeDuration !== undefined ? `<div style="font-size:10px;color:var(--white)">❄️ Freeze: <b style="color:var(--ice-blue)">${(def.levelStats[level].freezeDuration/1000).toFixed(1)}s</b></div>` : ""}
+                ${def.levelStats[level].hp !== undefined ? `<div style="font-size:10px;color:var(--white)">❤️ HP: <b style="color:var(--red)">${def.levelStats[level].hp}</b></div>` : ""}
+                ${def.levelStats[level].fireDistance !== undefined && def.levelStats[level].fireDistance > 1 ? `<div style="font-size:10px;color:var(--white)">📏 Range: <b style="color:var(--green)">${def.levelStats[level].fireDistance} cells</b></div>` : ""}
+                ${def.levelStats[level].cooldown !== undefined ? `<div style="font-size:10px;color:var(--white)">🔄 Cooldown: <b style="color:var(--gray)">${(def.levelStats[level].cooldown/1000).toFixed(1)}s</b></div>` : ""}
+              </div>` : `<div style="font-size:10px;color:var(--gray)">${def.description || "No stats available"}</div>`
+            }
+          </div>
+
           <div class="inv-actions">
             ${
               maxLevel

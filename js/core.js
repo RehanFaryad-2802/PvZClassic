@@ -282,7 +282,8 @@ const Core = (() => {
     if (placed) {
       spendSun(def.cost);
       // Use plant's own cooldown
-      trayCooldowns[selectedPlantId] = (def.getCooldown ? def.getCooldown() : def.cooldown) || 3000;
+      trayCooldowns[selectedPlantId] =
+        (def.getCooldown ? def.getCooldown() : def.cooldown) || 3000;
       selectedPlantId = null;
       UI.setSelectedTrayCard(null);
     }
@@ -463,14 +464,17 @@ const Core = (() => {
       });
     });
 
-    // Build display list — minimum 5 icons total (repeat if needed)
+    // Build display list — show unique types only, max 8 on mobile
     const types = Object.keys(typeCounts);
     let icons = types.map((t) => ({ type: t, count: typeCounts[t] }));
+    const isMobile = window.innerHeight < 500;
+    const maxIcons = isMobile ? 5 : 10;
 
-    // If fewer than 5 unique types, repeat to fill minimum 5 slots
-    while (icons.length < 5) {
-      icons = [...icons, ...icons].slice(0, Math.max(5, icons.length * 2));
+    // If fewer than 3 unique types, repeat to fill minimum 3 slots
+    while (icons.length < 3) {
+      icons = [...icons, ...icons].slice(0, Math.max(3, icons.length * 2));
     }
+    icons = icons.slice(0, maxIcons);
 
     // Build icons with staggered animation
     list.innerHTML = "";

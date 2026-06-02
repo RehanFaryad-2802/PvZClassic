@@ -1541,7 +1541,14 @@ html, body {
   .worlds-grid { gap: 8px; }
   .world-card { height: 120px; }
   .world-card-name { font-size: 14px; }
-
+.worlds-grid { 
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px; 
+    padding: 8px;
+  }
+  .world-card { height: 110px; border-radius: 10px; }
+  .world-card-name { font-size: 13px; padding: 6px; }
+  .world-lock { font-size: 28px; }
   /* Level select */
   .levelselect-container { padding: 8px; }
   .levelselect-header h2 { font-size: 16px; }
