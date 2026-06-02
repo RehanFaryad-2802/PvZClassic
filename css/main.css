@@ -1515,3 +1515,60 @@ html, body {
 }
 .world-theme-4 .level-btn.completed .level-orb::after { background: #4c1d95; }
 .world-theme-4 .level-connector.done { background: linear-gradient(90deg, #8b5cf6, #7c3aed); }
+
+
+@media (max-height: 500px) and (orientation: landscape) {
+  /* Logo */
+  .logo-pvz, .logo-3 { font-size: 42px; }
+  .game-logo.small .logo-pvz,
+  .game-logo.small .logo-3 { font-size: 28px; }
+
+  /* Menu */
+  .menu-container { padding: 8px 16px; gap: 6px; }
+  .btn-menu { font-size: 18px; padding: 10px 16px; }
+  .player-info-bar { font-size: 13px; }
+
+  /* Name screen */
+  .name-container { gap: 16px; padding: 16px; }
+  .name-form { gap: 10px; }
+  .name-form label { font-size: 16px; }
+  .name-form input { padding: 10px 16px; font-size: 16px; }
+
+  /* World map */
+  .worldmap-container { padding: 8px; }
+  .worldmap-header { margin-bottom: 6px; }
+  .worldmap-header h2 { font-size: 18px; }
+  .worlds-grid { gap: 8px; }
+  .world-card { height: 120px; }
+  .world-card-name { font-size: 14px; }
+
+  /* Level select */
+  .levelselect-container { padding: 8px; }
+  .levelselect-header h2 { font-size: 16px; }
+  .level-orb { width: 48px; height: 48px; font-size: 16px; }
+  .level-num { font-size: 16px; }
+
+  /* Coin display */
+  .coin-display { font-size: 13px; padding: 4px 10px; }
+
+  /* Shop */
+  .shop-header h2 { font-size: 18px; }
+  .shop-tab { font-size: 13px; padding: 6px 10px; }
+  .packet-card { padding: 10px 8px; }
+  .packet-img { width: 56px; height: 56px; }
+  .packet-name { font-size: 14px; }
+  .packet-price { font-size: 13px; }
+
+  /* Minigames hub */
+  .mg-card { padding: 10px; }
+  .mg-card-icon { font-size: 28px; }
+  .mg-card-name { font-size: 14px; }
+
+  /* Buttons */
+  .btn-primary { font-size: 18px; padding: 10px 24px; }
+  .btn-secondary { font-size: 16px; padding: 8px 20px; }
+
+  /* Result screen */
+  .result-title { font-size: 36px; }
+  .result-container { padding: 16px; gap: 12px; }
+}
