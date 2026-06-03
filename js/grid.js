@@ -201,6 +201,7 @@ const Grid = (() => {
     if (typeof PlantRegistry !== "undefined") {
       PlantRegistry.onDamage(p.plantId, row, col, p);
     }
+    SoundFX.play("plant_hurt");
 
     // Shake animation while being eaten
     if (!p.shaking && p.element) {
@@ -215,6 +216,11 @@ const Grid = (() => {
     }
 
     if (p.hp <= 0) {
+      // Clear shaking BEFORE removePlant wipes the element
+      if (p.shaking && p.element) {
+        p.shaking = false;
+        p.element.classList.remove("shaking");
+      }
       removePlant(row, col);
       return true; // plant died
     }

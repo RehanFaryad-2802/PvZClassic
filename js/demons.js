@@ -247,6 +247,8 @@ const Demons = (() => {
       // split / explode (applied in kill)
     };
     demons.push(demon);
+    if (cfg.type === "imp_king") SoundFX.play("king_roar");
+    else SoundFX.play("demon_spawn");
     return demon;
   }
 
@@ -272,6 +274,7 @@ const Demons = (() => {
       const d = demons[i];
       if (d.dead) {
         d.el.remove();
+        if (d.hpWrap) d.hpWrap.remove();
         demons.splice(i, 1);
         continue;
       }
@@ -431,6 +434,15 @@ const Demons = (() => {
       }
 
       for (const { col, plant } of plantsFiltered) {
+        if (!plant || plant.hp <= 0) {
+          if (d.targeting && d.targeting.col === col) {
+            d.targeting = null;
+            d.biteTimer = 0;
+            d.eating = false;
+            stopEating(d);
+          }
+          continue;
+        }
         const cellEl = Grid.getCellEl(d.row, col);
         if (!cellEl) continue;
 
@@ -443,10 +455,10 @@ const Demons = (() => {
           continue;
         if (cellRect.left > demonRect.right) continue;
 
-        if (
-          demonRect.right >= cellRect.left &&
-          demonRect.left <= cellRect.right + 10
-        ) {
+        const overlapX =
+          demonRect.right > cellRect.left + 4 &&
+          demonRect.left < cellRect.right - 4;
+        if (overlapX) {
           d.targeting = { row: d.row, col };
           d.biteTimer += dtMs;
 
@@ -457,6 +469,7 @@ const Demons = (() => {
               ? Math.floor(d.damage * CFG.LIFESTEAL_PCT)
               : 0;
 
+            SoundFX.play("demon_chomp");
             const died = Grid.damagePlant(d.row, col, d.damage);
 
             // LIFESTEAL
@@ -472,9 +485,17 @@ const Demons = (() => {
             }
 
             if (died) {
+              // Plant already removed by damagePlant — just reset demon state
               d.targeting = null;
               d.biteTimer = 0;
-              stopEating(d); // Stop eating when plant is destroyed
+              eating = false;
+              d.eating = false; // force-clear regardless of stopEating guard
+              stopEating(d);
+              // Clear all row shaking as a safety net
+              for (let sc = 0; sc < Grid.getCols(); sc++) {
+                Grid.stopShaking(d.row, sc);
+              }
+              break;
             }
           }
 
@@ -597,7 +618,6 @@ const Demons = (() => {
 
     demon.hp = Math.max(0, demon.hp - finalDmg);
     updateHpBar(demon);
-    updateHpBar(demon);
 
     // HIT FLASH
     demon.el.classList.add("hit");
@@ -643,6 +663,10 @@ const Demons = (() => {
     }
 
     // Death animation — style based on last damage type
+    const _dtype = demon.lastDamageType || "physical";
+    if (_dtype === "ice") SoundFX.play("demon_die_ice");
+    else if (_dtype === "fire") SoundFX.play("demon_die_fire");
+    else SoundFX.play("demon_die");
     playDeathAnimation(demon);
   }
 
@@ -1188,7 +1212,16 @@ const Demons = (() => {
     king.kingSpawnTimer = (king.kingSpawnTimer || 0) + dt * 1000;
     if (king.kingSpawnTimer >= cfg.SPAWN_INTERVAL) {
       king.kingSpawnTimer = 0;
-      spawnKingMinions(king, cfg, cellW, gridOffX);
+      // Roar effect before spawning
+      SoundFX.play("king_roar");
+      king.el.classList.add("king-roaring");
+      king.el.style.animation = "kingRoarPulse 0.5s ease-out, kingRoarShake 0.5s ease-in-out";
+      setTimeout(() => {
+        king.el.classList.remove("king-roaring");
+        king.el.style.animation = "";
+        king.el.classList.add("king-aura");
+        if (!king.dead) spawnKingMinions(king, cfg, cellW, gridOffX);
+      }, 600);
     }
   }
 
@@ -1232,10 +1265,7 @@ const Demons = (() => {
           minion.kingParent = king;
           king.kingMinions.push(minion);
 
-          // Rise from ground spawn animation
-          showMinionSpawnEffect(minion);
-
-          // Override x position to spawn near king
+          // Override x position FIRST, then run effect with correct coords
           const gridEl = document.getElementById("grid-container");
           const layerEl = document.getElementById("demons-layer");
           if (gridEl && layerEl) {
@@ -1245,51 +1275,201 @@ const Demons = (() => {
               gRect.left - lRect.left + targetCol * cellW + cellW / 2;
             minion.x = spawnX;
             minion.el.style.left = spawnX + "px";
+
+            // Now compute cell-accurate screen coords for the effect
+            const rowEl = document.querySelector(
+              `.grid-row[data-row="${targetRow}"]`,
+            );
+            const eEl = document.getElementById("effects-layer");
+            if (rowEl && eEl) {
+              const rRect = rowEl.getBoundingClientRect();
+              const eRect = eEl.getBoundingClientRect();
+              const cx =
+                gRect.left - eRect.left + targetCol * cellW + cellW / 2;
+              const cy = rRect.bottom - eRect.top;
+              const sz = Math.min(cellW, rRect.height) * 0.85;
+              showMinionSpawnEffect(minion, cx, cy, sz);
+            } else {
+              showMinionSpawnEffect(minion, null, null, null);
+            }
           }
         }
       }, i * 300); // stagger spawns slightly
     });
   }
 
-  function showMinionSpawnEffect(minion) {
+  function showMinionSpawnEffect(minion, cx, cy, sz) {
     if (!minion || !minion.el) return;
 
-    // Start underground
-    minion.el.style.opacity = "0";
-    minion.el.style.transform = "translateY(40px) scaleY(0.3)";
-    minion.el.style.transition = "none";
-
-    // Rise up animation
-    setTimeout(() => {
-      minion.el.style.transition =
-        "transform 0.5s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.4s ease-out";
-      minion.el.style.transform = "translateY(0px) scaleY(1)";
-      minion.el.style.opacity = "1";
-    }, 50);
-
-    // Ground crack effect
     const effectsEl = document.getElementById("effects-layer");
-    const layerEl = document.getElementById("demons-layer");
-    if (effectsEl && layerEl && minion.el) {
+    if (!effectsEl) return;
+
+    // Use passed-in coords (cell-accurate); fallback to DOM read if null
+    if (cx === null || cy === null || sz === null) {
       const mRect = minion.el.getBoundingClientRect();
       const eRect = effectsEl.getBoundingClientRect();
-      const cx = mRect.left - eRect.left + mRect.width / 2;
-      const cy = mRect.bottom - eRect.top;
-
-      const crack = document.createElement("div");
-      crack.style.cssText = `
-        position:absolute;
-        left:${cx - 20}px; top:${cy - 6}px;
-        width:40px; height:12px;
-        border-radius:50%;
-        background:radial-gradient(ellipse, rgba(139,69,19,0.8), rgba(0,0,0,0.4), transparent);
-        box-shadow:0 0 10px rgba(0,0,0,0.6);
-        pointer-events:none; z-index:35;
-        animation:crackFade 0.8s ease-out forwards;
-      `;
-      effectsEl.appendChild(crack);
-      setTimeout(() => crack.remove(), 800);
+      cx = mRect.left - eRect.left + mRect.width / 2;
+      cy = mRect.bottom - eRect.top;
+      sz = mRect.width;
     }
+
+    // Shadow pool on ground
+    const shadow = document.createElement("div");
+    shadow.style.cssText = `
+      position:absolute;
+      left:${cx - sz * 0.6}px; top:${cy - sz * 0.1}px;
+      width:${sz * 1.2}px; height:${sz * 0.25}px;
+      border-radius:50%;
+      background:radial-gradient(ellipse, rgba(120,0,200,0.85) 0%, rgba(80,0,0,0.5) 50%, transparent 80%);
+      pointer-events:none; z-index:30;
+      animation:shadowPool 0.9s ease-out forwards;
+    `;
+    effectsEl.appendChild(shadow);
+
+    // Warning flash "!" above spawn point
+    const warn = document.createElement("div");
+    warn.textContent = "!";
+    warn.style.cssText = `
+      position:absolute;
+      left:${cx - 10}px; top:${cy - sz * 1.2}px;
+      font-size:${sz * 0.5}px; font-weight:900; line-height:1;
+      color:#ff3300; text-shadow:0 0 10px #ff6600, 0 0 20px #ff0000;
+      pointer-events:none; z-index:50;
+      animation:warningFlash 0.25s ease-in-out 3;
+    `;
+    effectsEl.appendChild(warn);
+
+    // ── Phase 2 (t=200ms): Portal opens ──
+    setTimeout(() => {
+      if (minion.dead) return;
+
+      // Rotating dark portal disc
+      const portal = document.createElement("div");
+      portal.style.cssText = `
+        position:absolute;
+        left:${cx - sz * 0.55}px; top:${cy - sz * 0.55}px;
+        width:${sz * 1.1}px; height:${sz * 1.1}px;
+        border-radius:50%;
+        background:conic-gradient(
+          rgba(180,0,255,0.9) 0deg,
+          rgba(255,30,0,0.7) 90deg,
+          rgba(0,0,0,1) 180deg,
+          rgba(180,0,255,0.9) 270deg,
+          rgba(255,30,0,0.7) 360deg
+        );
+        pointer-events:none; z-index:33;
+        animation:portalExpand 0.7s ease-out forwards;
+      `;
+      effectsEl.appendChild(portal);
+
+      // Expanding rings x3
+      for (let r = 0; r < 3; r++) {
+        const ring = document.createElement("div");
+        ring.style.cssText = `
+          position:absolute;
+          left:${cx - sz * 0.5}px; top:${cy - sz * 0.5}px;
+          width:${sz}px; height:${sz}px;
+          border-radius:50%;
+          border:4px solid rgba(${r === 0 ? "255,60,0" : r === 1 ? "200,0,255" : "255,180,0"},0.9);
+          box-shadow:0 0 12px rgba(255,60,0,0.6);
+          pointer-events:none; z-index:34;
+          animation:portalRing 0.6s ease-out ${r * 0.12}s forwards;
+        `;
+        effectsEl.appendChild(ring);
+        setTimeout(() => ring.remove(), 800);
+      }
+
+      // Hellfire pillar rising from ground
+      const fire = document.createElement("div");
+      fire.style.cssText = `
+        position:absolute;
+        left:${cx - sz * 0.25}px; top:${cy - sz * 1.1}px;
+        width:${sz * 0.5}px; height:${sz * 1.1}px;
+        border-radius:50% 50% 20% 20%;
+        background:linear-gradient(to top,
+          rgba(255,50,0,1) 0%,
+          rgba(255,140,0,0.9) 40%,
+          rgba(255,220,50,0.6) 70%,
+          transparent 100%
+        );
+        filter:blur(6px);
+        pointer-events:none; z-index:32;
+        animation:hellfire 0.7s ease-out forwards;
+      `;
+      effectsEl.appendChild(fire);
+
+      // Floating embers (6 particles)
+      for (let e = 0; e < 6; e++) {
+        const angle = (e / 6) * Math.PI * 2;
+        const dist = sz * (0.5 + Math.random() * 0.5);
+        const ex = Math.cos(angle) * dist;
+        const ey = -(Math.random() * sz * 1.2 + sz * 0.3);
+        const ember = document.createElement("div");
+        ember.style.cssText = `
+          position:absolute;
+          left:${cx - 4}px; top:${cy - sz * 0.3}px;
+          width:${4 + Math.random() * 5}px;
+          height:${4 + Math.random() * 5}px;
+          border-radius:50%;
+          background:radial-gradient(circle, #fff 0%, #ff8800 50%, #ff2200 100%);
+          box-shadow:0 0 6px #ff4400;
+          pointer-events:none; z-index:36;
+          --ex:${ex}px; --ey:${ey}px;
+          animation:emberFloat ${0.5 + Math.random() * 0.4}s ease-out forwards;
+        `;
+        effectsEl.appendChild(ember);
+        setTimeout(() => ember.remove(), 900);
+      }
+
+      setTimeout(() => {
+        portal.remove();
+        fire.remove();
+      }, 700);
+    }, 200);
+
+    // ── Phase 3 (t=600ms): Minion bursts out ──
+    minion.el.style.opacity = "0";
+    minion.el.style.transform = "translateY(50px) scaleY(0.2) scaleX(1.3)";
+    minion.el.style.transition = "none";
+    minion.el.style.filter = "brightness(3) saturate(2)";
+
+    setTimeout(() => {
+      if (minion.dead) return;
+      minion.el.style.transition = "none";
+      minion.el.style.animation =
+        "minionRise 0.55s cubic-bezier(0.22,1,0.36,1) forwards";
+      minion.el.style.opacity = "1";
+
+      // Ground crack lines
+      for (let c = 0; c < 3; c++) {
+        const angle = -30 + c * 30;
+        const crack = document.createElement("div");
+        crack.style.cssText = `
+          position:absolute;
+          left:${cx - sz * 0.4}px; top:${cy - 4}px;
+          width:${sz * 0.8}px; height:8px;
+          background:linear-gradient(90deg, transparent, rgba(255,80,0,0.9), rgba(255,200,50,0.7), transparent);
+          border-radius:4px;
+          transform:rotate(${angle}deg);
+          transform-origin:center;
+          pointer-events:none; z-index:35;
+          animation:crackFade 0.7s ease-out forwards;
+        `;
+        effectsEl.appendChild(crack);
+        setTimeout(() => crack.remove(), 700);
+      }
+
+      // Reset filter after rise
+      setTimeout(() => {
+        if (minion.el) minion.el.style.filter = "";
+      }, 550);
+    }, 600);
+
+    // Cleanup shadow + warning
+    setTimeout(() => {
+      shadow.remove();
+      warn.remove();
+    }, 900);
   }
 
   function killKingMinions(king) {
@@ -1303,7 +1483,10 @@ const Demons = (() => {
             "transform 0.4s ease-in, opacity 0.4s ease-in";
           minion.el.style.transform = "translateY(-30px) scale(0)";
           minion.el.style.opacity = "0";
-          setTimeout(() => minion.el && minion.el.remove(), 400);
+          setTimeout(() => {
+            if (minion.el) minion.el.remove();
+            if (minion.hpWrap) minion.hpWrap.remove();
+          }, 400);
         }
       }
     });

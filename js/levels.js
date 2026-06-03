@@ -139,8 +139,8 @@ const Levels = (() => {
       id: "imp",
       name: "Imp",
       image: "assets/demons/demon1_imp.png",
-      hp: 80,
-      speed: 80,
+      hp: 100,
+      speed: 70,
       damage: 40,
       biteRate: 800,
       special: "dodge",
@@ -150,9 +150,9 @@ const Levels = (() => {
       id: "imp_axe",
       name: "Axe Imp",
       image: "assets/demons/var2.png",
-      hp: 60,
+      hp: 120,
       speed: 70,
-      damage: 40,
+      damage: 80,
       biteRate: 800,
       special: "dodge",
       reward: "imp",
@@ -169,27 +169,27 @@ const Levels = (() => {
       id: "imp_shield",
       name: "Shield Imp",
       image: "assets/demons/var1.png",
-      hp: 96, // 20% more than base (80 * 1.2)
+      hp: 150, // 20% more than base (80 * 1.2)
       speed: 80,
-      damage: 40,
+      damage: 60,
       biteRate: 800,
       special: "dodge",
       reward: "imp",
       damageModifiers: {
-        physical: 0.7, // 30% less from everything
-        ice: 0.7,
-        fire: 0.7,
-        electric: 0.7,
+        physical: 1, // 30% less from everything
+        ice: 0,
+        fire: 0,
+        electric: 1,
         psychic: 1.4, // BUT psychic deals 40% MORE
-        beam: 0.7,
+        beam: 0.5,
       },
     },
     imp_heavy: {
       id: "imp_heavy",
       name: "Heavy Imp",
       image: "assets/demons/var3.png",
-      hp: 160, // 100% more than base (80 * 2)
-      speed: 80,
+      hp: 250, // 100% more than base (80 * 2)
+      speed: 70,
       damage: 40,
       biteRate: 800,
       special: "dodge",
@@ -207,11 +207,11 @@ const Levels = (() => {
       id: "imp_king",
       name: "Imp King",
       image: "assets/demons/var4.png",
-      hp: 250,
+      hp: 200,
       speed: 80,
       damage: 0,
       biteRate: 99999,
-      special: [],
+      special: ["spawn"], // spawns other demons instead of attacking
       reward: "imp",
       // King config — all tunable
       kingConfig: {
@@ -244,7 +244,7 @@ const Levels = (() => {
       name: "Frost Gargoyle",
       image: "assets/demons/demon4_ice.png",
       hp: 140,
-      speed: 28,
+      speed: 50,
       damage: 12,
       biteRate: 1200,
       special: "freeze", // freezes plants it attacks (slows their fire rate)
@@ -255,8 +255,8 @@ const Levels = (() => {
       name: "Iron Warlord",
       image: "assets/demons/demon2_armored.png",
       hp: 400,
-      speed: 80,
-      damage: 20,
+      speed: 50,
+      damage: 100,
       biteRate: 1500,
       special: "armor", // 40% dmg reduction
       reward: "armored",
@@ -265,9 +265,9 @@ const Levels = (() => {
       id: "brute",
       name: "Brute Demon",
       image: "assets/demons/demon5_brute.png",
-      hp: 280,
-      speed: 80,
-      damage: 25,
+      hp: 400,
+      speed: 40,
+      damage: 150,
       biteRate: 1100,
       special: "charge", // doubles speed when HP < 30%
       reward: "brute",
@@ -288,8 +288,6 @@ const Levels = (() => {
     { worldId: 1, levelIdx: 3, plantId: "sporepuff" },
     { worldId: 1, levelIdx: 4, plantId: "voltlotus" },
     { worldId: 1, levelIdx: 5, plantId: "lavaburst" },
-    { worldId: 1, levelIdx: 6, plantId: "icepea" },
-    { worldId: 1, levelIdx: 12, plantId: "bonkchoy" },
     // Future plants added here
   ];
 

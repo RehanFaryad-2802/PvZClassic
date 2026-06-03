@@ -264,9 +264,28 @@ const Player = (() => {
     const p = data.plants[plantId];
     if (!p || !p.owned) return false;
     if (p.level >= 15) return false;
-    const needed = Seeds.getLevelUpCost(p.level);
-    if (!needed || p.seeds < needed) return false;
-    p.seeds -= needed;
+
+    const currentLevel = p.level;
+
+    if (currentLevel >= 14) {
+      // Levels 14–15: cost coins + seedCoins
+      const cost = Seeds.getLevelUpCost(currentLevel);
+      if (!cost) return false;
+      if (data.coins < cost.coins) return false;
+      const seedCoinItem = (data.inventory || []).find(i => i.id === "seedCoin");
+      const ownedSeedCoins = seedCoinItem ? seedCoinItem.quantity : 0;
+      if (ownedSeedCoins < cost.seedCoins) return false;
+      // Deduct
+      data.coins -= cost.coins;
+      removeInventoryItem("seedCoin", cost.seedCoins);
+    } else {
+      // Levels 1–13: cost coins only
+      const coinCost = Seeds.getLevelUpCoinCost(currentLevel);
+      if (!coinCost) return false;
+      if (data.coins < coinCost) return false;
+      data.coins -= coinCost;
+    }
+
     p.level += 1;
     save();
     return true;

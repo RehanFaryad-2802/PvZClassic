@@ -74,6 +74,7 @@
           <button class="btn-menu" id="btn-collection">📦 Invetory</button>
           <button class="btn-menu" id="btn-minigames">🎮 Minigames</button>
           <button class="btn-menu" id="btn-shop">🛒 Seed Shop</button>
+          <button class="btn-menu" id="btn-settings">⚙️ Settings</button>
         </div>
         <div class="menu-deco" style="display: none">
           <img src="assets/plants/sunflower.png" class="deco-plant p1" alt="" />
@@ -84,6 +85,62 @@
           />
           <img src="assets/plants/bonkchoy.png" class="deco-plant p3" alt="" />
           <img src="assets/plants/icepea.png" class="deco-plant p4" alt="" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+       SCREEN: SETTINGS
+  ══════════════════════════════════════════ -->
+    <div id="screen-settings" class="screen">
+      <div class="menu-bg"></div>
+      <div class="settings-container">
+        <div class="settings-header">
+          <button class="btn-back" id="btn-back-settings">↶</button>
+          <h2>⚙️ Settings</h2>
+        </div>
+        <div class="settings-body">
+
+          <div class="setting-row">
+            <label>🔇 Mute All</label>
+            <div class="toggle-wrap">
+              <input type="checkbox" id="set-mute" class="toggle-input" />
+              <label for="set-mute" class="toggle-label"></label>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <label>🖱️ UI Volume</label>
+            <div class="slider-wrap">
+              <input type="range" id="set-vol-ui" min="0" max="100" value="45" class="vol-slider" />
+              <span class="vol-val" id="val-ui">45</span>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <label>👹 Demon Volume</label>
+            <div class="slider-wrap">
+              <input type="range" id="set-vol-demon" min="0" max="100" value="55" class="vol-slider" />
+              <span class="vol-val" id="val-demon">55</span>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <label>🌱 Plant Volume</label>
+            <div class="slider-wrap">
+              <input type="range" id="set-vol-plant" min="0" max="100" value="40" class="vol-slider" />
+              <span class="vol-val" id="val-plant">40</span>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <label>🎵 Music Volume</label>
+            <div class="slider-wrap">
+              <input type="range" id="set-vol-music" min="0" max="100" value="20" class="vol-slider" />
+              <span class="vol-val" id="val-music">20</span>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -291,7 +348,8 @@
           <button class="btn-back" id="btn-back-shop">↶</button>
           <h2>Seed Shop</h2>
           <span class="coin-display">🪙 <span id="shop-coins">0</span></span>
-          <span class="loom-display">🔮 <span id="shop-looms">0</span></span>
+
+          <span class="loom-display"> <img src="assets/shop/loom.png" class="loom-icon-sm" alt="Loom"> <span id="shop-looms">0</span></span>
         </div>
         <div class="shop-grid" id="shop-grid">
           <!-- Shop items injected -->
@@ -304,6 +362,7 @@
   ══════════════════════════════════════════ -->
     <div id="toast" class="toast hidden"></div>
 
+    <script src="js/audio.js"></script>
     <script src="js/player.js"></script>
     <style>
       * {

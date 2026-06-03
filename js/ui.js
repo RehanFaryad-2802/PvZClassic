@@ -545,7 +545,10 @@ const UI = (() => {
         <img src="${def.image}" alt="${def.name}" />
         <div class="tray-cost">☀️${def.cost}</div>
       `;
-      card.addEventListener("click", () => Core.selectPlant(id));
+      card.addEventListener("click", () => {
+        SoundFX.play("plant_select");
+        Core.selectPlant(id);
+      });
       tray.appendChild(card);
     });
 
@@ -554,7 +557,10 @@ const UI = (() => {
     shovel.className = "shovel-btn";
     shovel.id = "shovel-btn";
     shovel.innerHTML = "🪣";
-    shovel.addEventListener("click", () => Core.toggleShovel());
+    shovel.addEventListener("click", () => {
+      SoundFX.play("plant_remove");
+      Core.toggleShovel();
+    });
     tray.appendChild(shovel);
   }
 
@@ -577,7 +583,8 @@ const UI = (() => {
         cdOverlay.className = "cooldown-overlay";
         card.appendChild(cdOverlay);
       }
-      const cdSec = cdMs / 1000;
+      // Round UP to nearest 0.1s so display never shows lower than actual remaining time
+      const cdSec = Math.ceil(cdMs / 100) / 10;
       cdOverlay.textContent =
         cdMs > 0 ? (cdSec >= 20 ? Math.ceil(cdSec) : cdSec.toFixed(1)) : "";
     } else {
@@ -789,19 +796,106 @@ const UI = (() => {
             </div>`
                 : ""
             }
-            ${
-              def.levelStats?.[level]
-                ? `
-              <div style="display:flex;flex-direction:column;gap:3px">
-                ${def.levelStats[level].damage !== undefined ? `<div style="font-size:10px;color:var(--white)">⚔️ Damage: <b style="color:var(--orange)">${def.levelStats[level].damage}</b></div>` : ""}
-                ${def.levelStats[level].fireRate !== undefined ? `<div style="font-size:10px;color:var(--white)">⚡ Speed: <b style="color:var(--gold)">${(def.levelStats[level].fireRate / 1000).toFixed(1)}s</b></div>` : ""}
-                ${def.levelStats[level].freezeDuration !== undefined ? `<div style="font-size:10px;color:var(--white)">❄️ Freeze: <b style="color:var(--ice-blue)">${(def.levelStats[level].freezeDuration / 1000).toFixed(1)}s</b></div>` : ""}
-                ${def.levelStats[level].hp !== undefined ? `<div style="font-size:10px;color:var(--white)">❤️ HP: <b style="color:var(--red)">${def.levelStats[level].hp}</b></div>` : ""}
-                ${def.levelStats[level].fireDistance !== undefined && def.levelStats[level].fireDistance > 1 ? `<div style="font-size:10px;color:var(--white)">📏 Range: <b style="color:var(--green)">${def.levelStats[level].fireDistance} cells</b></div>` : ""}
-                ${def.levelStats[level].cooldown !== undefined ? `<div style="font-size:10px;color:var(--white)">🔄 Cooldown: <b style="color:var(--gray)">${(def.levelStats[level].cooldown / 1000).toFixed(1)}s</b></div>` : ""}
-              </div>`
-                : `<div style="font-size:10px;color:var(--gray)">${def.description || "No stats available"}</div>`
-            }
+            ${(() => {
+              const ls = def.levelStats?.[level];
+              if (!ls)
+                return `<div style="font-size:10px;color:var(--gray)">${def.description || "No stats available"}</div>`;
+              const row = (icon, label, val, color) =>
+                `<div style="font-size:10px;color:var(--white)">
+                  ${icon} ${label}: <b style="color:${color}">${val}</b>
+                </div>`;
+              const msToS = (ms) => (ms / 1000).toFixed(1) + "s";
+              let html = `<div style="display:flex;flex-direction:column;gap:3px">`;
+              if (ls.cost !== undefined)
+                html += row("☀️", "Sun Cost", ls.cost, "var(--gold)");
+              if (ls.hp !== undefined)
+                html += row("❤️", "HP", ls.hp, "var(--red)");
+              if (ls.damage !== undefined)
+                html += row("⚔️", "Damage", ls.damage, "var(--orange)");
+              if (ls.fireRate !== undefined)
+                html += row(
+                  "⚡",
+                  "Attack Speed",
+                  msToS(ls.fireRate),
+                  "var(--gold)",
+                );
+              if (ls.cooldown !== undefined)
+                html += row(
+                  "🔄",
+                  "Cooldown",
+                  msToS(ls.cooldown),
+                  "var(--purple-light)",
+                );
+              if (ls.freezeDuration !== undefined)
+                html += row(
+                  "❄️",
+                  "Freeze Duration",
+                  msToS(ls.freezeDuration),
+                  "#7dd3fc",
+                );
+              if (ls.slowDuration !== undefined)
+                html += row(
+                  "🧊",
+                  "Slow Duration",
+                  msToS(ls.slowDuration),
+                  "#7dd3fc",
+                );
+              if (ls.slowAmount !== undefined)
+                html += row(
+                  "🐢",
+                  "Slow Amount",
+                  Math.round((1 - ls.slowAmount) * 100) + "%",
+                  "#7dd3fc",
+                );
+              if (ls.sunValue !== undefined)
+                html += row("☀️", "Sun per Drop", ls.sunValue, "var(--gold)");
+              if (ls.fireDistance !== undefined && ls.fireDistance > 1)
+                html += row(
+                  "📏",
+                  "Range",
+                  ls.fireDistance + " cells",
+                  "var(--green)",
+                );
+              if (ls.hitCount !== undefined && ls.hitCount < 99)
+                html += row("🎯", "Targets", ls.hitCount, "var(--orange)");
+              if (ls.aoeRadius !== undefined)
+                html += row(
+                  "💥",
+                  "AoE Radius",
+                  ls.aoeRadius + " cells",
+                  "var(--orange)",
+                );
+              if (ls.mindAttackDuration !== undefined)
+                html += row(
+                  "🌀",
+                  "Mind Duration",
+                  msToS(ls.mindAttackDuration),
+                  "var(--purple-light)",
+                );
+              if (ls.stunDuration !== undefined)
+                html += row(
+                  "💫",
+                  "Stun Duration",
+                  msToS(ls.stunDuration),
+                  "var(--purple-light)",
+                );
+              if (ls.burnDuration !== undefined)
+                html += row(
+                  "🔥",
+                  "Burn Duration",
+                  msToS(ls.burnDuration),
+                  "var(--orange)",
+                );
+              if (ls.burnDamage !== undefined)
+                html += row(
+                  "🔥",
+                  "Burn Damage",
+                  ls.burnDamage + "/tick",
+                  "var(--orange)",
+                );
+              html += `</div>`;
+              return html;
+            })()}
           </div>
 
           <div class="inv-actions">
@@ -810,9 +904,17 @@ const UI = (() => {
                 ? `<div class="inv-max-badge">🏆 MAX LEVEL</div>`
                 : canUp
                   ? `<button class="inv-action-btn inv-levelup-btn" id="inv-lvlup-btn" data-id="${id}">
-                    ⬆️ Level Up<br><small>${seeds}/${nextCost} seeds</small>
+                    ⬆️ Level Up<br><small>${
+                      level >= 14
+                        ? `🪙 ${nextCost.coins} + 🌀 ${nextCost.seedCoins}`
+                        : `🪙 ${nextCost} coins`
+                    }</small>
                    </button>`
-                  : `<div class="inv-need-seeds">Need ${(nextCost || 0) - seeds} more 🌱</div>`
+                  : `<div class="inv-need-seeds">${
+                      level >= 14
+                        ? `Need 🪙 ${(nextCost?.coins || 0) - Player.getCoins()} more coins`
+                        : `Need 🪙 ${(nextCost || 0) - Player.getCoins()} more coins`
+                    }</div>`
             }
           </div>
         </div>
@@ -1664,16 +1766,6 @@ const UI = (() => {
   }
 
   function renderPacketsTab(container) {
-    const header = document.createElement("div");
-    header.className = "shop-packets-header";
-    header.innerHTML = `
-      <div class="shop-loom-balance">
-        <img src="assets/shop/loom.png" class="loom-icon-sm"/> Your Looms: <strong id="shop-looms">${Player.getLooms()}</strong>
-        <span style="font-size:11px;color:var(--gray);display:block;margin-top:2px">Earn looms from minigames & events</span>
-      </div>
-    `;
-    container.appendChild(header);
-
     const grid = document.createElement("div");
     grid.className = "shop-packets-grid";
     container.appendChild(grid);
@@ -1698,13 +1790,13 @@ const UI = (() => {
         <div class="shop-packet-rarity" style="color:${color}">${def.rarity.toUpperCase()}</div>
         <div class="shop-packet-emoji">${getPacketEmoji(def.id)}</div>
         <div class="shop-packet-name">${def.name}</div>
-        <div class="shop-packet-desc">${def.description}</div>
+        <div class="shop-packet-desc">${def.description || ""}</div>
         <div class="shop-packet-seeds">
           <strong>${def.seedCount}</strong> seeds
           ${!def.allowRepeats ? "· No repeats" : "· May repeat"}
         </div>
         <button class="shop-buy-btn shop-loom-btn">
-        <img src="assets/shop/loom.png" class="loom-icon-sm"/> ${def.loomCost} Looms
+        <img src="assets/shop/loom.png" class="loom-icon-sm"/> ${def.loomCost}
         </button>
         ${qty > 0 ? `<div class="shop-packet-owned">In inventory: ×${qty}</div>` : ""}
       `;
@@ -1785,6 +1877,7 @@ const UI = (() => {
     const titleEl = document.getElementById("result-title");
     const rewardsEl = document.getElementById("result-rewards");
 
+    SoundFX.play(won ? "victory" : "defeat");
     titleEl.textContent = won ? "🏆 Victory!" : "💀 Defeated!";
     titleEl.className = `result-title ${won ? "win" : "lose"}`;
 
@@ -1846,11 +1939,67 @@ const UI = (() => {
     const arena = document.querySelector(".battle-arena");
     if (!arena) return;
     const banner = document.createElement("div");
+    SoundFX.play("wave_start");
     banner.className = "wave-banner";
     banner.textContent = text;
     arena.appendChild(banner);
     setTimeout(() => banner.remove(), 2000);
   }
+
+  // ── Global click sound + spark effect ─────────
+  const SPARK_EXCLUDED = new Set([
+    "screen-battle",
+    "screen-blockhunt",
+    "screen-bombball",
+    "screen-sharpshooters",
+  ]);
+
+  const SPARK_COLORS = ["#ffd450", "#ff6a00", "#fff", "#a78bfa", "#34d399"];
+
+  function spawnClickSpark(x, y) {
+    const COLORS = ["#ffe066", "#ffaa00", "#fff", "#ffdd99"];
+    const COUNT = 8;
+
+    // Tiny center flash
+    const center = document.createElement("div");
+    center.className = "click-spark-center";
+    center.style.left = x + "px";
+    center.style.top = y + "px";
+    center.style.background = "#fff";
+    center.style.boxShadow = "0 0 4px #ffe066";
+    document.body.appendChild(center);
+    setTimeout(() => center.remove(), 200);
+
+    // Sharp spark lines radiating out
+    for (let i = 0; i < COUNT; i++) {
+      const angle = (i / COUNT) * 360;
+      const dist = 10 + Math.random() * 8 + "px";
+      const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+      const line = document.createElement("div");
+      line.className = "click-spark-line";
+      line.style.cssText = `
+        left:${x}px; top:${y}px;
+        background:${color};
+        box-shadow:0 0 2px ${color};
+        --a:${angle}deg; --d:${dist};
+        animation-duration:${0.22 + Math.random() * 0.1}s;
+      `;
+      document.body.appendChild(line);
+      setTimeout(() => line.remove(), 350);
+    }
+  }
+
+  document.addEventListener(
+    "click",
+    (e) => {
+      SoundFX.play("btn_click");
+      // Check if active screen is excluded
+      const activeScreen = document.querySelector(".screen.active");
+      if (activeScreen && SPARK_EXCLUDED.has(activeScreen.id)) return;
+      spawnClickSpark(e.clientX, e.clientY);
+    },
+    true,
+  );
 
   // ── Wire up static buttons ─────────────────────
   function initButtons() {
@@ -1914,6 +2063,27 @@ const UI = (() => {
       .getElementById("btn-back-shop")
       .addEventListener("click", () => showScreen("screen-menu"));
 
+    // Settings open/back
+    document
+      .getElementById("btn-settings")
+      .addEventListener("click", () => showScreen("screen-settings"));
+    document
+      .getElementById("btn-back-settings")
+      .addEventListener("click", () => showScreen("screen-menu"));
+
+    // Settings controls
+    document.getElementById("set-mute").addEventListener("change", (e) => {
+      SoundFX.muteAll(e.target.checked);
+    });
+    ["ui", "demon", "plant", "music"].forEach((cat) => {
+      const slider = document.getElementById(`set-vol-${cat}`);
+      const label = document.getElementById(`val-${cat}`);
+      slider.addEventListener("input", () => {
+        label.textContent = slider.value;
+        SoundFX.setVolume(cat, slider.value / 100);
+      });
+    });
+
     // Start battle
     // btn-start-battle kept for safety but picker screen is no longer shown
     const startBattleBtn = document.getElementById("btn-start-battle");
@@ -1940,6 +2110,7 @@ const UI = (() => {
       .getElementById("btn-resume")
       .addEventListener("click", () => Core.resume());
     document.getElementById("btn-quit-battle").addEventListener("click", () => {
+      SoundFX.play("btn_skip");
       document.getElementById("pause-overlay").classList.add("hidden");
       Core.endBattle(false);
       showScreen("screen-menu");
@@ -2068,7 +2239,10 @@ const UI = (() => {
         <div class="packet-open-title">Opening ${Shop.SEED_PACKETS[packetId]?.name || "Packet"}...</div>
         <div class="packet-cards-area" id="packet-cards-area"></div>
         <div class="packet-summary hidden" id="packet-summary"></div>
-        <button class="packet-close-btn hidden" id="packet-close-btn">✓ Done</button>
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:8px">
+          <button class="packet-close-btn hidden" id="packet-skip-btn" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:var(--gray);font-size:13px;padding:8px 18px;border-radius:8px;cursor:pointer">⏭ Skip</button>
+          <button class="packet-close-btn hidden" id="packet-close-btn">✓ Done</button>
+        </div>
       </div>
     `;
     document.body.appendChild(overlay);
@@ -2165,6 +2339,26 @@ const UI = (() => {
         selectInventoryItem("packet", packetId);
       }, 300);
     });
+
+    // Skip button — jump straight to summary
+    const skipBtn = document.getElementById("packet-skip-btn");
+    if (skipBtn) {
+      skipBtn.classList.remove("hidden");
+      skipBtn.addEventListener("click", () => {
+        // Aggregate all remaining cards into summaryMap
+        while (i < results.length) {
+          const r = results[i];
+          i++;
+          summaryMap[r.plantId] = summaryMap[r.plantId] || {
+            name: r.plantName,
+            image: r.image,
+            seeds: 0,
+          };
+          summaryMap[r.plantId].seeds += r.seeds;
+        }
+        showSummary();
+      });
+    }
 
     // Start reveals
     setTimeout(revealNext, 500);

@@ -5,25 +5,34 @@
 */
 
 const Seeds = (() => {
-  const LEVEL_UP_COST = {
-    1: 20,
-    2: 35,
-    3: 50,
-    4: 70,
-    5: 90,
-    6: 110,
-    7: 135,
-    8: 160,
-    9: 190,
-    10: 220,
-    11: 260,
-    12: 300,
-    13: 350,
-    14: 400,
+  // Coin cost to level up (levels 1–13)
+  const LEVEL_UP_COIN_COST = {
+    1: 50,
+    2: 500,
+    3: 830,
+    4: 1090,
+    5: 1560,
+    6: 1910,
+    7: 2500,
+    8: 2940,
+    9: 3550,
+    10: 4500,
+    11: 5500,
+    12: 6700,
+    13: 8000,
+  };
+
+  // SeedCoin cost for levels 14 and 15
+  const LEVEL_UP_SEEDCOIN_COST = {
+    14: { coins: 9000, seedCoins: 200 },
+    15: { coins: 10000, seedCoins: 350 },
   };
 
   // Seeds needed to unlock (first time getting) a plant
-  const UNLOCK_COST = 10;
+  const UNLOCK_COST = 100;
+
+  // Legacy alias (kept so nothing else breaks)
+  const LEVEL_UP_COST = { ...LEVEL_UP_COIN_COST };
 
   // Seed rewards per minigame score bracket
   const MINIGAME_SEED_TABLE = {
@@ -46,7 +55,17 @@ const Seeds = (() => {
   }
 
   function getLevelUpCost(currentLevel) {
-    return LEVEL_UP_COST[currentLevel] || null;
+    if (currentLevel >= 14) return LEVEL_UP_SEEDCOIN_COST[currentLevel] || null;
+    return LEVEL_UP_COIN_COST[currentLevel] || null;
+  }
+
+  function getLevelUpCoinCost(currentLevel) {
+    if (currentLevel >= 14) return LEVEL_UP_SEEDCOIN_COST[currentLevel]?.coins || null;
+    return LEVEL_UP_COIN_COST[currentLevel] || null;
+  }
+
+  function getLevelUpSeedCoinCost(currentLevel) {
+    return LEVEL_UP_SEEDCOIN_COST[currentLevel]?.seedCoins || 0;
   }
 
   function getUnlockCost() {
@@ -84,6 +103,8 @@ const Seeds = (() => {
   return {
     getSeedsForMinigame,
     getLevelUpCost,
+    getLevelUpCoinCost,
+    getLevelUpSeedCoinCost,
     getUnlockCost,
     getLevelProgress,
     tryLevelUp,
@@ -91,5 +112,7 @@ const Seeds = (() => {
     giveSeeds,
     UNLOCK_COST,
     LEVEL_UP_COST,
+    LEVEL_UP_COIN_COST,
+    LEVEL_UP_SEEDCOIN_COST,
   };
 })();

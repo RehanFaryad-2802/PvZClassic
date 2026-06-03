@@ -224,7 +224,6 @@ const Core = (() => {
     for (const id in trayCooldowns) {
       if (trayCooldowns[id] > 0) {
         trayCooldowns[id] -= dt * 1000;
-        const cdSec = Math.ceil(trayCooldowns[id] / 1000);
         UI.updateTrayCard(id, sun, trayCooldowns[id] > 0, trayCooldowns[id]);
       } else {
         UI.updateTrayCard(id, sun, false, 0);
@@ -281,9 +280,10 @@ const Core = (() => {
 
     if (placed) {
       spendSun(def.cost);
-      // Use plant's own cooldown
+      // Use level-accurate cooldown from plant's own stats
+      const levelCd = def.getStats ? def.getStats(level).cooldown : null;
       trayCooldowns[selectedPlantId] =
-        (def.getCooldown ? def.getCooldown() : def.cooldown) || 3000;
+        levelCd || (def.getCooldown ? def.getCooldown() : def.cooldown) || 3000;
       selectedPlantId = null;
       UI.setSelectedTrayCard(null);
     }
@@ -464,22 +464,13 @@ const Core = (() => {
       });
     });
 
-    // Build display list — show unique types only, max 8 on mobile
+    // Build display list — unique demon types only, no counts, no repeats
     const types = Object.keys(typeCounts);
-    let icons = types.map((t) => ({ type: t, count: typeCounts[t] }));
-    const isMobile = window.innerHeight < 500;
-    const maxIcons = isMobile ? 5 : 10;
-
-    // If fewer than 3 unique types, repeat to fill minimum 3 slots
-    while (icons.length < 3) {
-      icons = [...icons, ...icons].slice(0, Math.max(3, icons.length * 2));
-    }
-    icons = icons.slice(0, maxIcons);
 
     // Build icons with staggered animation
     list.innerHTML = "";
-    icons.forEach((entry, i) => {
-      const stats = Levels.getDemonStats(entry.type);
+    types.forEach((type, i) => {
+      const stats = Levels.getDemonStats(type);
       if (!stats) return;
       const icon = document.createElement("div");
       icon.className = "dp-demon-icon";
@@ -487,7 +478,6 @@ const Core = (() => {
       icon.innerHTML = `
         <img src="${stats.image}" alt="${stats.name}" />
         <div class="dp-demon-name">${stats.name}</div>
-        ${entry.count > 1 ? `<div class="dp-demon-count">×${entry.count}</div>` : ""}
       `;
       list.appendChild(icon);
     });
@@ -495,7 +485,7 @@ const Core = (() => {
     overlay.classList.remove("hidden");
 
     // Countdown 5..1
-    let count = 5;
+    let count = 6;
     cdEl.textContent = count;
     const cdTimer = setInterval(() => {
       count--;

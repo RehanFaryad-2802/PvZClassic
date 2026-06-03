@@ -13,7 +13,8 @@ PlantRegistry.register({
   cooldown: 16000, // base — overridden by getCooldown()
 
   getCooldown() {
-    const pp = typeof Player !== "undefined" ? Player.getPlant("glacierbud") : null;
+    const pp =
+      typeof Player !== "undefined" ? Player.getPlant("glacierbud") : null;
     const level = pp ? pp.level : 1;
     return this.getStats(level).cooldown;
   },
@@ -32,21 +33,21 @@ PlantRegistry.register({
   },
 
   levelStats: {
-    1: { freezeDuration: 8000, cooldown: 16000 },
-    2: { freezeDuration: 8400, cooldown: 15200 },
-    3: { freezeDuration: 8800, cooldown: 14400 },
-    4: { freezeDuration: 9200, cooldown: 13600 },
-    5: { freezeDuration: 9600, cooldown: 12800 },
-    6: { freezeDuration: 10000, cooldown: 12000 },
-    7: { freezeDuration: 10500, cooldown: 11200 },
-    8: { freezeDuration: 11000, cooldown: 10400 },
-    9: { freezeDuration: 11500, cooldown: 9600 },
-    10: { freezeDuration: 12000, cooldown: 8800 },
-    11: { freezeDuration: 12600, cooldown: 8000 },
-    12: { freezeDuration: 13200, cooldown: 7200 },
-    13: { freezeDuration: 13800, cooldown: 6400 },
-    14: { freezeDuration: 14400, cooldown: 5700 },
-    15: { freezeDuration: 15000, cooldown: 5000 },
+    1: { hp: 1, freezeDuration: 8000, cooldown: 16000 },
+    2: { hp: 1, freezeDuration: 8400, cooldown: 15200 },
+    3: { hp: 1, freezeDuration: 8800, cooldown: 14400 },
+    4: { hp: 1, freezeDuration: 9200, cooldown: 13600 },
+    5: { hp: 1, freezeDuration: 9600, cooldown: 12800 },
+    6: { hp: 1, freezeDuration: 10000, cooldown: 12000 },
+    7: { hp: 1, freezeDuration: 10500, cooldown: 11200 },
+    8: { hp: 1, freezeDuration: 11000, cooldown: 10400 },
+    9: { hp: 1, freezeDuration: 11500, cooldown: 9600 },
+    10: { hp: 1, freezeDuration: 12000, cooldown: 8800 },
+    11: { hp: 1, freezeDuration: 12600, cooldown: 8000 },
+    12: { hp: 1, freezeDuration: 13200, cooldown: 7200 },
+    13: { hp: 1, freezeDuration: 13800, cooldown: 6400 },
+    14: { hp: 1, freezeDuration: 14400, cooldown: 5700 },
+    15: { hp: 1, freezeDuration: 15000, cooldown: 5000 },
   },
 
   getStats(level) {
@@ -55,7 +56,8 @@ PlantRegistry.register({
   },
 
   onPlace(row, col, plantData) {
-    const pp = typeof Player !== "undefined" ? Player.getPlant("glacierbud") : null;
+    const pp =
+      typeof Player !== "undefined" ? Player.getPlant("glacierbud") : null;
     const level = pp ? pp.level : 1;
     const stats = this.getStats(level);
     plantData.triggered = false; // only fires once
@@ -94,7 +96,8 @@ PlantRegistry.register({
     // Use registry range check — same as all other plants
     if (!PlantRegistry.isDemonInRange(row, col, this.fireDistance)) return;
 
-    const pp = typeof Player !== "undefined" ? Player.getPlant("glacierbud") : null;
+    const pp =
+      typeof Player !== "undefined" ? Player.getPlant("glacierbud") : null;
     const level = pp ? pp.level : 1;
     const stats = this.getStats(level);
 

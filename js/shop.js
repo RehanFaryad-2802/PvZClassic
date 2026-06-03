@@ -37,7 +37,7 @@ const Shop = (() => {
       name: "Mega Packet",
       description:
         "100 seeds spread across 10 random plants. May contain duplicates.",
-      image: "assets/shop/seedpack (3).png",
+      image: "assets/shop/seedpack (2).png",
       loomCost: 30,
       seedCount: 100,
       plantsCount: 10,
@@ -208,7 +208,11 @@ const Shop = (() => {
     const def = SEED_PACKETS[packetId];
     if (!def) return { ok: false, msg: "Unknown packet" };
     if (!Player.spendLooms(def.loomCost)) {
-      return { ok: false, msg: `Need ${def.loomCost} 🔮 Looms` };
+      // show original image of loom as image instead of emoji
+      return {
+        ok: false,
+        msg: `Need ${def.loomCost} <img src="assets/shop/loom.png" class="loom-icon-sm"/> Looms`,
+      };
     }
     Player.addInventoryItem(packetId, 1);
     return { ok: true };
