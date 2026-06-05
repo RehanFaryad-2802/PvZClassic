@@ -70,3 +70,25 @@
 .king-roaring {
   animation: kingRoarShake 0.5s ease-in-out !important;
 }
+/* ── Tray card line selection indicator ─────────── */
+.tray-select-line {
+  position: absolute;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 80%;
+  height: 3px;
+  border-radius: 2px 2px 0 0;
+  background: linear-gradient(90deg, transparent, #ffe066, #fff, #ffe066, transparent);
+  box-shadow: 0 0 6px #ffe066, 0 0 12px #ffaa00;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+.tray-card.selected .tray-select-line {
+  transform: translateX(-50%) scaleX(1);
+}
+.tray-card.selected {
+  background: rgba(255, 220, 80, 0.12) !important;
+  border-color: rgba(255, 220, 80, 0.5) !important;
+  box-shadow: 0 0 10px rgba(255, 200, 0, 0.3) !important;
+  transform: translateY(-3px);
+}

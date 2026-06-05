@@ -23,13 +23,13 @@ const Levels = (() => {
       demonUnlockByLevel: {
         imp: 1, // from level 1
         bat: 3, // from level 3
-        imp_axe: 5, // axe imp from level 5
-        imp_shield: 8, // shield imp from level 8
-        imp_heavy: 12, // heavy imp from level 12
-        imp_king: 14, // king from level 15
-        ice: 14, // ice demon from level 10
-        armored: 14, // armored demon from level 20
-        brute: 14, // brute demon from level 25
+        imp_axe: 5,
+        imp_shield: 8,
+        imp_heavy: 12,
+        imp_king: 14,
+        ice: 14,
+        armored: 14,
+        brute: 14,
       },
     },
     {
@@ -140,7 +140,7 @@ const Levels = (() => {
       name: "Imp",
       image: "assets/demons/demon1_imp.png",
       hp: 100,
-      speed: 70,
+      speed: 30,
       damage: 40,
       biteRate: 800,
       special: "dodge",
@@ -151,7 +151,7 @@ const Levels = (() => {
       name: "Axe Imp",
       image: "assets/demons/var2.png",
       hp: 120,
-      speed: 70,
+      speed: 35,
       damage: 80,
       biteRate: 800,
       special: "dodge",
@@ -170,7 +170,7 @@ const Levels = (() => {
       name: "Shield Imp",
       image: "assets/demons/var1.png",
       hp: 150, // 20% more than base (80 * 1.2)
-      speed: 80,
+      speed: 35,
       damage: 60,
       biteRate: 800,
       special: "dodge",
@@ -189,7 +189,7 @@ const Levels = (() => {
       name: "Heavy Imp",
       image: "assets/demons/var3.png",
       hp: 250, // 100% more than base (80 * 2)
-      speed: 70,
+      speed: 35,
       damage: 40,
       biteRate: 800,
       special: "dodge",
@@ -208,7 +208,7 @@ const Levels = (() => {
       name: "Imp King",
       image: "assets/demons/var4.png",
       hp: 200,
-      speed: 80,
+      speed: 35,
       damage: 0,
       biteRate: 99999,
       special: ["spawn"], // spawns other demons instead of attacking
@@ -274,21 +274,47 @@ const Levels = (() => {
     },
   };
 
+  // ── World Plant Pools (for seed packets) ───────
+  // These are the plants that can appear in seed packets for each world
+  const WORLD_PLANTS = {
+    1: ["sunflower", "peashooter", "icepea", "bonkchoy", "lilybeam", "sporepuff", "voltlotus", "lavaburst", "glacierbud"],
+    2: ["icepea", "glacierbud", "sporepuff", "lilybeam", "voltlotus"],
+    3: ["bonkchoy", "peashooter", "lavaburst", "voltlotus", "sporepuff"],
+    4: ["shadowspore", "sporepuff", "lavaburst", "bonkchoy", "glacierbud"],
+    5: ["voltlotus", "lilybeam", "peashooter", "icepea", "sporepuff"],
+    6: ["mossmellow", "sporepuff", "bonkchoy", "lilybeam", "lavaburst"],
+    7: ["glacierbud", "icepea", "voltlotus", "sporepuff", "lilybeam"],
+    8: ["shadowspore", "sporepuff", "lavaburst", "glacierbud", "bonkchoy"],
+    9: ["voltlotus", "lilybeam", "lavaburst", "icepea", "glacierbud"],
+    10: ["peashooter", "bonkchoy", "sporepuff", "voltlotus", "lavaburst"],
+  };
+
+  // ── Packet Reward Table ────────────────────────
+  // Add entries here to give a mini seed packet on level completion
+  // levelIdx is 0-based (level 5 = idx 4)
+  const PACKET_REWARDS = [
+    { worldId: 1, levelIdx: 0  }, // W1 Level 1
+    { worldId: 1, levelIdx: 9  }, // W1 Level 10
+    { worldId: 1, levelIdx: 14 }, // W1 Level 15
+    { worldId: 1, levelIdx: 19 }, // W1 Level 20
+    { worldId: 1, levelIdx: 24 }, // W1 Level 25
+    { worldId: 1, levelIdx: 29 }, // W1 Level 30
+    // Add more worlds here as you build them:
+    // { worldId: 2, levelIdx: 4 },
+  ];
+
   // ── Plant Unlock Table ─────────────────────────
   // levelIdx is 0-based: level 1 = idx 0, level 2 = idx 1
   const PLANT_UNLOCKS = [
-    { worldId: 1, levelIdx: 0, plantId: "peashooter" }, // W1 Level 1
-    { worldId: 1, levelIdx: 1, plantId: "sunflower" }, // W1 Level 2
-    { worldId: 1, levelIdx: 6, plantId: "icepea" }, // W1 Level 7
-    { worldId: 1, levelIdx: 9, plantId: "glacierbud" }, // W1 Level 10
-    { worldId: 1, levelIdx: 12, plantId: "bonkchoy" }, // W1 Level 13
-    { worldId: 1, levelIdx: 0, plantId: "peashooter" },
-    { worldId: 1, levelIdx: 1, plantId: "sunflower" },
-    { worldId: 1, levelIdx: 2, plantId: "lilybeam" },
-    { worldId: 1, levelIdx: 3, plantId: "sporepuff" },
-    { worldId: 1, levelIdx: 4, plantId: "voltlotus" },
-    { worldId: 1, levelIdx: 5, plantId: "lavaburst" },
-    // Future plants added here
+    { worldId: 1, levelIdx: 0,plantId: "peashooter" },
+    { worldId: 1, levelIdx: 0,plantId: "sunflower" },
+    { worldId: 1, levelIdx: 0,plantId: "icepea" },
+    { worldId: 1, levelIdx: 0,plantId: "bonkchoy" },
+    { worldId: 1, levelIdx: 0,plantId: "glacierbud" },
+    { worldId: 1, levelIdx: 0,plantId: "lilybeam" },
+    { worldId: 1, levelIdx: 0,plantId: "sporepuff" },
+    { worldId: 1, levelIdx: 0,plantId: "lavaburst" },
+    { worldId: 1, levelIdx: 0,plantId: "voltlotus" },
   ];
 
   // ── Minigame Unlock Table ──────────────────────
@@ -648,6 +674,35 @@ const Levels = (() => {
     }
   }
 
+  // ── Packet Reward Logic ────────────────────────
+  function checkPacketReward(worldId, levelIdx) {
+    return PACKET_REWARDS.find(
+      (p) => p.worldId === worldId && p.levelIdx === levelIdx
+    ) || null;
+  }
+
+  function generatePacketContents(worldId) {
+    const pool = WORLD_PLANTS[worldId] || WORLD_PLANTS[1];
+    // Pick 3 unique plants
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+    const picks = shuffled.slice(0, Math.min(3, shuffled.length));
+
+    // Build 3 slots: each is seeds, but 1% chance = looms
+    const slots = picks.map((plantId) => {
+      const isLoom = Math.random() < 0.01; // 1% chance
+      if (isLoom) {
+        return { type: "looms", amount: 10 };
+      }
+      return { type: "seeds", plantId, amount: 10 };
+    });
+
+    return slots;
+  }
+
+  function getWorldPlants(worldId) {
+    return WORLD_PLANTS[worldId] || [];
+  }
+
   return {
     getAllWorlds,
     getWorld,
@@ -657,6 +712,9 @@ const Levels = (() => {
     checkPlantUnlocks,
     checkMinigameUnlocks,
     getTempPlants,
+    checkPacketReward,
+    generatePacketContents,
+    getWorldPlants,
     DEMON_STATS,
     PLANT_UNLOCKS,
     MINIGAME_UNLOCKS,

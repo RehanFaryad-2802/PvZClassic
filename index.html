@@ -22,11 +22,79 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <meta name="screen-orientation" content="landscape" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <style>
+      /* Block ALL screens until fonts + scripts ready */
+      body { visibility: hidden; }
+      #screen-loading {
+        visibility: visible;
+        position: fixed;
+        inset: 0;
+        background: #0a0010;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+        gap: 24px;
+      }
+      #screen-loading .ld-logo {
+        font-size: 52px;
+        font-weight: 900;
+        letter-spacing: 2px;
+        color: #fff;
+        text-shadow: 0 0 30px #a855f7, 0 0 60px #7c3aed;
+        font-family: sans-serif;
+      }
+      #screen-loading .ld-logo span { color: #a855f7; }
+      #screen-loading .ld-sub {
+        color: #a78bfa;
+        font-size: 14px;
+        font-family: sans-serif;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+      }
+      #screen-loading .ld-bar-wrap {
+        width: 220px;
+        height: 8px;
+        background: #1e1035;
+        border-radius: 99px;
+        overflow: hidden;
+        border: 1px solid #4c1d95;
+      }
+      #screen-loading .ld-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #7c3aed, #a855f7, #ec4899);
+        border-radius: 99px;
+        transition: width 0.3s ease;
+        box-shadow: 0 0 10px #a855f7;
+      }
+      #screen-loading .ld-tip {
+        color: #6b21a8;
+        font-size: 12px;
+        font-family: sans-serif;
+        max-width: 260px;
+        text-align: center;
+        min-height: 32px;
+      }
+    </style>
     <link rel="stylesheet" href="css/main.css" />
     <link rel="stylesheet" href="css/game.css" />
     <link rel="stylesheet" href="css/minigames.css" />
   </head>
   <body>
+    <!-- ══════════════════════════════════════════
+       SCREEN: LOADING
+  ══════════════════════════════════════════ -->
+    <div id="screen-loading">
+      <div class="ld-logo">PvZ<span>Classic</span></div>
+      <div class="ld-sub">Plants vs Demons</div>
+      <div class="ld-bar-wrap"><div class="ld-bar" id="ld-bar"></div></div>
+      <div class="ld-tip" id="ld-tip">Loading game data...</div>
+    </div>
+
     <!-- ══════════════════════════════════════════
        SCREEN: NAME ENTRY
   ══════════════════════════════════════════ -->
@@ -361,14 +429,14 @@
        GLOBAL TOAST NOTIFICATION
   ══════════════════════════════════════════ -->
     <div id="toast" class="toast hidden"></div>
-
-    <script src="js/audio.js"></script>
-    <script src="js/player.js"></script>
     <style>
       * {
         -webkit-tap-highlight-color: transparent;
         touch-action: manipulation;
       }
+      *::-webkit-scrollbar {
+        display: none;
+}
       body {
         overscroll-behavior: none;
         overflow: hidden;
@@ -379,6 +447,38 @@
         -webkit-user-select: none;
       }
     </style>
+    <style>
+      /* ── Coins Tab ── */
+      .inv-coins-tab {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px;
+      }
+      .inv-currency-card {
+        background: rgba(168,85,247,0.06);
+        border: 1px solid rgba(168,85,247,0.25);
+        border-radius: 14px;
+        padding: 20px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .inv-currency-label { font-size: 11px; color: #a78bfa; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 2px; }
+      .inv-currency-amount { font-size: 36px; font-weight: 900; color: #fff; font-family: var(--font-display, sans-serif); line-height: 1; }
+      .inv-currency-hint { font-size: 11px; color: #4b5563; }
+
+      /* ── Mini Packet card ── */
+      .inv-minipacket-card { border-color: rgba(168,85,247,0.5) !important; }
+
+      /* ── Result screen packet reward ── */
+      .reward-packet { border-color: rgba(168,85,247,0.5) !important; background: rgba(168,85,247,0.08) !important; }
+      .reward-packet-img { width: 44px; height: 44px; object-fit: contain; filter: drop-shadow(0 0 8px #a855f7); }
+      .reward-packet-hint { font-size: 10px; color: #7c3aed; text-align: center; margin-top: -8px; margin-bottom: 4px; }
+    </style>
+
+    <script src="js/audio.js"></script>
+    <script src="js/player.js"></script>
     <script src="js/seeds.js"></script>
     <script src="js/coins.js"></script>
     <script src="js/levels.js"></script>
@@ -405,7 +505,50 @@
     <script>
       // Boot
       window.addEventListener("DOMContentLoaded", () => {
-        UI.init();
+        const bar = document.getElementById("ld-bar");
+        const tip = document.getElementById("ld-tip");
+        const tips = [
+          "Watering your plants...",
+          "Summoning demons...",
+          "Loading worlds...",
+          "Sharpening thorns...",
+          "Ready to battle!",
+        ];
+        let progress = 0;
+
+        function setProgress(pct, msg) {
+          if (bar) bar.style.width = pct + "%";
+          if (tip && msg) tip.textContent = msg;
+        }
+
+        // Animate progress while fonts + everything loads
+        setProgress(10, tips[0]);
+        setTimeout(() => setProgress(30, tips[1]), 600);
+        setTimeout(() => setProgress(55, tips[2]), 1200);
+        setTimeout(() => setProgress(75, tips[3]), 1800);
+
+        // Wait for fonts to finish loading, then boot
+        const ready = () => {
+          setProgress(100, tips[4]);
+          setTimeout(() => {
+            // Make body visible now that fonts are ready
+            document.body.style.visibility = "visible";
+            // Fade out loading screen
+            const ld = document.getElementById("screen-loading");
+            if (ld) {
+              ld.style.transition = "opacity 0.4s ease";
+              ld.style.opacity = "0";
+              setTimeout(() => ld.remove(), 400);
+            }
+            UI.init();
+          }, 300);
+        };
+
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(() => setTimeout(ready, 2200));
+        } else {
+          setTimeout(ready, 2800);
+        }
 
         // Fix mobile touch for name entry button
         const startBtn = document.getElementById("btn-start-game");

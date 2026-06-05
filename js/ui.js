@@ -482,7 +482,7 @@ const UI = (() => {
       card.innerHTML = `
         <img src="${def.image}" alt="${def.name}" />
         <div class="plant-card-name">${def.name}</div>
-        <div class="plant-card-level">${isTemp ? "🔒 Trial" : `Lv.${level}`} · ☀️${def.cost}</div>
+        <div class="plant-card-level">${isTemp ? "🔒 Trial" : `Lv.${level}`} · ☀️${def.levelStats?.[level]?.cost ?? def.cost}</div>
       `;
 
       if (owned) {
@@ -543,7 +543,8 @@ const UI = (() => {
       card.dataset.plantId = id;
       card.innerHTML = `
         <img src="${def.image}" alt="${def.name}" />
-        <div class="tray-cost">☀️${def.cost}</div>
+        <div class="tray-cost">☀️${def.levelStats?.[Player.getPlant(id)?.level ?? 1]?.cost ?? def.cost}</div>
+        <div class="tray-select-line"></div>
       `;
       card.addEventListener("click", () => {
         SoundFX.play("plant_select");
@@ -572,7 +573,8 @@ const UI = (() => {
     const def = PlantRegistry.get(plantId);
     if (!def) return;
 
-    const canAfford = sunAvailable >= def.cost;
+    const plantLvl = Player.getPlant(def.id)?.level ?? 1;
+    const canAfford = sunAvailable >= (def.levelStats?.[plantLvl]?.cost ?? def.cost);
     card.classList.toggle("no-sun", !canAfford && !onCooldown);
     card.classList.toggle("cooldown", onCooldown);
 
@@ -640,7 +642,8 @@ const UI = (() => {
           <div class="inv-right" id="inv-right">
             <div class="inv-tabs" id="inv-tabs">
               <button class="inv-tab active" data-tab="plants">🌿 Plants</button>
-              <button class="inv-tab" data-tab="packets">📦 Packets</button>
+              <button class="inv-tab" data-tab="packets">📦 Items</button>
+              <button class="inv-tab" data-tab="coins">🪙 Coins</button>
             </div>
             <div class="inv-grid" id="inv-grid"></div>
           </div>
@@ -671,6 +674,14 @@ const UI = (() => {
     const grid = document.getElementById("inv-grid");
     if (!grid) return;
     grid.innerHTML = "";
+    grid.style.display = "";
+    grid.style.flexDirection = "";
+    grid.style.gap = "";
+    grid.style.padding = "";
+
+    // Reset left panel to empty state when switching tabs
+    const left = document.getElementById("inv-left");
+    if (left) left.innerHTML = `<div class="inv-detail-empty">Select an item</div>`;
 
     if (tab === "plants") {
       const allPlants = PlantRegistry.getAll();
@@ -713,8 +724,10 @@ const UI = (() => {
       const packetDefs = Shop.SEED_PACKETS;
 
       let hasAny = false;
+
+      // ── Shop packets ──
       Object.values(packetDefs).forEach((def) => {
-        const owned = inv.find((i) => i.id === def.id);
+        const owned = inv.find((i) => i.id === def.id && !i.meta);
         const qty = owned ? owned.quantity : 0;
         if (qty === 0) return;
         hasAny = true;
@@ -732,9 +745,82 @@ const UI = (() => {
         grid.appendChild(card);
       });
 
+      // ── Mini packets from level rewards ──
+      const miniPackets = inv.filter((i) => i.meta && i.meta.type === "minipacket");
+      miniPackets.forEach((item) => {
+        hasAny = true;
+        const worldId = item.meta.worldId || "?";
+        const card = document.createElement("div");
+        card.className = "inv-item-card inv-packet-card inv-minipacket-card";
+        card.innerHTML = `
+          <img src="assets/shop/minipacket.png" style="width:56px;height:56px;object-fit:contain;filter:drop-shadow(0 0 10px #a855f7)"/>
+          <div class="inv-item-name">Seed Packet</div>
+          <div class="inv-packet-qty" style="color:#a855f7">W${worldId}</div>
+          <div style="font-size:9px;color:#6b7280;margin-top:2px">Tap to open</div>
+        `;
+        card.addEventListener("click", () =>
+          selectInventoryItem("minipacket", item.id),
+        );
+        grid.appendChild(card);
+      });
+
       if (!hasAny) {
-        grid.innerHTML = `<div class="inv-empty">No packets in inventory.<br>Buy some from the Shop!</div>`;
+        grid.innerHTML = `<div class="inv-empty">No packets in inventory.<br>Complete levels or buy from Shop!</div>`;
       }
+
+    } else if (tab === "coins") {
+      // Coins card
+      const coinCard = document.createElement("div");
+      coinCard.className = "inv-item-card inv-packet-card";
+      coinCard.innerHTML = `
+        <div style="font-size:36px;line-height:1">🪙</div>
+        <div class="inv-item-name">Coins</div>
+        <div class="inv-packet-qty" style="color:#fbbf24">${Player.getCoins()}</div>
+      `;
+      coinCard.addEventListener("click", () => {
+        const left = document.getElementById("inv-left");
+        if (!left) return;
+        left.innerHTML = `
+          <div class="inv-detail" style="text-align:center">
+            <div class="inv-detail-name">🪙 Coins</div>
+            <div style="font-size:56px;margin:12px 0">🪙</div>
+            <div class="inv-currency-amount" style="font-size:40px;font-weight:900;color:#fbbf24">${Player.getCoins()}</div>
+            <div style="margin-top:12px;font-size:11px;color:#6b7280;line-height:1.7">
+              The main currency of PvZ Classic.<br>
+              Earned by completing levels.<br>
+              Used to level up plants and buy items from the Shop.
+            </div>
+          </div>
+        `;
+      });
+      grid.appendChild(coinCard);
+
+      // Looms card
+      const loomCard = document.createElement("div");
+      loomCard.className = "inv-item-card inv-packet-card";
+      loomCard.style.borderColor = "rgba(250,204,21,0.4)";
+      loomCard.innerHTML = `
+        <img src="assets/shop/loom.png" style="width:44px;height:44px;object-fit:contain"/>
+        <div class="inv-item-name" style="color:#fbbf24">Looms</div>
+        <div class="inv-packet-qty" style="color:#fbbf24">${Player.getLooms()}</div>
+      `;
+      loomCard.addEventListener("click", () => {
+        const left = document.getElementById("inv-left");
+        if (!left) return;
+        left.innerHTML = `
+          <div class="inv-detail" style="text-align:center">
+            <div class="inv-detail-name" style="color:#fbbf24">✨ Looms</div>
+            <img src="assets/shop/loom.png" style="width:64px;height:64px;object-fit:contain;margin:12px auto;display:block;filter:drop-shadow(0 0 16px #fbbf24)"/>
+            <div class="inv-currency-amount" style="font-size:40px;font-weight:900;color:#fbbf24">${Player.getLooms()}</div>
+            <div style="margin-top:12px;font-size:11px;color:#6b7280;line-height:1.7">
+              A rare and valuable currency.<br>
+              Found inside Seed Packets with a <span style="color:#fbbf24">1% chance</span>.<br>
+              Used for premium upgrades and special items in the Shop.
+            </div>
+          </div>
+        `;
+      });
+      grid.appendChild(loomCard);
     }
   }
 
@@ -752,6 +838,74 @@ const UI = (() => {
     inventorySelectedItem = { type, id };
     const left = document.getElementById("inv-left");
     if (!left) return;
+
+    if (type === "minipacket") {
+      const inv = Player.getInventory();
+      const item = inv.find((i) => i.id === id);
+      if (!item || !item.meta) return;
+      const worldId = item.meta.worldId;
+
+      left.innerHTML = `
+        <div class="inv-detail">
+          <div class="inv-detail-name">🎁 World ${worldId} Seed Packet</div>
+          <div class="inv-packet-big-img">
+            <img src="assets/shop/minipacket.png" alt="World Packet"
+              style="width:72px;height:72px;object-fit:contain;filter:drop-shadow(0 0 16px #a855f7)"/>
+          </div>
+          <div class="inv-detail-desc">
+            3 mystery seeds from World ${worldId} plants.<br>
+            One slot has a <span style="color:#fbbf24;font-weight:700">1% chance</span> of 10 Looms!
+          </div>
+          <div style="display:flex;justify-content:center;gap:10px;margin:12px 0">
+            <div style="width:44px;height:58px;background:rgba(168,85,247,0.15);border:2px solid rgba(168,85,247,0.5);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px">❓</div>
+            <div style="width:44px;height:58px;background:rgba(168,85,247,0.15);border:2px solid rgba(168,85,247,0.5);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px">❓</div>
+            <div style="width:44px;height:58px;background:rgba(168,85,247,0.15);border:2px solid rgba(168,85,247,0.5);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px">❓</div>
+          </div>
+          <div class="inv-packet-qty-big">You have: <strong>×1</strong></div>
+          <div class="inv-actions">
+            <button class="inv-action-btn inv-open-btn" id="btn-open-minipacket">
+              📦 Open Packet
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("btn-open-minipacket").addEventListener("click", () => {
+        // Open packet and get raw contents
+        const rawContents = Player.openPacket(id);
+        if (!rawContents) return;
+
+        // Convert to the format showPacketOpenAnimation expects
+        const animResults = rawContents.map(slot => {
+          if (slot.type === "looms") {
+            return {
+              plantId: "__looms__",
+              plantName: "Looms",
+              image: "assets/shop/loom.png",
+              seeds: 0,
+              isLooms: true,
+              amount: slot.amount,
+            };
+          }
+          const def = PlantRegistry.get(slot.plantId);
+          return {
+            plantId: slot.plantId,
+            plantName: def ? def.name : slot.plantId,
+            image: def ? def.image : "assets/shop/minipacket.png",
+            seeds: slot.amount,
+            isLooms: false,
+          };
+        });
+
+        updateCoinDisplays();
+        buildInventoryGrid("packets");
+        left.innerHTML = `<div class="inv-detail-empty">Select an item</div>`;
+
+        // Reuse the existing packet open animation
+        showMiniPacketAnimation(animResults);
+      });
+      return;
+    }
 
     if (type === "plant") {
       const def = PlantRegistry.get(id);
@@ -1777,7 +1931,7 @@ const UI = (() => {
       legendary: "#f59e0b",
     };
 
-    Object.values(Shop.SEED_PACKETS).forEach((def) => {
+    Object.values(Shop.SEED_PACKETS).filter(def => !def.isMiniPacket).forEach((def) => {
       const inv = Player.getInventory();
       const owned = inv.find((i) => i.id === def.id);
       const qty = owned ? owned.quantity : 0;
@@ -1852,14 +2006,40 @@ const UI = (() => {
     `;
   }
 
-  // ── Battle Result ──────────────────────────────
   function showBattleResult(
     won,
     coinReward,
     seedReward,
     unlockedPlants = null,
     unlockedMinigames = null,
+    packetReward = null,
   ) {
+    // ── Save progress when won ──
+    if (won) {
+      // Give coins
+      Player.addCoins(coinReward || 0);
+
+      // Save stars (calculate based on performance — default 3 for now,
+      // your Core can pass a stars param if you want 1/2/3 logic)
+      const stars = 3;
+      Player.setLevelStars(pendingBattleWorld, pendingBattleLevel, stars);
+
+      // Check if this unlocks new worlds
+      Levels.checkWorldUnlocks();
+
+      // Give seeds if any
+      if (seedReward && seedReward.plantId && seedReward.amount) {
+        Player.addSeeds(seedReward.plantId, seedReward.amount);
+      }
+
+      // Check for plant/minigame unlocks triggered by this level
+      if (!unlockedPlants) {
+        unlockedPlants = Levels.checkPlantUnlocks(pendingBattleWorld, pendingBattleLevel);
+      }
+      if (!unlockedMinigames) {
+        unlockedMinigames = Levels.checkMinigameUnlocks(pendingBattleWorld, pendingBattleLevel);
+      }
+    }
     // ── Clean up any leftover sun coins / floating effects ──
     const effectsLayer = document.getElementById("effects-layer");
     if (effectsLayer) {
@@ -1884,6 +2064,15 @@ const UI = (() => {
     rewardsEl.innerHTML = "";
     if (won) {
       rewardsEl.innerHTML += `<div class="reward-row"><span>Coins Earned</span><span>🪙 ${coinReward}</span></div>`;
+      if (packetReward) {
+        rewardsEl.innerHTML += `
+          <div class="reward-row reward-packet">
+            <span>🎁 Seed Packet</span>
+            <img src="assets/shop/minipacket.png" class="reward-packet-img" title="Added to inventory!" />
+          </div>
+          <div class="reward-packet-hint">Open in Inventory → Items</div>
+        `;
+      }
       if (seedReward) {
         const pname =
           PlantRegistry.get(seedReward.plantId)?.name || seedReward.plantId;
@@ -1989,14 +2178,36 @@ const UI = (() => {
     }
   }
 
+  // Elements that handle their own sound — skip global click sound on these
+  const SOUND_SELF_HANDLED = [
+    "tray-card",
+    "tray-plant",
+    "grid-cell",
+    "plant-entity",
+  ];
+
   document.addEventListener(
     "click",
     (e) => {
-      SoundFX.play("btn_click");
-      // Check if active screen is excluded
       const activeScreen = document.querySelector(".screen.active");
-      if (activeScreen && SPARK_EXCLUDED.has(activeScreen.id)) return;
-      spawnClickSpark(e.clientX, e.clientY);
+
+      // Skip click sound if target is a plant card or grid cell (they play their own)
+      const isSelfHandled = SOUND_SELF_HANDLED.some((cls) =>
+        e.target.closest(`.${cls}`),
+      );
+
+      // Skip click sound in battle entirely — only spark excluded, sound excluded too
+      const isExcludedScreen =
+        activeScreen && SPARK_EXCLUDED.has(activeScreen.id);
+
+      if (!isSelfHandled && !isExcludedScreen) {
+        SoundFX.play("btn_click");
+      }
+
+      // Spark — excluded in battle/minigames regardless
+      if (!isExcludedScreen) {
+        spawnClickSpark(e.clientX, e.clientY);
+      }
     },
     true,
   );
@@ -2120,10 +2331,14 @@ const UI = (() => {
     document.getElementById("btn-result-next").addEventListener("click", () => {
       const next = pendingBattleLevel + 1;
       const world = Levels.getWorld(pendingBattleWorld);
-      if (next < world.levelCount) {
+      if (next < world.levelCount && Player.isLevelUnlocked(pendingBattleWorld, next)) {
         openPlantPicker(pendingBattleWorld, next);
-      } else {
+      } else if (next >= world.levelCount) {
+        // Last level of world — go to world map (world unlock already saved)
         showScreen("screen-worldmap");
+      } else {
+        // Shouldn't happen after fix, but safety fallback
+        showScreen("screen-levelselect");
       }
     });
     document
@@ -2249,9 +2464,9 @@ const UI = (() => {
 
     requestAnimationFrame(() => overlay.classList.add("packet-open-active"));
 
-    const cardsArea = document.getElementById("packet-cards-area");
-    const summary = document.getElementById("packet-summary");
-    const closeBtn = document.getElementById("packet-close-btn");
+    const cardsArea = overlay.querySelector("#packet-cards-area");
+    const summary = overlay.querySelector("#packet-summary");
+    const closeBtn = overlay.querySelector("#packet-close-btn");
 
     // Reveal cards one by one
     let i = 0;
@@ -2330,40 +2545,137 @@ const UI = (() => {
       `;
     }
 
-    closeBtn.addEventListener("click", () => {
-      overlay.classList.remove("packet-open-active");
-      setTimeout(() => {
-        overlay.remove();
-        // Refresh inventory
-        buildInventoryGrid("packets");
-        selectInventoryItem("packet", packetId);
-      }, 300);
-    });
-
-    // Skip button — jump straight to summary
-    const skipBtn = document.getElementById("packet-skip-btn");
+    const skipBtn = overlay.querySelector("#packet-skip-btn");
     if (skipBtn) {
       skipBtn.classList.remove("hidden");
       skipBtn.addEventListener("click", () => {
-        // Aggregate all remaining cards into summaryMap
         while (i < results.length) {
-          const r = results[i];
-          i++;
-          summaryMap[r.plantId] = summaryMap[r.plantId] || {
-            name: r.plantName,
-            image: r.image,
-            seeds: 0,
-          };
+          const r = results[i++];
+          summaryMap[r.plantId] = summaryMap[r.plantId] || { name: r.plantName, image: r.image, seeds: 0 };
           summaryMap[r.plantId].seeds += r.seeds;
         }
         showSummary();
       });
     }
 
-    // Start reveals
-    setTimeout(revealNext, 500);
+    closeBtn.addEventListener("click", () => {
+      overlay.classList.remove("packet-open-active");
+      setTimeout(() => {
+        overlay.remove();
+        buildInventoryGrid("packets");
+        selectInventoryItem("packet", packetId);
+      }, 300);
+    });
+
+    revealNext();
+  } // end showPacketOpenAnimation
+
+  function showMiniPacketAnimation(results) {
+    const overlay = document.createElement("div");
+    overlay.className = "packet-open-overlay";
+    overlay.innerHTML = `
+      <div class="packet-open-stage">
+        <div class="packet-open-title">🎁 Opening Seed Packet...</div>
+        <div class="packet-cards-area" id="packet-cards-area"></div>
+        <div class="packet-summary hidden" id="packet-summary"></div>
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:8px">
+          <button class="packet-close-btn hidden" id="packet-skip-btn" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:var(--gray);font-size:13px;padding:8px 18px;border-radius:8px;cursor:pointer">⏭ Skip</button>
+          <button class="packet-close-btn hidden" id="packet-close-btn">✓ Done</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add("packet-open-active"));
+
+    const cardsArea = overlay.querySelector("#packet-cards-area");
+    const summary = overlay.querySelector("#packet-summary");
+    const closeBtn = overlay.querySelector("#packet-close-btn");
+    const skipBtn = overlay.querySelector("#packet-skip-btn");
+    let i = 0;
+    const summaryItems = [];
+
+    function revealNext() {
+      if (i >= results.length) { showSummary(); return; }
+      const r = results[i++];
+      summaryItems.push(r);
+
+      const card = document.createElement("div");
+      card.className = "packet-reveal-card";
+      if (r.isLooms) {
+        card.innerHTML = `
+          <div class="prc-inner">
+            <div class="prc-front">❓</div>
+            <div class="prc-back" style="background:linear-gradient(135deg,#92400e,#b45309)">
+              <span class="prc-sparkle prc-sparkle-tl">✦</span>
+              <span class="prc-sparkle prc-sparkle-tr">✦</span>
+              <span class="prc-sparkle prc-sparkle-bl">✦</span>
+              <span class="prc-sparkle prc-sparkle-br">✦</span>
+              <img src="${r.image}" alt="Looms" style="filter:drop-shadow(0 0 12px #fbbf24)"/>
+              <div class="prc-plant-name" style="color:#fbbf24">✨ Looms!</div>
+              <div class="prc-seeds" style="color:#fde68a">+${r.amount} Looms</div>
+            </div>
+          </div>`;
+      } else {
+        card.innerHTML = `
+          <div class="prc-inner">
+            <div class="prc-front">❓</div>
+            <div class="prc-back">
+              <span class="prc-sparkle prc-sparkle-tl">✦</span>
+              <span class="prc-sparkle prc-sparkle-tr">✦</span>
+              <span class="prc-sparkle prc-sparkle-bl">✦</span>
+              <span class="prc-sparkle prc-sparkle-br">✦</span>
+              <img src="${r.image}" alt="${r.plantName}"/>
+              <div class="prc-plant-name">${r.plantName}</div>
+              <div class="prc-seeds">+${r.seeds} 🌱</div>
+            </div>
+          </div>`;
+      }
+
+      if (cardsArea.children.length >= 3) cardsArea.removeChild(cardsArea.firstChild);
+      cardsArea.appendChild(card);
+      setTimeout(() => { card.classList.add("flipped"); setTimeout(revealNext, 600); }, 300);
+    }
+
+    function showSummary() {
+      cardsArea.classList.add("hidden");
+      summary.classList.remove("hidden");
+      closeBtn.classList.remove("hidden");
+      skipBtn.classList.add("hidden");
+      summary.innerHTML = `
+        <div class="packet-summary-title">🎉 You received!</div>
+        <div class="packet-summary-grid">
+          ${summaryItems.map(r => r.isLooms
+            ? `<div class="packet-summary-row">
+                <img src="${r.image}" alt="Looms"/>
+                <span style="color:#fbbf24">Looms</span>
+                <span class="psr-seeds" style="color:#fbbf24">+${r.amount} ✨</span>
+               </div>`
+            : `<div class="packet-summary-row">
+                <img src="${r.image}" alt="${r.plantName}"/>
+                <span>${r.plantName}</span>
+                <span class="psr-seeds">+${r.seeds} 🌱</span>
+               </div>`
+          ).join("")}
+        </div>
+      `;
+    }
+
+    skipBtn.classList.remove("hidden");
+    skipBtn.addEventListener("click", () => {
+      while (i < results.length) summaryItems.push(results[i++]);
+      showSummary();
+    });
+
+    closeBtn.addEventListener("click", () => {
+      overlay.classList.remove("packet-open-active");
+      setTimeout(() => overlay.remove(), 300);
+    });
+
+    revealNext();
   }
+
   function showUpgradeCard(def, oldLevel, newLevel, oldStats, newStats) {
+    SoundFX.play("level_up");
     // Build stat comparison list
     const statDefs = getStatDefs(def.id, oldStats, newStats);
     if (statDefs.length === 0) {

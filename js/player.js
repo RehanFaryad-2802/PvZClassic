@@ -187,15 +187,49 @@ const Player = (() => {
     return data.inventory;
   }
 
-  function addInventoryItem(itemId, quantity = 1) {
+  function addInventoryItem(itemId, quantity = 1, meta = null) {
     if (!data.inventory) data.inventory = [];
-    const existing = data.inventory.find((i) => i.id === itemId);
+    // Packets are unique items (never stacked), stored with metadata
+    if (meta && meta.type === "minipacket") {
+      data.inventory.push({ id: itemId, quantity: 1, meta });
+      save();
+      return;
+    }
+    const existing = data.inventory.find((i) => i.id === itemId && !i.meta);
     if (existing) {
       existing.quantity += quantity;
     } else {
       data.inventory.push({ id: itemId, quantity });
     }
     save();
+  }
+
+  function openPacket(packetId) {
+    if (!data.inventory) return null;
+    const idx = data.inventory.findIndex((i) => i.id === packetId);
+    if (idx === -1) return null;
+    const packet = data.inventory[idx];
+    if (!packet.meta || packet.meta.type !== "minipacket") return null;
+    const contents = packet.meta.contents;
+    // Apply rewards
+    contents.forEach((slot) => {
+      if (slot.type === "looms") {
+        data.looms = (data.looms || 0) + slot.amount;
+      } else if (slot.type === "seeds" && slot.plantId) {
+        if (!data.plants[slot.plantId]) return;
+        data.plants[slot.plantId].seeds = (data.plants[slot.plantId].seeds || 0) + slot.amount;
+        // Auto-unlock if threshold met
+        const UNLOCK_SEEDS = 10;
+        if (!data.plants[slot.plantId].owned && data.plants[slot.plantId].seeds >= UNLOCK_SEEDS) {
+          data.plants[slot.plantId].owned = true;
+          data.plants[slot.plantId].seeds -= UNLOCK_SEEDS;
+        }
+      }
+    });
+    // Remove packet from inventory
+    data.inventory.splice(idx, 1);
+    save();
+    return contents;
   }
 
   function removeInventoryItem(itemId, quantity = 1) {
@@ -441,6 +475,7 @@ const Player = (() => {
     getInventory,
     addInventoryItem,
     removeInventoryItem,
+    openPacket,
     getPlants,
     getPlant,
     getOwnedPlants,

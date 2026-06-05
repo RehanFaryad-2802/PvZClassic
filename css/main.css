@@ -388,6 +388,7 @@ html, body {
 .levelselect-header, .collection-header,
 .minigames-header, .shop-header, .picker-header {
   display: flex;
+  margin: 10px 20px;
   align-items: center;
   justify-content: space-between;
 }
@@ -841,7 +842,6 @@ html, body {
 ═══════════════════════════════════════════════════ */
 .minigames-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 18px;
   padding: 16px;
   overflow-y: auto;
@@ -1647,7 +1647,9 @@ html, body {
   .mg-card { padding: 10px; }
   .mg-card-icon { font-size: 28px; }
   .mg-card-name { font-size: 14px; }
-
+  #screen-minigames{
+  overflow: scroll !important;
+  }
   /* Buttons */
   .btn-primary { font-size: 18px; padding: 10px 24px; }
   .btn-secondary { font-size: 16px; padding: 8px 20px; }

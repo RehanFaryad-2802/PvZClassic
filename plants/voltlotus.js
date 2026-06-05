@@ -11,7 +11,7 @@ PlantRegistry.register({
   fireDistance: 9,
   cooldown: 7000,
   hp: 320,
-  hitCount: 3,
+  hitCount: 1,
   fireRate: 2000,
   description: "Chain lightning that hits all demons in its lane.",
 
@@ -160,8 +160,11 @@ PlantRegistry.register({
     const isOvercharge = plantData.shotCount % 5 === 0;
     const mult = isOvercharge ? 3 : 1;
 
+    // Limit chain to hitCount targets
+    const chainTargets = demonsInRow.slice(0, this.hitCount);
+
     // Hit first demon with full damage, chain to rest with half
-    demonsInRow.forEach((d, i) => {
+    chainTargets.forEach((d, i) => {
       const dmg = i === 0 ? stats.damage * mult : stats.chainDamage * mult;
       setTimeout(() => {
         if (!d.dead) Demons.damage(d, dmg, "electric");
@@ -169,7 +172,7 @@ PlantRegistry.register({
     });
 
     // Lightning visual
-    showLightning(row, col, demonsInRow, isOvercharge);
+    showLightning(row, col, chainTargets, isOvercharge);
 
     // Discharge animation
     const cell = Grid.getCellEl(row, col);

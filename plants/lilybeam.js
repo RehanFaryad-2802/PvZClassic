@@ -7,8 +7,7 @@ PlantRegistry.register({
   id: "lilybeam",
   name: "Lily Beam",
   image: "assets/plants/lilybeam.png",
-  cost: 50,
-  // cost: 200,
+  cost: 200,
   fireDistance: 9,
   cooldown: 6000,
   fireDistance: 7,
@@ -20,105 +19,90 @@ PlantRegistry.register({
   levelStats: {
     1: {
       hp: 350,
-      fireRate: 2500,
       damage: 18,
       freezeDuration: 2000,
       shieldCooldown: 8000,
     },
     2: {
       hp: 420,
-      fireRate: 2300,
       damage: 23,
       freezeDuration: 2300,
       shieldCooldown: 7500,
     },
     3: {
       hp: 500,
-      fireRate: 2100,
       damage: 29,
       freezeDuration: 2600,
       shieldCooldown: 7000,
     },
     4: {
       hp: 600,
-      fireRate: 1900,
       damage: 36,
       freezeDuration: 3000,
       shieldCooldown: 6500,
     },
     5: {
       hp: 720,
-      fireRate: 1700,
       damage: 44,
       freezeDuration: 3400,
       shieldCooldown: 6000,
     },
     6: {
       hp: 860,
-      fireRate: 1500,
       damage: 54,
       freezeDuration: 3800,
       shieldCooldown: 5500,
     },
     7: {
       hp: 1000,
-      fireRate: 1400,
       damage: 65,
       freezeDuration: 4200,
       shieldCooldown: 5000,
     },
     8: {
       hp: 1150,
-      fireRate: 1300,
       damage: 78,
       freezeDuration: 4600,
       shieldCooldown: 4500,
     },
     9: {
       hp: 1300,
-      fireRate: 1200,
       damage: 92,
       freezeDuration: 5000,
       shieldCooldown: 4000,
     },
     10: {
       hp: 1500,
-      fireRate: 1100,
       damage: 108,
       freezeDuration: 5500,
       shieldCooldown: 3500,
     },
     11: {
       hp: 1700,
-      fireRate: 1000,
       damage: 125,
       freezeDuration: 6000,
       shieldCooldown: 3000,
     },
     12: {
       hp: 1900,
-      fireRate: 900,
       damage: 144,
       freezeDuration: 6500,
       shieldCooldown: 2800,
     },
     13: {
       hp: 2100,
-      fireRate: 820,
       damage: 165,
       freezeDuration: 7000,
       shieldCooldown: 2600,
     },
     14: {
       hp: 2350,
-      fireRate: 750,
       damage: 188,
       freezeDuration: 7500,
       shieldCooldown: 2400,
     },
     15: {
       hp: 2600,
-      fireRate: 680,
       damage: 215,
       freezeDuration: 8000,
       shieldCooldown: 2000,
@@ -182,6 +166,7 @@ PlantRegistry.register({
     const stats = this.getStats(plantData.level);
 
     // Freeze ALL demons in row
+    SoundFX.play("beam_shoot");
     active.forEach((d) => {
       if (d.dead || d.row !== row) return;
       const dRect = d.el.getBoundingClientRect();

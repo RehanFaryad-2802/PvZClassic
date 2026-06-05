@@ -124,6 +124,8 @@ const Grid = (() => {
   function removePlant(row, col) {
     const p = grid[row][col];
     if (!p) return;
+    if (shovelActive && typeof SoundFX !== "undefined")
+      SoundFX.play("plant_remove");
 
     // Trigger onRemove
     if (typeof PlantRegistry !== "undefined") {

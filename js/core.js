@@ -44,6 +44,7 @@ const Core = (() => {
     sun = levelData.startingSun;
     running = true;
     paused = false;
+    requestAnimationFrame(loop);
     document.getElementById("pause-overlay")?.classList.add("hidden");
     elapsed = 0;
     currentWaveIdx = 0;
@@ -83,6 +84,16 @@ const Core = (() => {
     const projLayer = document.getElementById("projectiles-layer");
     const effectsLayer = document.getElementById("effects-layer");
 
+    // ── Ghost demon fix: wipe ALL leftover demons/plants from any previous battle ──
+    Demons.clear();
+    Grid.clear();
+    // Also remove any stale demon DOM elements that survived (safety net)
+    if (demonsLayer) demonsLayer.innerHTML = "";
+    if (effectsLayer) {
+      // Only remove demon hp bars / float texts, not the layer itself
+      effectsLayer.querySelectorAll(".demon-hp-wrap, .float-text, .sun-token, .sky-sun").forEach(el => el.remove());
+    }
+
     Grid.init(arenaEl);
     Grid.clear();
 
@@ -113,6 +124,7 @@ const Core = (() => {
     // Show battle screen
     UI.showScreen("screen-battle");
     UI.updateSunDisplay();
+
     const firstWaveTypes = spawnQueue
       .filter((e) => e.waveIndex === 0)
       .map((e) => e.type);
@@ -121,6 +133,8 @@ const Core = (() => {
 
     // Show demon preview before starting
     showDemonPreview(() => {
+      // ── Start world battle music (inside callback = after user gesture) ──
+      if (typeof SoundFX !== "undefined") SoundFX.playMusic(worldId);
       // Start sky sun drops if level has them
       if (levelData.skyDropSun) startSkyDrops();
       // Initial wave banner
@@ -194,7 +208,7 @@ const Core = (() => {
 
     // All dead, move to next wave
     const nextWaveIdx = currentWaveIdx + 1;
-    if (nextWaveIdx >= levelData.waveCount) {
+    if (nextWaveIdx >= levelData.waves.length) {
       if (!allWavesSpawned) {
         allWavesSpawned = true;
       }
@@ -217,6 +231,11 @@ const Core = (() => {
 
     if (ms >= waveStartTimes[nextWaveIdx]) {
       currentWaveIdx = nextWaveIdx;
+      // Safety: if next wave has no demons, mark spawned immediately
+      const nextEntries = spawnQueue.filter(e => e.waveIndex === nextWaveIdx);
+      if (nextEntries.length === 0 && nextWaveIdx + 1 >= levelData.waves.length) {
+        allWavesSpawned = true;
+      }
     }
   }
 
@@ -244,8 +263,10 @@ const Core = (() => {
     }
     const def = PlantRegistry.get(plantId);
     if (!def) return;
-    if (sun < def.cost) {
-      UI.showToast(`Need ☀️${def.cost} sun!`);
+    const plantLvl = Player.getPlant(def.id)?.level ?? 1;
+    const plantCost = def.levelStats?.[plantLvl]?.cost ?? def.cost;
+    if (sun < plantCost) {
+      UI.showToast(`Need ☀️${plantCost} sun!`);
       return;
     }
     selectedPlantId = plantId;
@@ -263,8 +284,10 @@ const Core = (() => {
 
     const def = PlantRegistry.get(selectedPlantId);
     if (!def) return;
-    if (sun < def.cost) {
-      UI.showToast(`Need ☀️${def.cost} sun!`);
+    const plantLvl = Player.getPlant(def.id)?.level ?? 1;
+    const plantCost = def.levelStats?.[plantLvl]?.cost ?? def.cost;
+    if (sun < plantCost) {
+      UI.showToast(`Need ☀️${plantCost} sun!`);
       return;
     }
 
@@ -279,7 +302,8 @@ const Core = (() => {
     });
 
     if (placed) {
-      spendSun(def.cost);
+      SoundFX.play("plant_place");
+      spendSun(plantCost);
       // Use level-accurate cooldown from plant's own stats
       const levelCd = def.getStats ? def.getStats(level).cooldown : null;
       trayCooldowns[selectedPlantId] =
@@ -384,24 +408,32 @@ const Core = (() => {
 
     if (won) {
       const coinReward = Coins.getLevelReward(currentWorld);
-      Player.addCoins(coinReward);
       Player.setLevelStars(currentWorld, currentLevel, 3);
       Levels.checkWorldUnlocks();
 
-      // Unlock plants earned by this level
-      const unlockedPlants = Levels.checkPlantUnlocks(
-        currentWorld,
-        currentLevel,
-      );
+      // Unlock plants/minigames earned by this level
+      const unlockedPlants = Levels.checkPlantUnlocks(currentWorld, currentLevel);
+      const unlockedMinigames = Levels.checkMinigameUnlocks(currentWorld, currentLevel);
 
-      // Unlock minigames earned by this level
-      const unlockedMinigames = Levels.checkMinigameUnlocks(
-        currentWorld,
-        currentLevel,
-      );
+      // Check if this level gives a seed packet
+      const hasPacket = !!Levels.checkPacketReward(currentWorld, currentLevel);
+      let packetReward = null;
+      let seedReward = null;
 
-      // Seed reward only to owned plants
-      const seedReward = Seeds.giveRandomSeeds(2);
+      if (hasPacket) {
+        // Packet level: give packet + coins only, no regular seeds
+        const contents = Levels.generatePacketContents(currentWorld);
+        const packetId = "minipacket_" + Date.now();
+        Player.addInventoryItem(packetId, 1, {
+          type: "minipacket",
+          worldId: currentWorld,
+          contents,
+        });
+        packetReward = { packetId, contents };
+      } else {
+        // Normal level: give regular seed reward
+        seedReward = Seeds.giveRandomSeeds(2);
+      }
 
       UI.showBattleResult(
         true,
@@ -409,13 +441,15 @@ const Core = (() => {
         seedReward,
         unlockedPlants,
         unlockedMinigames,
+        packetReward,
       );
     } else {
       UI.showBattleResult(false, 0, null);
     }
-
     // Cleanup
     stopSkyDrops();
+    // Stop battle music
+    if (typeof SoundFX !== "undefined") SoundFX.stopMusic();
     // Remove any leftover sun tokens still floating on screen
     document
       .querySelectorAll(".sun-token, .sky-sun, .sun-coin, .sun-orb")
@@ -436,12 +470,14 @@ const Core = (() => {
   function pause() {
     paused = true;
     document.getElementById("pause-overlay").classList.remove("hidden");
+    if (typeof SoundFX !== "undefined") SoundFX.pauseMusic();
   }
 
   function resume() {
     paused = false;
     lastTime = performance.now();
     document.getElementById("pause-overlay").classList.add("hidden");
+    if (typeof SoundFX !== "undefined") SoundFX.resumeMusic();
   }
 
   // ── Sky Sun Drops ──────────────────────────────
@@ -593,7 +629,7 @@ const Core = (() => {
       token.style.opacity = "0.6";
 
       setTimeout(() => {
-        Core.addSun(25);
+        Core.addSun(50);
         UI.updateSunDisplay();
         // Flash sun display
         if (sunEl) {

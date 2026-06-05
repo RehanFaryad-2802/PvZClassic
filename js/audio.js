@@ -26,6 +26,33 @@ const SoundFX = (() => {
       victory: "assets/audio/battle/win.ogg",
       defeat: "assets/audio/battle/lost.mp3",
       btn_skip: "assets/audio/battle/skip.mp3",
+      plant_place: "assets/audio/battle/plant.mp3",
+      level_up: "assets/audio/game/levelup.mp3",
+      
+      pea_shoot: null,   // peashooter + icepea fire sound
+      ice_shoot:       null,   // icepea freeze sound
+      fire_shoot:      null,   // lavaburst attack sound
+      beam_shoot:      "assets/audio/plants/beam.mp3",   // lilybeam fire sound
+      electric_shoot:  null,   // voltlotus lightning sound
+      bonk_punch:      null,   // bonkchoy punch sound
+      plant_hurt:      null,   // any plant taking damage
+      plant_die:       null,   // plant death sound
+      sun_produce:     null,  
+    },
+
+    // World battle music — keyed by worldId (number or string)
+    // Set a path to null to silence that world's music.
+    WORLD_MUSIC: {
+      1: "assets/audio/battle/world1.ogg",
+      2: "assets/audio/battle/world2.ogg",
+      3: "assets/audio/battle/world3.ogg",
+      4: "assets/audio/battle/world4.ogg",
+      5: "assets/audio/battle/Inferno-Fields.ogg", // 🔥 Inferno Fields
+      6: "assets/audio/battle/world6.ogg",
+      7: "assets/audio/battle/world7.ogg",
+      8: "assets/audio/battle/world8.ogg",
+      9: "assets/audio/battle/world9.ogg",
+      10: "assets/audio/battle/world10.ogg",
     },
 
     // Sounds definition table
@@ -146,7 +173,120 @@ const SoundFX = (() => {
 
   const t = () => ctx.currentTime;
 
-  // ── Sound synthesizers ────────────────────────────────────────────────────
+  // ── Plant place — soft satisfying thud + sprout pop ───────────────────────
+  function s_plant_place() {
+    const now = t();
+    // Earthy thud
+    const g1 = env("ui");
+    const n = noise(0.12, g1);
+    const f = ctx.createBiquadFilter();
+    f.type = "lowpass";
+    f.frequency.value = 280;
+    n.connect(f);
+    ramp(
+      g1,
+      [
+        [0, 0.4],
+        [0.04, 0.2],
+        [0.12, 0],
+      ],
+      now,
+    );
+    n.start(now);
+    n.stop(now + 0.12);
+    // Sprout pop
+    const g2 = env("ui");
+    const o = osc("sine", 320, g2);
+    o.frequency.linearRampToValueAtTime(580, now + 0.12);
+    ramp(
+      g2,
+      [
+        [0, 0],
+        [0.03, 0.28],
+        [0.14, 0],
+      ],
+      now,
+    );
+    o.start(now);
+    o.stop(now + 0.14);
+    // Leaf rustle shimmer
+    const g3 = env("ui");
+    const n2 = noise(0.18, g3);
+    const f2 = ctx.createBiquadFilter();
+    f2.type = "bandpass";
+    f2.frequency.value = 2200;
+    f2.Q.value = 3;
+    n2.connect(f2);
+    ramp(
+      g3,
+      [
+        [0, 0],
+        [0.05, 0.12],
+        [0.18, 0],
+      ],
+      now + 0.05,
+    );
+    n2.start(now + 0.05);
+    n2.stop(now + 0.23);
+  }
+
+  // ── Plant delete — shovel dig scrape ─────────────────────────────────────
+  function s_plant_remove() {
+    const now = t();
+    // Scrape
+    const g1 = env("ui");
+    const n = noise(0.22, g1);
+    const f = ctx.createBiquadFilter();
+    f.type = "bandpass";
+    f.frequency.value = 900;
+    f.Q.value = 2;
+    f.frequency.linearRampToValueAtTime(300, now + 0.22);
+    n.connect(f);
+    ramp(
+      g1,
+      [
+        [0, 0.35],
+        [0.08, 0.25],
+        [0.22, 0],
+      ],
+      now,
+    );
+    n.start(now);
+    n.stop(now + 0.22);
+    // Dull thump at end
+    const g2 = env("ui");
+    const o = osc("sine", 180, g2);
+    o.frequency.linearRampToValueAtTime(60, now + 0.18);
+    ramp(
+      g2,
+      [
+        [0, 0],
+        [0.12, 0.3],
+        [0.28, 0],
+      ],
+      now + 0.1,
+    );
+    o.start(now + 0.1);
+    o.stop(now + 0.28);
+    // Dirt scatter (high noise burst)
+    const g3 = env("ui");
+    const n2 = noise(0.1, g3);
+    const f2 = ctx.createBiquadFilter();
+    f2.type = "highpass";
+    f2.frequency.value = 1800;
+    n2.connect(f2);
+    ramp(
+      g3,
+      [
+        [0, 0.2],
+        [0.04, 0.1],
+        [0.1, 0],
+      ],
+      now + 0.12,
+    );
+    n2.start(now + 0.12);
+    n2.stop(now + 0.22);
+  }
 
   function s_btn_click() {
     const g = env("ui");
@@ -403,27 +543,27 @@ const SoundFX = (() => {
   }
 
   function s_demon_chomp() {
-    // Quick crunchy bite
+    // Soft muffled gnaw — low frequency, quiet
+    const now = t();
     const g = env("demon");
-    const n = noise(0.08, g);
+    const n = noise(0.14, g);
     const filt = ctx.createBiquadFilter();
-    filt.type = "bandpass";
-    filt.frequency.value = 800;
-    filt.Q.value = 4;
+    filt.type = "lowpass";
+    filt.frequency.value = 200;
+    filt.Q.value = 1.5;
     n.connect(filt);
     ramp(
       g,
       [
-        [0, 0.5],
-        [0.03, 0.3],
-        [0.08, 0],
+        [0, 0.08],
+        [0.04, 0.05],
+        [0.14, 0],
       ],
-      t(),
+      now,
     );
-    n.start(t());
-    n.stop(t() + 0.08);
+    n.start(now);
+    n.stop(now + 0.14);
   }
-
   function s_demon_die() {
     // Splat: descending noise burst
     const g = env("demon");
@@ -872,6 +1012,10 @@ const SoundFX = (() => {
   function play(key) {
     if (CFG.MUTED) return;
 
+    // Always ensure audio context is running before any play attempt
+    ensureCtx();
+    resume();
+
     const filePath = CFG.FILES[key];
     if (filePath) {
       try {
@@ -901,11 +1045,15 @@ const SoundFX = (() => {
 
   // Pre-warm all pools on first user gesture so files are loaded before needed
   function _prewarm() {
+    ensureCtx();
+    resume();
     Object.entries(CFG.FILES).forEach(([key, path]) => {
       if (path) _getPool(key, path);
     });
   }
-  document.addEventListener("click", _prewarm, { once: true });
+  // Use mousedown/touchstart — fires BEFORE click, so audio is unlocked
+  // by the time the click handler tries to play a sound
+  document.addEventListener("mousedown", _prewarm, { once: true });
   document.addEventListener("touchstart", _prewarm, { once: true });
 
   function setVolume(cat, val) {
@@ -941,5 +1089,96 @@ const SoundFX = (() => {
     { once: true },
   );
 
-  return { play, setVolume, muteAll, isMuted };
+  // ── Battle Music Player ───────────────────────────────────────────────────
+  // Lazily created on first playMusic() call — ensures it exists after a user gesture.
+  let _music = null;
+  let _musicWorld   = null;
+  let _musicPending = false;
+
+  function _getMusic() {
+    if (_music) return _music;
+    _music = new Audio();
+    _music.loop    = true;
+    _music.preload = "auto";
+    _music.volume  = CFG.VOL_MUSIC;
+    _music.muted   = CFG.MUTED;
+    return _music;
+  }
+
+  function _tryPlay() {
+    const m = _getMusic();
+    m.play().then(() => {
+      _musicPending = false;
+    }).catch(() => {
+      _musicPending = true;
+    });
+  }
+
+  function _onGesture() {
+    if (!_music) return;
+    if (_musicPending && _music.src && _music.paused) {
+      _music.play().then(() => { _musicPending = false; }).catch(() => {});
+    }
+  }
+  document.addEventListener("click", _onGesture);
+  document.addEventListener("touchstart", _onGesture);
+  document.addEventListener("keydown", _onGesture);
+
+  /**
+   * playMusic(worldId)
+   * Load + loop the battle track for this world.
+   * Same world already playing → no-op.
+   */
+  function playMusic(worldId) {
+    const path = CFG.WORLD_MUSIC[worldId];
+    if (!path) { stopMusic(); return; }
+
+    const m = _getMusic();
+
+    // Same track already playing? Do nothing.
+    if (_musicWorld === worldId && !m.paused) return;
+
+    // New track — swap src
+    m.pause();
+    m.currentTime = 0;
+    m.src    = path;
+    m.volume = CFG.VOL_MUSIC;
+    m.muted  = CFG.MUTED;
+    _musicWorld = worldId;
+    m.load();
+    _tryPlay();
+  }
+
+  function pauseMusic() {
+    if (_music && !_music.paused) _music.pause();
+  }
+
+  function resumeMusic() {
+    if (_music && _music.paused && _musicWorld !== null) _tryPlay();
+  }
+
+  function stopMusic() {
+    if (!_music) return;
+    _music.pause();
+    _music.currentTime = 0;
+    _musicWorld   = null;
+    _musicPending = false;
+  }
+
+   return {
+    play,
+    isMuted,
+    playMusic,
+    pauseMusic,
+    resumeMusic,
+    stopMusic,
+    setVolume(cat, val) {
+      setVolume(cat, val);
+      if (_music && cat === "music") _music.volume = CFG.VOL_MUSIC;
+    },
+    muteAll(muted) {
+      muteAll(muted);
+      if (_music) _music.muted = muted;
+    },
+  };
 })();

@@ -6,6 +6,19 @@
 const Shop = (() => {
   // ── Seed Packet Definitions ──────────────────────
   const SEED_PACKETS = {
+    packet_world: {
+      id: "packet_world",
+      name: "World Packet",
+      description: "3 mystery seeds from a specific world. 1% chance of 10 Looms instead!",
+      image: "assets/shop/minipacket.png",
+      loomCost: 10,
+      seedCount: 30,
+      plantsCount: 3,
+      seedsPerPlant: 10,
+      allowRepeats: false,
+      rarity: "world",
+      isMiniPacket: true,
+    },
     packet_small: {
       id: "packet_small",
       name: "Seed Packet",
@@ -37,7 +50,7 @@ const Shop = (() => {
       name: "Mega Packet",
       description:
         "100 seeds spread across 10 random plants. May contain duplicates.",
-      image: "assets/shop/seedpack (2).png",
+      image: "assets/shop/seedpack (3).png",
       loomCost: 30,
       seedCount: 100,
       plantsCount: 10,
@@ -208,13 +221,24 @@ const Shop = (() => {
     const def = SEED_PACKETS[packetId];
     if (!def) return { ok: false, msg: "Unknown packet" };
     if (!Player.spendLooms(def.loomCost)) {
-      // show original image of loom as image instead of emoji
       return {
         ok: false,
         msg: `Need ${def.loomCost} <img src="assets/shop/loom.png" class="loom-icon-sm"/> Looms`,
       };
     }
-    Player.addInventoryItem(packetId, 1);
+    // World packets get stored as mini packets with world 1 contents by default
+    // (player buys a generic world packet — world 1 pool)
+    if (def.isMiniPacket) {
+      const contents = Levels.generatePacketContents(1);
+      const packetId2 = "minipacket_" + Date.now();
+      Player.addInventoryItem(packetId2, 1, {
+        type: "minipacket",
+        worldId: 1,
+        contents,
+      });
+    } else {
+      Player.addInventoryItem(packetId, 1);
+    }
     return { ok: true };
   }
 

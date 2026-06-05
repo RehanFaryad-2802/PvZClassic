@@ -158,7 +158,7 @@ function spawnSunToken(x, y, amount = 25) {
   const bounceTimer1 = setTimeout(() => {
     if (!token.parentNode || collected) return;
 
-    const cellBottom = y + 60;
+    const cellBottom = y + 20;
     token.style.transition = "top 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
     token.style.top = cellBottom + "px";
 

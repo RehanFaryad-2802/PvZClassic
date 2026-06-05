@@ -183,7 +183,7 @@ PlantRegistry.register({
 
     let target = null,
       closestDist = Infinity;
-
+SoundFX.play("pea_shoot");
     active.forEach((d) => {
       if (d.dead || d.row !== row) return;
       const dRect = d.el.getBoundingClientRect();

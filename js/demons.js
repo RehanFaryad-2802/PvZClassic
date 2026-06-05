@@ -28,7 +28,7 @@ const Demons = (() => {
   const CFG = {
     DEMON_WIDTH: 120,
     DEMON_HEIGHT: 120,
-    DODGE_CHANCE: 0.15,
+    DODGE_CHANCE: 0.01,
     ARMOR_REDUCTION: 0.4,
     REGEN_INTERVAL: 2000,
     REGEN_PERCENT: 0.03,
@@ -172,6 +172,18 @@ const Demons = (() => {
     }
 
     wrap.appendChild(sprite);
+
+    // ── Tornado under demon feet ──
+    const tornado = document.createElement("div");
+    tornado.className = "demon-tornado";
+    // Inner layers for real cone shape
+    tornado.innerHTML = `
+      <div class="tornado-base"></div>
+      <div class="tornado-mid"></div>
+      <div class="tornado-top"></div>
+      <div class="tornado-core"></div>
+    `;
+    wrap.appendChild(tornado);
     layer.appendChild(wrap);
     const effectsEl = document.getElementById("effects-layer");
     if (effectsEl) effectsEl.appendChild(hpWrap);
@@ -247,8 +259,6 @@ const Demons = (() => {
       // split / explode (applied in kill)
     };
     demons.push(demon);
-    if (cfg.type === "imp_king") SoundFX.play("king_roar");
-    else SoundFX.play("demon_spawn");
     return demon;
   }
 
@@ -461,6 +471,7 @@ const Demons = (() => {
         if (overlapX) {
           d.targeting = { row: d.row, col };
           d.biteTimer += dtMs;
+        if (d._chompCooldown > 0) d._chompCooldown -= dtMs;
 
           const effectiveBiteRate = d.currentBiteRate || d.biteRate;
           if (d.biteTimer >= effectiveBiteRate) {
@@ -469,7 +480,10 @@ const Demons = (() => {
               ? Math.floor(d.damage * CFG.LIFESTEAL_PCT)
               : 0;
 
-            SoundFX.play("demon_chomp");
+            if (!d._chompCooldown || d._chompCooldown <= 0) {
+              SoundFX.play("demon_chomp");
+              d._chompCooldown = 900; // ms between chomp sounds
+            }
             const died = Grid.damagePlant(d.row, col, d.damage);
 
             // LIFESTEAL
@@ -663,10 +677,6 @@ const Demons = (() => {
     }
 
     // Death animation — style based on last damage type
-    const _dtype = demon.lastDamageType || "physical";
-    if (_dtype === "ice") SoundFX.play("demon_die_ice");
-    else if (_dtype === "fire") SoundFX.play("demon_die_fire");
-    else SoundFX.play("demon_die");
     playDeathAnimation(demon);
   }
 
@@ -833,13 +843,19 @@ const Demons = (() => {
   }
 
   function clear() {
-    demons.forEach((d) => d.el && d.el.remove());
+    demons.forEach((d) => {
+      if (d.el) d.el.remove();
+      if (d.hpWrap) d.hpWrap.remove();  // hp bar lives in effects-layer
+    });
     demons = [];
   }
 
   function startEating(demon) {
     if (demon.eating) return;
     demon.eating = true;
+
+    // Lean toward the plant while eating
+    demon.el.classList.add("demon-eating-nudge");
 
     if (demon.type === "imp" || demon.type.startsWith("imp_")) {
       demon.el.classList.remove("imp-walk", "imp-charging");
@@ -873,6 +889,9 @@ const Demons = (() => {
   function stopEating(demon) {
     if (!demon.eating) return;
     demon.eating = false;
+
+    // Remove eat lean
+    demon.el.classList.remove("demon-eating-nudge");
 
     // Restore idle animation per type
     if (demon.type === "imp" || demon.type.startsWith("imp_")) {
@@ -1215,7 +1234,8 @@ const Demons = (() => {
       // Roar effect before spawning
       SoundFX.play("king_roar");
       king.el.classList.add("king-roaring");
-      king.el.style.animation = "kingRoarPulse 0.5s ease-out, kingRoarShake 0.5s ease-in-out";
+      king.el.style.animation =
+        "kingRoarPulse 0.5s ease-out, kingRoarShake 0.5s ease-in-out";
       setTimeout(() => {
         king.el.classList.remove("king-roaring");
         king.el.style.animation = "";
