@@ -846,6 +846,9 @@ html, body {
   padding: 16px;
   overflow-y: auto;
 }
+.lololo{
+  max-width: inherit;
+}
 
 .mg-card {
   background: rgba(255,255,255,0.05);
