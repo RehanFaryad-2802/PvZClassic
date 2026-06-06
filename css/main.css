@@ -842,6 +842,7 @@ html, body {
 ═══════════════════════════════════════════════════ */
 .minigames-grid {
   display: grid;
+  grid-template-columns: repeat(4, 180px);
   gap: 18px;
   padding: 16px;
   overflow-y: auto;
