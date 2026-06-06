@@ -178,10 +178,21 @@ const Demons = (() => {
     tornado.className = "demon-tornado";
     // Inner layers for real cone shape
     tornado.innerHTML = `
-      <div class="tornado-base"></div>
-      <div class="tornado-mid"></div>
-      <div class="tornado-top"></div>
-      <div class="tornado-core"></div>
+      <div class="tw tw1"></div>
+      <div class="tw tw2"></div>
+      <div class="tw tw3"></div>
+      <div class="tw tw4"></div>
+      <div class="tw tw5"></div>
+      <div class="tw tw6"></div>
+      <div class="tornado-glow"></div>
+      <div class="w1-leaf"></div>
+      <div class="w1-leaf"></div>
+      <div class="w1-leaf"></div>
+      <div class="w1-leaf"></div>
+      <div class="w1-leaf"></div>
+      <div class="w1-leaf"></div>
+      <div class="w1-rune"></div>
+      <div class="w1-boxshadow"></div>
     `;
     wrap.appendChild(tornado);
     layer.appendChild(wrap);

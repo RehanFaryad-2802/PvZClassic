@@ -1,0 +1,451 @@
+/* css/boss.css
+   Boss battle visual styles
+*/
+
+/* ══════════════════════════════════════════════
+   BOSS ENTITY
+══════════════════════════════════════════════ */
+.boss-entity {
+  position: absolute;
+  z-index: 50;
+  image-rendering: pixelated;
+  transform-origin: bottom center;
+  transition: filter 0.3s;
+}
+
+.boss-entity img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: auto;
+}
+
+.boss-entity.boss-walking img {
+  animation: bossWalk 0.4s steps(2) infinite;
+}
+
+.boss-entity.boss-charging {
+  animation: bossChargePulse 0.3s ease-in-out infinite alternate;
+}
+
+.boss-entity.boss-roar {
+  animation: bossRoar 0.15s ease-in-out 4 alternate;
+}
+
+.boss-entity.boss-phase2 {
+  filter: drop-shadow(0 0 12px #ff6600) !important;
+}
+
+.boss-entity.boss-phase3 {
+  filter: drop-shadow(0 0 20px #ff0000) !important;
+  animation: bossEnrageShake 0.08s ease-in-out infinite alternate;
+}
+
+.boss-entity.boss-slam {
+  transform: scaleY(0.85) scaleX(1.1);
+  transition: transform 0.1s;
+}
+
+.boss-entity.boss-leap {
+  transform: translateY(-40px);
+  transition: transform 0.2s ease-out;
+}
+
+.boss-entity.boss-death {
+  animation: bossDeath 1.8s ease-out forwards;
+}
+
+@keyframes bossWalk {
+  0%   { transform: translateY(0px); }
+  100% { transform: translateY(-4px); }
+}
+
+@keyframes bossChargePulse {
+  0%   { filter: drop-shadow(0 0 8px #ffaa00);  transform: scale(1.0); }
+  100% { filter: drop-shadow(0 0 24px #ff6600); transform: scale(1.02); }
+}
+
+@keyframes bossRoar {
+  0%   { transform: scale(1.0) rotate(-1deg); }
+  100% { transform: scale(1.06) rotate(1deg); }
+}
+
+@keyframes bossEnrageShake {
+  0%   { transform: translateX(-2px); }
+  100% { transform: translateX(2px);  }
+}
+
+@keyframes bossDeath {
+  0%   { opacity: 1;   transform: scale(1)    rotate(0deg); filter: brightness(1);    }
+  30%  { opacity: 1;   transform: scale(1.15) rotate(-5deg); filter: brightness(3); }
+  60%  { opacity: 0.6; transform: scale(0.8)  rotate(10deg); filter: brightness(2);  }
+  100% { opacity: 0;   transform: scale(0.2)  rotate(-15deg) translateY(30px); }
+}
+
+/* ══════════════════════════════════════════════
+   ENTRY OVERLAY
+══════════════════════════════════════════════ */
+#boss-entry-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  pointer-events: none;
+  transition: background 0.5s;
+}
+
+#boss-entry-overlay.visible {
+  background: rgba(0,0,0,0.75);
+}
+
+.boss-entry-title {
+  font-size: 28px;
+  font-weight: 900;
+  color: #ff4400;
+  text-shadow: 0 0 20px #ff0000;
+  letter-spacing: 3px;
+  animation: bossEntryPulse 0.5s ease-in-out infinite alternate;
+  margin-bottom: 12px;
+  opacity: 0;
+  transition: opacity 0.3s 0.2s;
+}
+
+#boss-entry-overlay.visible .boss-entry-title {
+  opacity: 1;
+}
+
+.boss-entry-name {
+  font-size: 42px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 0 30px #ff6600, 0 0 60px #ff0000;
+  letter-spacing: 2px;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.4s 0.4s, transform 0.4s 0.4s;
+}
+
+#boss-entry-overlay.visible .boss-entry-name {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@keyframes bossEntryPulse {
+  0%   { text-shadow: 0 0 10px #ff0000; }
+  100% { text-shadow: 0 0 30px #ff0000, 0 0 60px #ff4400; }
+}
+
+/* ══════════════════════════════════════════════
+   POWER CHARGE BAR
+══════════════════════════════════════════════ */
+#boss-charge-wrap {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+  background: rgba(0,0,0,0.85);
+  border: 2px solid #ff4400;
+  border-radius: 12px;
+  padding: 16px 20px;
+  z-index: 9998;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+#boss-charge-wrap.visible { opacity: 1; }
+
+.boss-charge-label {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: #ff9900;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.boss-charge-bar-bg {
+  width: 100%;
+  height: 14px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #ff4400;
+}
+
+.boss-charge-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #ff4400, #ffaa00, #ffffff);
+  border-radius: 8px;
+  transition: width 0.06s linear;
+  box-shadow: 0 0 10px #ff6600;
+}
+
+.boss-charge-pct {
+  font-size: 13px;
+  color: #ffaa00;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+/* ══════════════════════════════════════════════
+   BOSS HP BAR
+══════════════════════════════════════════════ */
+#boss-hp-bar {
+  position: absolute;
+  top: 46px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  max-width: 480px;
+  background: rgba(0,0,0,0.85);
+  border: 2px solid #ff4400;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  padding: 8px 16px 10px;
+  z-index: 200;
+  text-align: center;
+}
+
+.boss-hp-name {
+  font-size: 13px;
+  font-weight: 900;
+  color: #ff6600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.boss-hp-phase {
+  font-size: 10px;
+  color: #ffaa00;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.boss-hp-bar-bg {
+  position: relative;
+  width: 100%;
+  height: 16px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 8px;
+  overflow: visible;
+  border: 1px solid rgba(255,100,0,0.4);
+}
+
+.boss-hp-bar-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #ff4400, #ffaa00);
+  border-radius: 8px;
+  transition: width 0.3s ease-out, background 0.5s;
+  box-shadow: 0 0 8px #ff6600;
+}
+
+/* Phase marker lines */
+.boss-hp-bar-phase2,
+.boss-hp-bar-phase3 {
+  position: absolute;
+  top: -4px;
+  width: 3px;
+  height: calc(100% + 8px);
+  background: #ffffff;
+  border-radius: 2px;
+  transform: translateX(-50%);
+  z-index: 10;
+  box-shadow: 0 0 4px #fff;
+}
+
+.boss-hp-text {
+  font-size: 10px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 4px;
+}
+
+/* ══════════════════════════════════════════════
+   LASER BEAM
+══════════════════════════════════════════════ */
+.boss-laser-beam {
+  position: absolute;
+  height: 6px;
+  background: linear-gradient(90deg, #ff00aa, #ff0066, #ffffff);
+  transform-origin: left center;
+  border-radius: 3px;
+  z-index: 150;
+  box-shadow: 0 0 12px 4px #ff0066, 0 0 24px 8px #aa0044;
+  animation: laserFlicker 0.05s linear infinite;
+  pointer-events: none;
+}
+
+.boss-laser-impact {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, #ffffff 0%, #ff0066 40%, transparent 100%);
+  z-index: 151;
+  animation: laserImpact 0.2s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes laserFlicker {
+  0%   { opacity: 1;    height: 6px; }
+  50%  { opacity: 0.85; height: 8px; }
+  100% { opacity: 1;    height: 6px; }
+}
+
+@keyframes laserImpact {
+  0%   { transform: scale(0.5); opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* ══════════════════════════════════════════════
+   BOSS EFFECT TEXT
+══════════════════════════════════════════════ */
+.boss-effect-text {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px currentColor;
+  z-index: 300;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.boss-effect-text.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0px);
+}
+
+/* ══════════════════════════════════════════════
+   CONVEYOR BELT
+══════════════════════════════════════════════ */
+#boss-conveyor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 82px;
+  background: linear-gradient(180deg, #1a0a00 0%, #2a1200 100%);
+  border-bottom: 3px solid #ff6600;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.conveyor-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #ff9900;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.conveyor-track {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  overflow: hidden;
+  padding: 0 10px;
+  position: relative;
+}
+
+/* Belt texture line */
+#boss-conveyor::before {
+  content: "";
+  position: absolute;
+  bottom: 3px;
+  left: 0; right: 0;
+  height: 6px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255,150,0,0.3) 0px,
+    rgba(255,150,0,0.3) 20px,
+    rgba(0,0,0,0.2) 20px,
+    rgba(0,0,0,0.2) 22px
+  );
+}
+
+.conveyor-card {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  background: rgba(0,0,0,0.6);
+  border: 2px solid rgba(255,150,0,0.4);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateX(30px);
+  transition: opacity 0.3s, transform 0.3s, border-color 0.2s, box-shadow 0.2s;
+  gap: 2px;
+}
+
+.conveyor-card.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.conveyor-card.slide-out {
+  opacity: 0;
+  transform: translateX(-40px);
+}
+
+.conveyor-card:hover {
+  border-color: #ffaa00;
+  box-shadow: 0 0 10px rgba(255,170,0,0.5);
+}
+
+.conveyor-card.selected {
+  border-color: #00ff88;
+  box-shadow: 0 0 14px rgba(0,255,136,0.6);
+}
+
+.conveyor-card img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.conveyor-card-name {
+  font-size: 7px;
+  color: rgba(255,255,255,0.7);
+  text-align: center;
+  line-height: 1;
+}
+
+/* ══════════════════════════════════════════════
+   SCREEN SHAKE
+══════════════════════════════════════════════ */
+.screen-shake {
+  animation: screenShake 0.4s ease-in-out;
+}
+
+@keyframes screenShake {
+  0%   { transform: translateX(0);    }
+  15%  { transform: translateX(-8px); }
+  30%  { transform: translateX(8px);  }
+  45%  { transform: translateX(-6px); }
+  60%  { transform: translateX(6px);  }
+  75%  { transform: translateX(-3px); }
+  90%  { transform: translateX(3px);  }
+  100% { transform: translateX(0);    }
+}

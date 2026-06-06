@@ -34,7 +34,19 @@ const Core = (() => {
 
   // ── Public: Start Battle ───────────────────────
   function startBattle(worldId, levelIdx, plantIds, tempPlants = []) {
+    // ── Boss level detection ──
+    const world = Levels.getWorld(worldId);
+    if (world && world.bossLevelIdx === levelIdx) {
+      Boss.start(worldId, levelIdx, Levels.getLevel(worldId, levelIdx) || {}, plantIds);
+      return;
+    }
     currentWorld = worldId;
+// Set world class on demon layer for per-world effects
+const demonLayer = document.getElementById("demons-layer");
+if (demonLayer) {
+  demonLayer.className = demonLayer.className.replace(/\bworld-\d+\b/g, "");
+  demonLayer.classList.add("world-" + worldId);
+}
     currentLevel = levelIdx;
     levelData = Levels.getLevel(worldId, levelIdx);
     if (!levelData) return;
@@ -657,9 +669,14 @@ const Core = (() => {
     document.removeEventListener("visibilitychange", onVisibilityChange);
   }
 
+  function selectPlantFree(plantId) {
+    selectedPlantId = plantId;
+  }
+
   return {
     startBattle,
     endBattle,
+    selectPlantFree,
     onCellClick,
     selectPlant,
     toggleShovel,

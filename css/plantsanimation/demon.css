@@ -503,7 +503,7 @@
   border: 1px solid rgba(0,0,0,0.5);
   overflow: hidden;
   pointer-events: none;
-  z-index: 50;
+  z-index: 5;
 }
 
 .demon-hp-fill {
@@ -788,214 +788,252 @@
   70%  { transform: scaleX(0.97) scaleY(1.03) rotate(-1deg); }
   100% { transform: scaleX(1)    scaleY(1)    rotate(0deg);  }
 }
+/* ══════════════════════════════════════════
+   TORNADO — stacked oval rings, V-cone shape
+   Wide at top (feet), sharp tip at bottom
+   ══════════════════════════════════════════ */
 
-/* ── IMP DEMON CSS ANIMATIONS
-   States: walk, eat, hit, death, dodge
-══════════════════════════════════════════════════ */
+/* Default tornado color (fallback) */
+:root {
+  --tornado-color-a: rgba(234,179,8,1);
+  --tornado-color-b: rgba(251,146,60,1);
+}
 
-/* ══════════════════════════════════════════════════
-   DEMON TORNADO — replaces foot animations
-   Each demon type gets its own color
-══════════════════════════════════════════════════ */
+/* ── Per-demon tornado colors ── */
 
-/* ── Tornado container ──
-   Sits at the bottom 40% of the demon sprite (covers legs)
-   Wide at top where feet are, narrow tip pointing down — classic PvZ style
-*/
+/* Imp — red/fire */
+.demon-entity.type-imp,
+.demon-entity.type-imp_axe,
+.demon-entity.type-imp_shield,
+.demon-entity.type-imp_heavy {
+  --tornado-color-a: rgba(255,60,60,1);
+  --tornado-color-b: rgba(180,20,20,1);
+}
+
+/* Bat — purple/dark */
+.demon-entity.type-bat {
+  --tornado-color-a: rgba(160,80,255,1);
+  --tornado-color-b: rgba(80,0,180,1);
+}
+
+/* Ice — cyan/blue */
+.demon-entity.type-ice {
+  --tornado-color-a: rgba(80,220,255,1);
+  --tornado-color-b: rgba(30,120,220,1);
+}
+
+/* Armored — silver/grey */
+.demon-entity.type-armored {
+  --tornado-color-a: rgba(200,210,220,1);
+  --tornado-color-b: rgba(100,120,140,1);
+}
+
+/* Brute — orange/brown */
+.demon-entity.type-brute {
+  --tornado-color-a: rgba(255,140,20,1);
+  --tornado-color-b: rgba(160,60,0,1);
+}
+
+/* King — gold/yellow */
+.demon-entity.type-king {
+  --tornado-color-a: rgba(255,215,0,1);
+  --tornado-color-b: rgba(200,140,0,1);
+}/* Default tornado color (fallback) */
+:root {
+  --tornado-color-a: rgba(234,179,8,1);
+  --tornado-color-b: rgba(251,146,60,1);
+}
+
+/* ── Per-demon tornado colors ── */
+
+/* Imp — red/fire */
+.demon-entity.type-imp,
+.demon-entity.type-imp_axe,
+.demon-entity.type-imp_shield,
+.demon-entity.type-imp_heavy {
+  --tornado-color-a: rgba(255,60,60,1);
+  --tornado-color-b: rgba(180,20,20,1);
+}
+
+/* Bat — purple/dark */
+.demon-entity.type-bat {
+  --tornado-color-a: rgba(160,80,255,1);
+  --tornado-color-b: rgba(80,0,180,1);
+}
+
+/* Ice — cyan/blue */
+.demon-entity.type-ice {
+  --tornado-color-a: rgba(80,220,255,1);
+  --tornado-color-b: rgba(30,120,220,1);
+}
+
+/* Armored — silver/grey */
+.demon-entity.type-armored {
+  --tornado-color-a: rgba(200,210,220,1);
+  --tornado-color-b: rgba(100,120,140,1);
+}
+
+/* Brute — orange/brown */
+.demon-entity.type-brute {
+  --tornado-color-a: rgba(255,140,20,1);
+  --tornado-color-b: rgba(160,60,0,1);
+}
+
+/* King — gold/yellow */
+.demon-entity.type-king {
+  --tornado-color-a: rgba(255,215,0,1);
+  --tornado-color-b: rgba(200,140,0,1);
+}
 .demon-tornado {
   position: absolute;
-  bottom: 0;
+  bottom: 5%;
   left: 50%;
   transform: translateX(-50%);
-  width: 100%;
-  height: 42%;          /* covers only legs, not whole body */
+  width: 70%;
+  height: 40%;
   pointer-events: none;
   z-index: 10;
   overflow: visible;
 }
 
-/* ── LAYER 1: Ground glow disc — bright halo at feet level ── */
-.tornado-base {
+/* Each .tw is a thin spinning oval ring.
+   Positioned from top (feet) down to tip.
+   Width shrinks as we go down = V cone */
+.tw {
   position: absolute;
-  top: 0;               /* TOP of tornado container = feet level */
   left: 50%;
-  transform: translateX(-50%) scaleY(0.3);
-  transform-origin: top center;
-  width: 120%;
-  height: 60%;
+  transform: translateX(-50%) scaleY(0.32);
+  transform-origin: center center;
   border-radius: 50%;
+  /* Use solid colors ignoring the CSS variable alpha — force full opacity */
   background: radial-gradient(ellipse at 50% 50%,
-    var(--tornado-color-a) 0%,
-    var(--tornado-color-a) 25%,
-    var(--tornado-color-b) 55%,
-    transparent 100%
-  );
-  filter: blur(5px);
-  opacity: 1;
-  animation: tornadoBaseSwirl 0.4s linear infinite;
-}
-
-/* ── LAYER 2: Main V-cone body — wide at top, tapers to tip at bottom ── */
-.tornado-mid {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 90%;
-  height: 100%;
-  margin-left: -45%;
-  /* V shape: wide at top (100%), narrow tip at bottom (0%) */
-  clip-path: polygon(10% 0%, 90% 0%, 52% 100%, 48% 100%);
-  background: conic-gradient(
-    from 0deg at 50% 0%,
-    transparent 0deg,
-    var(--tornado-color-a) 35deg,
-    var(--tornado-color-b) 70deg,
-    transparent 110deg,
-    var(--tornado-color-b) 160deg,
-    var(--tornado-color-a) 210deg,
-    transparent 250deg,
-    var(--tornado-color-a) 300deg,
-    transparent 360deg
-  );
-  animation: tornadoMidSpin 0.28s linear infinite;
-  filter: blur(1px);
-  opacity: 0.92;
-  transform-origin: top center;
-}
-
-/* ── LAYER 3: Inner bright swirl — tighter V, faster spin ── */
-.tornado-top {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 55%;
-  height: 100%;
-  margin-left: -27.5%;
-  clip-path: polygon(18% 0%, 82% 0%, 53% 100%, 47% 100%);
-  background: conic-gradient(
-    from 0deg at 50% 0%,
-    transparent 0deg,
-    var(--tornado-color-a) 50deg,
-    transparent 100deg,
-    var(--tornado-color-b) 180deg,
-    transparent 230deg,
-    var(--tornado-color-a) 310deg,
-    transparent 360deg
-  );
-  animation: tornadoMidSpin 0.18s linear infinite reverse;
-  filter: blur(0.5px);
-  opacity: 0.85;
-  transform-origin: top center;
-}
-
-/* ── LAYER 4: Bright core ring at feet — makes it look grounded ── */
-.tornado-core {
-  position: absolute;
-  top: -4px;
-  left: 50%;
-  transform: translateX(-50%) scaleY(0.28);
-  transform-origin: top center;
-  width: 85%;
-  height: 50%;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 50%,
-    white 0%,
+    #ffffff 0%,
+    #ffffff 12%,
     var(--tornado-color-a) 30%,
-    var(--tornado-color-b) 65%,
+    var(--tornado-color-a) 60%,
+    var(--tornado-color-b) 80%,
+    #00000033 92%,
     transparent 100%
   );
-  filter: blur(6px);
-  opacity: 0.85;
-  animation: tornadoCoreGlow 0.5s ease-in-out infinite alternate;
+  box-shadow:
+    0 0 16px 8px var(--tornado-color-a),
+    0 0 32px 12px var(--tornado-color-b),
+    inset 0 0 8px 2px #ffffff88;
+  animation: twSpin 0.35s linear infinite;
+  opacity: 1 !important;
 }
 
-@keyframes tornadoBaseSwirl {
-  0%   { transform: translateX(-50%) scaleY(0.3) rotate(0deg);   }
-  100% { transform: translateX(-50%) scaleY(0.3) rotate(360deg); }
+/* Ring 1 — widest, at very top (feet level) */
+.tw1 {
+  top: -4%;
+  width: 105%;
+  height: 105%;
+  opacity: 1;
+  animation-duration: 0.30s;
+  animation-delay: 0s;
 }
-
-@keyframes tornadoMidSpin {
-  0%   { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+/* Ring 2 */
+.tw2 {
+  top: 12%;
+  width: 88%;
+  height: 88%;
+  opacity: 0.95;
+  animation-duration: 0.27s;
+  animation-delay: -0.05s;
+  animation-direction: reverse;
 }
-
-@keyframes tornadoCoreGlow {
-  0%   { opacity: 0.7; filter: blur(5px);  }
-  100% { opacity: 1.0; filter: blur(7px);  }
+/* Ring 3 */
+.tw3 {
+  top: 28%;
+  width: 84%;
+  height: 84%;
+  opacity: 0.88;
+  animation-duration: 0.24s;
+  animation-delay: -0.09s;
 }
-
-/* Eating nudge — lean slightly left toward plant */
-.demon-entity.demon-eating-nudge {
-  transform: translateX(-6px) !important;
-  transition: transform 0.12s ease-out;
-}
-
-/* ── Per-type tornado colors ─────────────────────── */
-
-/* imp — amber/yellow fire */
-.demon-entity.type-imp .demon-tornado,
-.demon-entity.type-imp_axe .demon-tornado {
-  --tornado-color-a: rgba(234,179,8,0.85);
-  --tornado-color-b: rgba(251,146,60,0.6);
-}
-
-/* imp_shield — electric blue */
-.demon-entity.type-imp_shield .demon-tornado {
-  --tornado-color-a: rgba(96,165,250,0.9);
-  --tornado-color-b: rgba(147,197,253,0.55);
-}
-
-/* imp_heavy — dark blood red */
-.demon-entity.type-imp_heavy .demon-tornado {
-  --tornado-color-a: rgba(185,28,28,0.9);
-  --tornado-color-b: rgba(127,29,29,0.6);
-}
-
-/* imp_king — gold royal */
-.demon-entity.type-imp_king .demon-tornado {
-  --tornado-color-a: rgba(250,204,21,0.95);
-  --tornado-color-b: rgba(234,179,8,0.7);
-  width: 120%;
+/* Ring 4 */
+.tw4 {
+  top: 46%;
+  width: 58%;
   height: 58%;
+  opacity: 0.78;
+  animation-duration: 0.20s;
+  animation-delay: -0.13s;
+  animation-direction: reverse;
+}
+/* Ring 5 */
+.tw5 {
+  top: 63%;
+  width: 34%;
+  height: 34%;
+  opacity: 0.62;
+  animation-duration: 0.16s;
+  animation-delay: -0.17s;
+}
+/* Ring 6 — tip, narrowest */
+.tw6 {
+  top: 78%;
+  width: 16%;
+  height: 16%;
+  opacity: 0.45;
+  animation-duration: 0.12s;
+  animation-delay: -0.21s;
+  animation-direction: reverse;
 }
 
-/* bat — deep crimson */
-.demon-entity.type-bat .demon-tornado {
-  --tornado-color-a: rgba(220,38,38,0.8);
-  --tornado-color-b: rgba(127,29,29,0.5);
+/* Glowing halo at feet */
+.tornado-glow {
+  display: none;
 }
 
-/* ice — frost cyan */
-.demon-entity.type-ice .demon-tornado {
-  --tornado-color-a: rgba(103,232,249,0.85);
-  --tornado-color-b: rgba(186,230,253,0.5);
+@keyframes twSpin {
+  0%   { transform: translateX(-50%) scaleY(0.32) rotate(0deg);   }
+  100% { transform: translateX(-50%) scaleY(0.32) rotate(360deg); }
 }
 
-/* armored — steel orange */
-.demon-entity.type-armored .demon-tornado {
-  --tornado-color-a: rgba(249,115,22,0.8);
-  --tornado-color-b: rgba(100,116,139,0.6);
+/* ── Mobile tornado fixes ── */
+@media (max-width: 768px) {
+  .demon-tornado {
+    width: 80%;
+    height: 38%;
+    bottom: 3%;
+  }
+
+  .tw {
+    transform: translateX(-50%) scaleY(0.42);
+    box-shadow:
+      0 0 10px 5px var(--tornado-color-a),
+      0 0 20px 8px var(--tornado-color-b);
+    background: radial-gradient(ellipse at 50% 50%,
+      #fff 0%,
+      #fff 15%,
+      var(--tornado-color-a) 35%,
+      var(--tornado-color-a) 62%,
+      var(--tornado-color-b) 80%,
+      transparent 100%
+    );
+  }
+
+  .tw1 { width: 105%; height: 105%; top: -4%; opacity: 1; }
+  .tw2 { width: 88%;  height: 88%;  top: 12%; opacity: 0.95; }
+  .tw3 { width: 68%;  height: 68%;  top: 28%; opacity: 0.88; }
+  .tw4 { width: 48%;  height: 48%;  top: 46%; opacity: 0.78; }
+  .tw5 { width: 28%;  height: 28%;  top: 63%; opacity: 0.65; }
+  .tw6 { width: 14%;  height: 14%;  top: 78%; opacity: 0.48; }
+
+  @keyframes twSpin {
+    0%   { transform: translateX(-50%) scaleY(0.42) rotate(0deg);   }
+    100% { transform: translateX(-50%) scaleY(0.42) rotate(360deg); }
+  }
 }
 
-/* brute — violet purple */
-.demon-entity.type-brute .demon-tornado {
-  --tornado-color-a: rgba(168,85,247,0.9);
-  --tornado-color-b: rgba(109,40,217,0.6);
-  width: 120%;
-  height: 58%;
+@keyframes tornadoGlowPulse {
+  0%   { opacity: 0.65; filter: blur(6px);  }
+  100% { opacity: 0.90; filter: blur(9px);  }
 }
 
-/* Frozen tornado — pause spin, tint blue */
-.demon-entity.frozen .demon-tornado::before,
-.demon-entity.frozen .demon-tornado::after {
-  animation-play-state: paused !important;
-  filter: hue-rotate(160deg) brightness(1.3) blur(2px) !important;
-}
+/* ── Old tornado classes (safe to keep, unused) ── */
+.tornado-base, .tornado-mid, .tornado-top, .tornado-core { display: none; }
 
-/* Slowed tornado — slow spin */
-.demon-entity.slowed .demon-tornado::before {
-  animation-duration: 1.8s !important;
-}
-.demon-entity.slowed .demon-tornado::after {
-  animation-duration: 1.3s !important;
-}
+/* ── Hide all HP bars ── */
+.demon-hp-wrap { display: none !important; }
