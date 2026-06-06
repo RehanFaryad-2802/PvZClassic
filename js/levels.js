@@ -323,7 +323,7 @@ const Levels = (() => {
     { worldId: 1, levelIdx: 3, minigameId: "blockhunt" }, // W1 Level 4
     { worldId: 1, levelIdx: 3, minigameId: "bombball" }, // W1 Level 4
     { worldId: 1, levelIdx: 3, minigameId: "sharpshooters" }, // W1 Level 4
-    // Future minigames added here
+    { worldId: 1, levelIdx: 0, minigameId: "discofdoom" }, // W1 Level 1
   ];
 
   const LEVEL_TEMP_PLANTS = {

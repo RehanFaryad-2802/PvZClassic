@@ -1692,8 +1692,8 @@ const UI = (() => {
       name: "Disc of Doom",
       icon: "💿",
       image: null,
-      desc: "Coming soon!",
-      reward: "Seeds",
+      desc: "Deflect spinning discs into demons before they reach you!",
+      reward: "Seeds & Coins",
     },
     {
       id: "fleefacility",
@@ -1769,6 +1769,9 @@ const UI = (() => {
     } else if (id === "sharpshoot") {
       showScreen("screen-sharpshooters");
       SharpShooters.startGame();
+    } else if (id === "discofdoom") {
+      showScreen("screen-discofdoom");
+      DiscOfDoom.startGame();
     } else {
       showToast("Coming soon! 🚧");
     }

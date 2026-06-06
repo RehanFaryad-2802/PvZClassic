@@ -843,11 +843,9 @@ html, body {
 .minigames-grid {
   display: grid;
   gap: 18px;
+  grid-template-columns: repeat(4, 180px);
   padding: 16px;
   overflow-y: auto;
-}
-.lololo{
-  max-width: inherit;
 }
 
 .mg-card {

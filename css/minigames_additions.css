@@ -321,3 +321,336 @@
   filter: drop-shadow(0 0 6px rgba(249,115,22,0.9));
   transition: transform 0.05s;
 }
+
+/* ═══════════════════════════════════════════════
+   DIFFICULTY PICKER — shared visual upgrade
+═══════════════════════════════════════════════ */
+
+/* Make picker scrollable so buttons don't get cut on small screens */
+.bh-result {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px 12px;
+  gap: 8px !important;
+  justify-content: flex-start !important;
+  align-items: center;
+}
+
+.bh-result h2 {
+  flex-shrink: 0;
+  margin-bottom: 4px;
+}
+
+.bh-result .btn-menu,
+.bh-result .btn-primary,
+.bh-result .btn-secondary {
+  position: relative;
+  width: min(300px, 88vw) !important;
+  flex-shrink: 0;
+  padding: 13px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+  color: var(--white);
+  font-family: var(--font-display);
+  font-size: 16px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  text-align: left !important;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  overflow: hidden;
+}
+
+.bh-result .btn-menu::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 60%, rgba(255,255,255,0.04));
+  pointer-events: none;
+}
+
+.bh-result .btn-menu:hover,
+.bh-result .btn-primary:hover {
+  transform: translateY(-2px) scale(1.02);
+  border-color: rgba(255,255,255,0.28);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+}
+
+.bh-result .btn-menu:active,
+.bh-result .btn-primary:active {
+  transform: scale(0.97);
+}
+
+/* Colour-coded left border per difficulty */
+.bh-result .btn-menu[data-diff="0"] { border-left: 4px solid #22c55e; }
+.bh-result .btn-menu[data-diff="1"] { border-left: 4px solid #3b82f6; }
+.bh-result .btn-menu[data-diff="2"] { border-left: 4px solid #f97316; }
+.bh-result .btn-menu[data-diff="3"] { border-left: 4px solid #ef4444; }
+.bh-result .btn-menu[data-diff="4"] { border-left: 4px solid #a855f7; }
+
+/* Sub-text line inside the button */
+.bh-result .btn-menu span {
+  display: block;
+  margin-top: 3px;
+  font-family: inherit;
+  font-size: 12px !important;
+  color: rgba(255,255,255,0.45) !important;
+  letter-spacing: 0.5px;
+}
+
+/* Result end-of-game button row */
+.bh-result > div[style*="display:flex"] {
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+
+/* Result overlay title colours per game */
+#screen-blockhunt     .bh-result h2 { color: var(--orange); text-shadow: 0 0 24px var(--orange); }
+#screen-bombball      .bh-result h2 { color: #06b6d4;       text-shadow: 0 0 24px #06b6d4; }
+#screen-sharpshooters .bh-result h2 { color: #f97316;       text-shadow: 0 0 24px #f97316; }
+#screen-discofdoom    .bh-result h2 { color: #a78bfa;       text-shadow: 0 0 24px #a78bfa; }
+
+/* ═══════════════════════════════════════════════
+   DISC OF DOOM  (minigame 4)
+═══════════════════════════════════════════════ */
+
+#screen-discofdoom {
+  background: linear-gradient(160deg, #0a0018, #12002a);
+  overflow: hidden;
+}
+
+.dod-container {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px;
+  gap: 6px;
+}
+
+.dod-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.dod-header h2 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 3px;
+  color: #a78bfa;
+}
+
+.dod-stats {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.dod-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 4px 10px;
+  min-width: 52px;
+}
+.dod-stat .stat-val {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--white);
+}
+.dod-stat .stat-lbl {
+  font-size: 9px;
+  color: var(--gray);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.dod-lives {
+  font-size: 18px;
+  letter-spacing: 3px;
+}
+
+.dod-timer-bar {
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.dod-timer-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7c3aed, #a78bfa, #f97316);
+  border-radius: 4px;
+  transition: width 0.12s linear;
+}
+
+.dod-arena {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(167,139,250,0.2);
+  /* Row lane lines */
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent,
+    transparent calc(20% - 1px),
+    rgba(167,139,250,0.06) 20%
+  );
+  touch-action: none;
+}
+
+/* Screen flash on life loss */
+.dod-arena.dod-flash {
+  animation: dodFlash 0.4s ease-out;
+}
+@keyframes dodFlash {
+  0%,100% { box-shadow: none; }
+  30%     { box-shadow: inset 0 0 40px rgba(239,68,68,0.7); }
+}
+
+/* ── Disc ── */
+.dod-disc {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  cursor: pointer;
+  border: 2px solid var(--disc-color, #a78bfa);
+  box-shadow: 0 0 12px var(--disc-color, #a78bfa);
+  background: rgba(0,0,0,0.5);
+  user-select: none;
+  z-index: 3;
+  animation: discSpin 0.8s linear infinite;
+  transition: box-shadow 0.1s;
+}
+.dod-disc:hover {
+  box-shadow: 0 0 24px var(--disc-color, #a78bfa);
+  transform: scale(1.1);
+}
+.dod-disc.deflected {
+  box-shadow: 0 0 28px var(--disc-color, #a78bfa), 0 0 50px var(--disc-color, #a78bfa);
+  animation: discSpinFast 0.25s linear infinite;
+}
+@keyframes discSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes discSpinFast {
+  from { transform: rotate(0deg) scale(1.15); }
+  to   { transform: rotate(360deg) scale(1.15); }
+}
+
+/* ── Demon ── */
+.dod-demon {
+  position: absolute;
+  width: 54px;
+  height: 54px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--demon-color, #ef4444);
+  box-shadow: 0 0 10px var(--demon-color, #ef4444);
+  background: rgba(0,0,0,0.5);
+  z-index: 2;
+  animation: demonWalk 0.5s steps(2) infinite;
+}
+.dod-demon-emoji { font-size: 26px; line-height: 1; }
+.dod-demon.frozen {
+  filter: hue-rotate(180deg) brightness(1.4);
+  animation: none !important;
+}
+@keyframes demonWalk {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-3px); }
+  100% { transform: translateY(0); }
+}
+
+.dod-hp-bar {
+  width: 80%;
+  height: 4px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 2px;
+}
+.dod-hp-fill {
+  height: 100%;
+  background: #ef4444;
+  border-radius: 2px;
+  transition: width 0.1s;
+}
+
+/* ── FX ── */
+.dod-fx {
+  position: absolute;
+  font-size: 22px;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  animation: dodFxRise 0.7s ease-out forwards;
+}
+.dod-kill-fx { font-size: 28px; }
+@keyframes dodFxRise {
+  0%   { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
+  100% { opacity: 0; transform: translate(-50%, -160%) scale(0.7); }
+}
+
+.dod-hint {
+  text-align: center;
+  font-size: 11px;
+  color: rgba(167,139,250,0.5);
+  letter-spacing: 1px;
+  flex-shrink: 0;
+  padding-bottom: 2px;
+}
+
+/* ── Result overlay ── */
+.dod-result {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.88);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 50;
+  animation: fadeIn 0.3s ease;
+}
+.dod-result h2 {
+  font-family: var(--font-display);
+  font-size: 42px;
+  letter-spacing: 3px;
+  color: #a78bfa;
+  text-shadow: 0 0 24px #a78bfa;
+}
+.dod-result-score { font-family: var(--font-display); font-size: 20px; color: var(--white); }
+.dod-result-seeds { font-size: 18px; color: var(--green); }
+.dod-result-coins { font-size: 16px; color: var(--gold); }
+.dod-result-btn {
+  padding: 12px 24px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+  color: white;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+.dod-result-btn-sec {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+}
