@@ -1,111 +1,164 @@
 /* js/minigames/disc_of_doom.js
    Disc of Doom — Minigame 4
-   Discs fall from top into a left-side queue.
-   Tap a queued disc to load it into the launcher.
-   Tap the arena to aim and fire at marching demons.
+   Queue = left conveyor belt rail.
+   Fire zone = left strip of arena only.
+   Cooldown between shots.
 */
 
 const DiscOfDoom = (() => {
 
-  // ── CONFIG ───────────────────────────────────────
+  // ══════════════════════════════════════════════════
+  //  CONFIG
+  // ══════════════════════════════════════════════════
   const CFG = {
     ROWS: 5,
     DURATION_MS: 60000,
-    DISC_FALL_INTERVAL_START: 1200, // ms between new discs falling into queue
-    DISC_FALL_INTERVAL_MIN:   500,
-    DEMON_SPAWN_INTERVAL_START: 3200,
-    DEMON_SPAWN_INTERVAL_MIN:   1400,
-    DEMON_SPEED_PX_S: 62,
-    FIRED_SPEED_PX_S: 720,         // speed of a fired disc crossing the arena
+
+    // Rail / queue
+    QUEUE_MAX: 5,
+    SLOT_H: 62,                      // px per slot (item size + gap)
+    DISC_FALL_INTERVAL_START: 1300,
+    DISC_FALL_INTERVAL_MIN:   480,
+
+    // Conveyor animation
+    BELT_SLIDE_MS: 260,              // ms to slide all items down one slot
+
+    // Cooldown after firing (ms)
+    FIRE_COOLDOWN_MS: 600,
+
+    // Fire zone: fraction of arena width player can click to fire
+    FIRE_ZONE_FRAC: 0.28,            // left 28% of arena
+
+    // Fired disc
+    FIRED_SPEED_PX_S: 740,
     DISC_RADIUS: 26,
-    DEMON_WIDTH: 52,
-    DEMON_HEIGHT: 52,
-    QUEUE_MAX: 5,                  // max discs sitting in the left queue
+
+    // Demons
+    DEMON_SPEED_PX_S:         60,
+    DEMON_SPAWN_INTERVAL_START: 3200,
+    DEMON_SPAWN_INTERVAL_MIN:   1300,
+    DEMON_WIDTH:  54,
+    DEMON_HEIGHT: 54,
+    DEMON_HP: { imp:3, bat:3, brute:6, armored:10 },
+
+    // Scoring
     LIVES: 3,
     SEEDS_PER_HIT:  2,
     SEEDS_PER_KILL: 5,
     COINS_PER_KILL: 3,
     SCORE_PER_HIT:  10,
     SCORE_PER_KILL: 25,
+
     DIFFICULTY_RAMP_EVERY_MS: 8000,
+
     DISC_TYPES: [
-      { id: "normal", emoji: "💿", color: "#a78bfa", points: 1, speedMult: 1.0 },
-      { id: "fire",   emoji: "🔥", color: "#f97316", points: 2, speedMult: 1.0 },
-      { id: "ice",    emoji: "❄️",  color: "#38bdf8", points: 1, speedMult: 1.0, freeze: true },
-      { id: "gold",   emoji: "⭐", color: "#fbbf24", points: 3, speedMult: 1.0 },
+      { id:"normal", emoji:"💿", color:"#a78bfa", direct_dmg:0.30, burn_dps:0,    burn_dur:0, freeze:false, freeze_dur:0, star:false },
+      { id:"fire",   emoji:"🔥", color:"#f97316", direct_dmg:0.25, burn_dps:0.06, burn_dur:5, freeze:false, freeze_dur:0, star:false },
+      { id:"ice",    emoji:"❄️",  color:"#38bdf8", direct_dmg:0.20, burn_dps:0,    burn_dur:0, freeze:true,  freeze_dur:2.5, star:false },
+      { id:"star",   emoji:"⭐", color:"#fbbf24", direct_dmg:0,    burn_dps:0,    burn_dur:0, freeze:false, freeze_dur:0, star:true  },
     ],
+
+    STAR_POWER: {
+      dmg_pct:   0.55,
+      freeze_dur: 1.5,
+      fx_duration: 800,
+    },
+
     DEMON_TYPES: [
-      { id: "imp",     emoji: "😈", color: "#ef4444", hp: 1 },
-      { id: "bat",     emoji: "🦇", color: "#8b5cf6", hp: 1 },
-      { id: "armored", emoji: "🛡️",  color: "#6b7280", hp: 3 },
-      { id: "brute",   emoji: "👹", color: "#dc2626", hp: 2 },
+      { id:"imp",     emoji:"😈", color:"#ef4444" },
+      { id:"bat",     emoji:"🦇", color:"#8b5cf6" },
+      { id:"brute",   emoji:"👹", color:"#dc2626" },
+      { id:"armored", emoji:"🛡️",  color:"#6b7280" },
     ],
   };
 
-  // ── Difficulties ─────────────────────────────────
+  // ══════════════════════════════════════════════════
+  //  DIFFICULTIES
+  // ══════════════════════════════════════════════════
   const DIFFICULTIES = [
-    { name: "Easy",   pips: 1, fallMult: 1.0,  demonSpeedMult: 0.7,  spawnMult: 1.0,  reward: { seeds: 1,  coins: 5  } },
-    { name: "Medium", pips: 2, fallMult: 0.85, demonSpeedMult: 0.9,  spawnMult: 0.82, reward: { seeds: 2,  coins: 12 } },
-    { name: "Hard",   pips: 3, fallMult: 0.70, demonSpeedMult: 1.15, spawnMult: 0.65, reward: { seeds: 4,  coins: 22 } },
-    { name: "Expert", pips: 4, fallMult: 0.55, demonSpeedMult: 1.4,  spawnMult: 0.48, reward: { seeds: 7,  coins: 38 } },
-    { name: "Insane", pips: 5, fallMult: 0.38, demonSpeedMult: 1.8,  spawnMult: 0.32, reward: { seeds: 11, coins: 58 } },
+    { name:"Easy",   pips:1, fallMult:1.00, demonSpeedMult:0.70, hpMult:0.7, spawnMult:1.00, reward:{seeds:1,  coins:5  }},
+    { name:"Medium", pips:2, fallMult:0.85, demonSpeedMult:0.90, hpMult:1.0, spawnMult:0.82, reward:{seeds:2,  coins:12 }},
+    { name:"Hard",   pips:3, fallMult:0.70, demonSpeedMult:1.15, hpMult:1.4, spawnMult:0.65, reward:{seeds:4,  coins:22 }},
+    { name:"Expert", pips:4, fallMult:0.55, demonSpeedMult:1.40, hpMult:1.9, spawnMult:0.48, reward:{seeds:7,  coins:38 }},
+    { name:"Insane", pips:5, fallMult:0.38, demonSpeedMult:1.80, hpMult:2.6, spawnMult:0.32, reward:{seeds:11, coins:58 }},
   ];
 
   let currentDiff = 0;
 
-  // ── State ─────────────────────────────────────────
-  let running = false;
-  let queue   = [];    // discs waiting in left panel
-  let fired   = [];    // discs currently flying across arena
-  let demons  = [];
-  let loaded  = null;  // the disc currently loaded in launcher (ready to fire)
+  // ══════════════════════════════════════════════════
+  //  STATE
+  // ══════════════════════════════════════════════════
+  let running     = false;
+  let queue       = [];   // { id, type }  index 0 = top of belt
+  let loaded      = null; // disc in fire slot
+  let fired       = [];   // flying discs in arena
+  let demons      = [];
   let score = 0, lives = CFG.LIVES, seedsEarned = 0, coinsEarned = 0;
   let timeLeft = CFG.DURATION_MS, lastTs = 0, animId = null;
   let fallTimer = 0, demonTimer = 0, diffTimer = 0, diffLevel = 0;
-  let nextDiscId = 0, nextDemonId = 0;
+  let nextId = 0;
+
+  // Cooldown
+  let cooldownUntil = 0;            // performance.now() timestamp
+  let cooldownTimerId = null;
+
+  // Belt animation state
+  let beltSliding   = false;        // true while CSS transition is running
+  let beltSlideStart= 0;            // performance.now() when slide began
+  let beltOffsetPx  = 0;            // current extra Y offset during slide (0→SLOT_H)
 
   // DOM refs
-  let arenaEl = null, queueEl = null, launcherEl = null;
+  let arenaEl = null, railTrackEl = null, loadedSlotEl = null, fireZoneEl = null;
+  let cooldownBarEl = null;
   let timerFill = null, scorEl = null, livesEl = null, seedsEl = null;
 
-  // ── Entry point ───────────────────────────────────
+  // ══════════════════════════════════════════════════
+  //  ENTRY
+  // ══════════════════════════════════════════════════
   function startGame(diffIdx) {
     if (diffIdx === undefined) {
-      const screen = document.getElementById("screen-discofdoom");
-      if (screen) { buildUI(screen); showPicker(screen); }
+      const scr = document.getElementById("screen-discofdoom");
+      if (scr) { buildUI(scr); showPicker(scr); }
       return;
     }
     currentDiff = Math.min(diffIdx, DIFFICULTIES.length - 1);
 
-    // Reset
     running = false;
-    queue = []; fired = []; demons = []; loaded = null;
+    queue = []; loaded = null; fired = []; demons = [];
     score = 0; lives = CFG.LIVES; seedsEarned = 0; coinsEarned = 0;
     timeLeft = CFG.DURATION_MS; lastTs = 0; animId = null;
     fallTimer = 0; demonTimer = 0; diffTimer = 0; diffLevel = 0;
-    nextDiscId = 0; nextDemonId = 0;
+    nextId = 0;
+    cooldownUntil = 0; cooldownTimerId = null;
+    beltSliding = false; beltSlideStart = 0; beltOffsetPx = 0;
 
-    const screen = document.getElementById("screen-discofdoom");
-    if (!screen) return;
-    buildUI(screen);
+    const scr = document.getElementById("screen-discofdoom");
+    if (!scr) return;
+    buildUI(scr);
 
-    // Diff badge
-    const badge = screen.querySelector("#dod-diff-badge");
-    if (badge) badge.innerHTML = DIFFICULTIES.map((_,i) =>
-      `<div class="bh-diff-pip${i <= currentDiff ? " active" : ""}"></div>`).join("");
-    const nameEl = screen.querySelector("#dod-diff-name");
-    if (nameEl) nameEl.textContent = DIFFICULTIES[currentDiff].name;
+    scr.querySelector("#dod-diff-badge").innerHTML =
+      DIFFICULTIES.map((_,i) =>
+        `<div class="bh-diff-pip${i<=currentDiff?" active":""}"></div>`).join("");
+    scr.querySelector("#dod-diff-name").textContent = DIFFICULTIES[currentDiff].name;
 
-    showCountdown(screen, 3, () => {
+    // Pre-fill queue + auto-load
+    for (let i = 0; i < CFG.QUEUE_MAX; i++) pushToQueue(true);
+    autoLoad(true);
+    renderRail(false);
+    renderLoaded();
+
+    showCountdown(scr, 3, () => {
       running = true;
       lastTs = performance.now();
       animId = requestAnimationFrame(loop);
     });
   }
 
-  // ── UI ────────────────────────────────────────────
-  function buildUI(screen) {
-    screen.innerHTML = `
+  // ══════════════════════════════════════════════════
+  //  BUILD UI
+  // ══════════════════════════════════════════════════
+  function buildUI(scr) {
+    scr.innerHTML = `
       <div class="dod-container" id="dod-container">
 
         <div class="dod-header">
@@ -128,81 +181,95 @@ const DiscOfDoom = (() => {
 
         <div class="dod-play-area">
 
-          <!-- LEFT: disc queue (falls from top) -->
-          <div class="dod-queue-panel" id="dod-queue-panel">
-            <div class="dod-queue-label">QUEUE</div>
-            <div class="dod-queue-slots" id="dod-queue-slots"></div>
-            <!-- launcher slot at bottom of panel -->
-            <div class="dod-launcher-wrap">
-              <div class="dod-launcher-label">LOADED</div>
-              <div class="dod-launcher-slot" id="dod-launcher-slot">
-                <span class="dod-launcher-empty">tap↑</span>
-              </div>
+          <!-- LEFT: conveyor rail + loaded slot -->
+          <div class="dod-rail-panel">
+            <div class="dod-rail-label">QUEUE</div>
+            <div class="dod-rail-track" id="dod-rail-track"></div>
+            <div class="dod-rail-sep"></div>
+            <div class="dod-rail-label">LOADED</div>
+            <div class="dod-loaded-slot" id="dod-loaded-slot">
+              <span class="dod-loaded-empty">—</span>
+            </div>
+            <div class="dod-cooldown-bar-wrap">
+              <div class="dod-cooldown-bar" id="dod-cooldown-bar"></div>
             </div>
           </div>
 
-          <!-- RIGHT: arena where demons march -->
+          <!-- RIGHT: arena with fire-zone overlay on the left -->
           <div class="dod-arena" id="dod-arena">
-            <div class="dod-fire-hint" id="dod-fire-hint">Load a disc, then tap here to fire →</div>
+            <!-- Fire zone: clickable left strip -->
+            <div class="dod-fire-zone" id="dod-fire-zone">
+              <div class="dod-fire-zone-label">FIRE<br>ZONE</div>
+            </div>
           </div>
 
         </div>
 
-        <div class="dod-hint">Tap a disc to load it · Tap the arena to fire at demons</div>
+        <div class="dod-hint">Tap FIRE ZONE to shoot · Tap queue item to reorder</div>
       </div>
     `;
 
-    arenaEl    = screen.querySelector("#dod-arena");
-    queueEl    = screen.querySelector("#dod-queue-slots");
-    launcherEl = screen.querySelector("#dod-launcher-slot");
-    timerFill  = screen.querySelector("#dod-timer-fill");
-    scorEl     = screen.querySelector("#dod-score");
-    livesEl    = screen.querySelector("#dod-lives");
-    seedsEl    = screen.querySelector("#dod-seeds");
+    arenaEl      = scr.querySelector("#dod-arena");
+    railTrackEl  = scr.querySelector("#dod-rail-track");
+    loadedSlotEl = scr.querySelector("#dod-loaded-slot");
+    fireZoneEl   = scr.querySelector("#dod-fire-zone");
+    cooldownBarEl= scr.querySelector("#dod-cooldown-bar");
+    timerFill    = scr.querySelector("#dod-timer-fill");
+    scorEl       = scr.querySelector("#dod-score");
+    livesEl      = scr.querySelector("#dod-lives");
+    seedsEl      = scr.querySelector("#dod-seeds");
 
-    // Back button
-    screen.querySelector("#dod-back").addEventListener("click", () => {
+    scr.querySelector("#dod-back").addEventListener("click", () => {
       running = false;
       if (animId) { cancelAnimationFrame(animId); animId = null; }
       if (typeof UI !== "undefined") UI.showScreen("screen-minigames");
     });
 
-    // Fire: tap arena to shoot loaded disc toward that row
-    arenaEl.addEventListener("pointerdown", (e) => {
+    // ── FIRE ZONE click ────────────────────────────
+    fireZoneEl.addEventListener("pointerdown", e => {
+      e.stopPropagation();
       if (!loaded || !running) return;
+      const now = performance.now();
+      if (now < cooldownUntil) return;        // still on cooldown
+      if (beltSliding) return;               // belt is mid-animation
+
       const rect = arenaEl.getBoundingClientRect();
       const tapY = e.clientY - rect.top;
-      fireDisc(tapY);
+      triggerFire(tapY);
     });
   }
 
-  // ── Countdown ────────────────────────────────────
-  function showCountdown(screen, n, cb) {
+  // ══════════════════════════════════════════════════
+  //  COUNTDOWN
+  // ══════════════════════════════════════════════════
+  function showCountdown(scr, n, cb) {
     const el = document.createElement("div");
     el.className = "mg-countdown";
     el.textContent = n;
-    screen.appendChild(el);
-    let count = n;
+    scr.appendChild(el);
+    let c = n;
     const tick = () => {
-      count--;
-      if (count <= 0) { el.remove(); cb(); return; }
+      c--;
+      if (c <= 0) { el.remove(); cb(); return; }
       el.style.animation = "none"; void el.offsetWidth; el.style.animation = "";
-      el.textContent = count;
+      el.textContent = c;
       setTimeout(tick, 900);
     };
     setTimeout(tick, 900);
   }
 
-  // ── Game Loop ─────────────────────────────────────
+  // ══════════════════════════════════════════════════
+  //  GAME LOOP
+  // ══════════════════════════════════════════════════
   function loop(ts) {
     if (!running) return;
     const dt = Math.min(ts - lastTs, 100);
     lastTs = ts;
 
-    timeLeft -= dt;
+    timeLeft  -= dt;
     diffTimer += dt;
     fallTimer += dt;
-    demonTimer += dt;
+    demonTimer+= dt;
 
     if (diffTimer >= CFG.DIFFICULTY_RAMP_EVERY_MS) { diffTimer = 0; diffLevel++; }
 
@@ -215,7 +282,8 @@ const DiscOfDoom = (() => {
     );
     if (fallTimer >= fallInterval && queue.length < CFG.QUEUE_MAX) {
       fallTimer = 0;
-      addDiscToQueue();
+      pushToQueue(false);
+      renderRail(true); // true = animate new item dropping in from top
     }
 
     // Spawn demon
@@ -225,116 +293,259 @@ const DiscOfDoom = (() => {
     );
     if (demonTimer >= demonInterval) { demonTimer = 0; spawnDemon(); }
 
+    // Advance belt slide animation
+    if (beltSliding) updateBeltSlide(ts);
+
     updateFired(dt);
     updateDemons(dt);
     checkCollisions();
     updateHUD();
+    updateCooldownBar();
 
     if (timeLeft <= 0 || lives <= 0) { endGame(); return; }
     animId = requestAnimationFrame(loop);
   }
 
-  // ── Queue ─────────────────────────────────────────
-  function addDiscToQueue() {
-    const rand = Math.random();
-    let type;
-    if      (rand < 0.05) type = CFG.DISC_TYPES[3]; // gold
-    else if (rand < 0.20) type = CFG.DISC_TYPES[2]; // ice
-    else if (rand < 0.40) type = CFG.DISC_TYPES[1]; // fire
-    else                  type = CFG.DISC_TYPES[0]; // normal
-
-    const disc = { id: nextDiscId++, type };
-    queue.push(disc);
-    renderQueue();
+  // ══════════════════════════════════════════════════
+  //  QUEUE MANAGEMENT
+  // ══════════════════════════════════════════════════
+  function pickDiscType() {
+    const r = Math.random();
+    if      (r < 0.03) return CFG.DISC_TYPES[3]; // star  3%
+    else if (r < 0.18) return CFG.DISC_TYPES[2]; // ice  15%
+    else if (r < 0.40) return CFG.DISC_TYPES[1]; // fire 22%
+    else               return CFG.DISC_TYPES[0]; // normal
   }
 
-  function renderQueue() {
-    if (!queueEl) return;
-    queueEl.innerHTML = "";
-    queue.forEach((disc, idx) => {
-      const el = document.createElement("div");
-      el.className = "dod-queue-disc";
-      el.textContent = disc.type.emoji;
-      el.style.setProperty("--disc-color", disc.type.color);
-      el.style.animationDelay = (idx * 0.05) + "s";
-      el.addEventListener("pointerdown", (e) => {
-        e.stopPropagation();
-        loadDisc(disc, idx);
-      });
-      queueEl.appendChild(el);
-    });
+  function pushToQueue(silent) {
+    queue.push({ id: nextId++, type: pickDiscType(), isNew: !silent });
   }
 
-  function loadDisc(disc, idx) {
-    if (!running) return;
-    // Put previously loaded disc back into queue front if there was one
-    if (loaded) queue.unshift(loaded);
-    queue.splice(loaded ? idx + 1 : idx, 1);
-    loaded = disc;
-    renderQueue();
-    renderLauncher();
+  // Pull top item from queue into loaded slot (no animation)
+  function autoLoad(silent) {
+    if (loaded) return;
+    if (queue.length === 0) return;
+    loaded = queue.shift();
+    if (!silent) renderLoaded();
   }
 
-  function renderLauncher() {
-    if (!launcherEl) return;
+  // Player taps a queue item — swap it to loaded, put current loaded back
+  function swapLoad(idx) {
+    if (!running || beltSliding) return;
+    const tapped = queue[idx];
     if (loaded) {
-      launcherEl.innerHTML = `
-        <div class="dod-launcher-disc" style="--disc-color:${loaded.type.color}">
-          ${loaded.type.emoji}
-        </div>
-        <div class="dod-launcher-name">${loaded.type.id}</div>
-      `;
+      queue.splice(idx, 1, loaded); // replace tapped slot with current loaded
     } else {
-      launcherEl.innerHTML = `<span class="dod-launcher-empty">tap↑</span>`;
+      queue.splice(idx, 1);
     }
-    // Flash hint
-    const hint = document.getElementById("dod-fire-hint");
-    if (hint) hint.style.display = loaded ? "none" : "block";
+    loaded = tapped;
+    renderLoaded();
+    renderRail(false);
   }
 
-  // ── Fire ──────────────────────────────────────────
-  function fireDisc(tapY) {
-    if (!loaded || !arenaEl) return;
-    const arenaH = arenaEl.clientHeight;
+  // ══════════════════════════════════════════════════
+  //  CONVEYOR BELT ANIMATION
+  //  All items smoothly slide down one SLOT_H when
+  //  the loaded item is consumed (fire / autoLoad).
+  // ══════════════════════════════════════════════════
+  function startBeltSlide() {
+    beltSliding    = true;
+    beltSlideStart = performance.now();
+    beltOffsetPx   = 0;
+    // Give every existing item element a starting top based on CURRENT positions
+    // They will be moved by updateBeltSlide each frame
+    const items = railTrackEl ? railTrackEl.querySelectorAll(".dod-rail-item") : [];
+    items.forEach((el, i) => {
+      // store their logical index so we know target
+      el.dataset.slotIdx = i;
+      el.style.transition = "none";
+      el.style.top = (i * CFG.SLOT_H) + "px"; // reset to clean positions
+    });
+  }
 
-    // Clamp y to arena bounds
-    const y = Math.max(CFG.DISC_RADIUS, Math.min(arenaH - CFG.DISC_RADIUS, tapY));
+  function updateBeltSlide(ts) {
+    const elapsed = ts - beltSlideStart;
+    const t = Math.min(elapsed / CFG.BELT_SLIDE_MS, 1);
+    // Ease-out cubic
+    const ease = 1 - Math.pow(1 - t, 3);
+    beltOffsetPx = ease * CFG.SLOT_H;
 
-    fired.push({
-      id: nextDiscId++,
-      type: loaded.type,
-      x: CFG.DISC_RADIUS,   // start at left edge of arena
-      y,
-      speed: CFG.FIRED_SPEED_PX_S,
-      el: null,
+    const items = railTrackEl ? railTrackEl.querySelectorAll(".dod-rail-item") : [];
+    items.forEach((el, i) => {
+      el.style.top = (i * CFG.SLOT_H + beltOffsetPx) + "px";
     });
 
-    loaded = null;
-    renderLauncher();
-
-    // Render the new fired disc immediately
-    renderFired();
-  }
-
-  // ── Update fired discs ────────────────────────────
-  function updateFired(dt) {
-    if (!arenaEl) return;
-    const dtS = dt / 1000;
-    const arenaW = arenaEl.clientWidth;
-
-    for (let i = fired.length - 1; i >= 0; i--) {
-      const d = fired[i];
-      d.x += d.speed * dtS;
-      if (d.x > arenaW + CFG.DISC_RADIUS * 2) {
-        if (d.el) d.el.remove();
-        fired.splice(i, 1);
+    if (t >= 1) {
+      // Slide complete
+      beltSliding  = false;
+      beltOffsetPx = 0;
+      // Re-render from fresh data (removes the ghost of what was at slot 0)
+      autoLoad(false);
+      renderRail(false);
+      renderLoaded();
+      // Ensure queue stays topped up
+      if (queue.length < CFG.QUEUE_MAX) {
+        pushToQueue(false);
+        renderRail(true);
       }
     }
   }
 
-  function renderFired() {
+  // ══════════════════════════════════════════════════
+  //  RENDER RAIL
+  // ══════════════════════════════════════════════════
+  function renderRail(animateNewItem) {
+    if (!railTrackEl) return;
+    // Keep existing elements if mid-slide; otherwise full rebuild
+    if (beltSliding) return;
+
+    railTrackEl.innerHTML = "";
+    // Track height = enough for all slots
+    railTrackEl.style.height = (CFG.QUEUE_MAX * CFG.SLOT_H) + "px";
+
+    queue.forEach((disc, idx) => {
+      const el = document.createElement("div");
+      el.className = "dod-rail-item";
+      el.dataset.id = disc.id;
+      el.style.setProperty("--disc-color", disc.type.color);
+
+      // Position: top slot is idx=0
+      el.style.top = (idx * CFG.SLOT_H) + "px";
+
+      el.innerHTML = `<span class="dod-rail-emoji">${disc.type.emoji}</span>`;
+
+      // New item drop-in animation from above
+      if (disc.isNew && animateNewItem) {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(-28px) scale(0.6)";
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            el.style.transition = "opacity 0.22s ease, transform 0.22s ease";
+            el.style.opacity = "1";
+            el.style.transform = "translateY(0) scale(1)";
+          });
+        });
+        disc.isNew = false;
+      }
+
+      el.addEventListener("pointerdown", e => {
+        e.stopPropagation();
+        swapLoad(idx);
+      });
+
+      railTrackEl.appendChild(el);
+    });
+
+    // Ghost empty slots so the rail always looks full-length
+    for (let i = queue.length; i < CFG.QUEUE_MAX; i++) {
+      const ghost = document.createElement("div");
+      ghost.className = "dod-rail-ghost";
+      ghost.style.top = (i * CFG.SLOT_H) + "px";
+      railTrackEl.appendChild(ghost);
+    }
+  }
+
+  function renderLoaded() {
+    if (!loadedSlotEl) return;
+    if (!loaded) {
+      loadedSlotEl.innerHTML = `<span class="dod-loaded-empty">—</span>`;
+      loadedSlotEl.className = "dod-loaded-slot";
+      return;
+    }
+    loadedSlotEl.innerHTML = `
+      <div class="dod-loaded-disc" style="--disc-color:${loaded.type.color}">
+        ${loaded.type.emoji}
+      </div>
+      <div class="dod-loaded-name">${loaded.type.id}</div>
+    `;
+    loadedSlotEl.className = "dod-loaded-slot dod-loaded-active";
+    // Update fire zone colour to match
+    if (fireZoneEl) fireZoneEl.style.setProperty("--fz-color", loaded.type.color);
+  }
+
+  // ══════════════════════════════════════════════════
+  //  COOLDOWN BAR
+  // ══════════════════════════════════════════════════
+  function updateCooldownBar() {
+    if (!cooldownBarEl) return;
+    const now = performance.now();
+    if (now >= cooldownUntil) {
+      cooldownBarEl.style.width = "0%";
+      cooldownBarEl.parentElement.classList.remove("active");
+      return;
+    }
+    const pct = ((cooldownUntil - now) / CFG.FIRE_COOLDOWN_MS) * 100;
+    cooldownBarEl.style.width = pct + "%";
+    cooldownBarEl.parentElement.classList.add("active");
+  }
+
+  // ══════════════════════════════════════════════════
+  //  FIRE
+  // ══════════════════════════════════════════════════
+  function triggerFire(tapY) {
+    if (!loaded || !arenaEl) return;
+    const arenaH = arenaEl.clientHeight;
+    const y = Math.max(CFG.DISC_RADIUS, Math.min(arenaH - CFG.DISC_RADIUS, tapY));
+
+    if (loaded.type.star) {
+      activateStar();
+    } else {
+      fired.push({
+        id: nextId++,
+        type: loaded.type,
+        x: CFG.DISC_RADIUS,
+        y,
+        speed: CFG.FIRED_SPEED_PX_S,
+        el: null,
+      });
+    }
+
+    // Start cooldown
+    cooldownUntil = performance.now() + CFG.FIRE_COOLDOWN_MS;
+
+    // Clear loaded slot visually
+    loaded = null;
+    renderLoaded();
+    if (fireZoneEl) fireZoneEl.classList.add("dod-fz-fired");
+    setTimeout(() => fireZoneEl && fireZoneEl.classList.remove("dod-fz-fired"), 180);
+
+    // Start belt slide which will auto-load next item when done
+    startBeltSlide();
+  }
+
+  // ══════════════════════════════════════════════════
+  //  STAR POWER
+  // ══════════════════════════════════════════════════
+  function activateStar() {
+    const sp  = CFG.STAR_POWER;
+    const now = performance.now();
+    demons.forEach(d => {
+      if (d.dead) return;
+      d.hp -= d.maxHp * sp.dmg_pct;
+      d.frozenUntil = now + sp.freeze_dur * 1000;
+      showFX(d.x, d.y, "#fbbf24", "⭐");
+      if (d.hp <= 0) killDemon(d);
+    });
+    if (arenaEl) {
+      arenaEl.classList.add("dod-star-flash");
+      setTimeout(() => arenaEl.classList.remove("dod-star-flash"), sp.fx_duration);
+    }
+    score += 50;
+    showFX(arenaEl ? arenaEl.clientWidth / 2 : 200, 40, "#fbbf24", "✨ STAR!");
+  }
+
+  // ══════════════════════════════════════════════════
+  //  UPDATE — FIRED DISCS
+  // ══════════════════════════════════════════════════
+  function updateFired(dt) {
     if (!arenaEl) return;
-    fired.forEach(d => {
+    const dtS  = dt / 1000;
+    const aW   = arenaEl.clientWidth;
+
+    for (let i = fired.length - 1; i >= 0; i--) {
+      const d = fired[i];
+      d.x += d.speed * dtS;
+
       if (!d.el) {
         d.el = document.createElement("div");
         d.el.className = "dod-fired-disc";
@@ -344,32 +555,42 @@ const DiscOfDoom = (() => {
       }
       d.el.style.left = d.x - CFG.DISC_RADIUS + "px";
       d.el.style.top  = d.y - CFG.DISC_RADIUS + "px";
-    });
+
+      if (d.x > aW + CFG.DISC_RADIUS * 2) {
+        d.el.remove();
+        fired.splice(i, 1);
+      }
+    }
   }
 
-  // ── Demons ────────────────────────────────────────
+  // ══════════════════════════════════════════════════
+  //  UPDATE — DEMONS
+  // ══════════════════════════════════════════════════
   function spawnDemon() {
     if (!arenaEl) return;
-    const arenaH = arenaEl.clientHeight;
-    const arenaW = arenaEl.clientWidth;
-    const rowH   = arenaH / CFG.ROWS;
+    const aH   = arenaEl.clientHeight;
+    const aW   = arenaEl.clientWidth;
+    const rowH = aH / CFG.ROWS;
+    const diff = DIFFICULTIES[currentDiff];
 
     let pool = [CFG.DEMON_TYPES[0], CFG.DEMON_TYPES[1]];
-    if (diffLevel >= 2) pool.push(CFG.DEMON_TYPES[3]);
-    if (diffLevel >= 4) pool.push(CFG.DEMON_TYPES[2]);
+    if (diffLevel >= 2) pool.push(CFG.DEMON_TYPES[2]);
+    if (diffLevel >= 4) pool.push(CFG.DEMON_TYPES[3]);
     const dType = pool[Math.floor(Math.random() * pool.length)];
     const row   = Math.floor(Math.random() * CFG.ROWS);
     const y     = row * rowH + rowH / 2;
-    const diff  = DIFFICULTIES[currentDiff];
+    const baseHp = CFG.DEMON_HP[dType.id] * diff.hpMult;
 
     demons.push({
-      id: nextDemonId++,
-      x: arenaW + CFG.DEMON_WIDTH / 2,
+      id: nextId++,
+      x: aW + CFG.DEMON_WIDTH / 2,
       y, row,
       type: dType,
-      hp: dType.hp, maxHp: dType.hp,
+      hp: baseHp, maxHp: baseHp,
       speed: CFG.DEMON_SPEED_PX_S * diff.demonSpeedMult,
       frozenUntil: 0,
+      burnEndTime: 0,
+      burnDps: 0,
       dead: false,
       el: null,
     });
@@ -382,10 +603,19 @@ const DiscOfDoom = (() => {
     for (let i = demons.length - 1; i >= 0; i--) {
       const d = demons[i];
       if (d.dead) { if (d.el) d.el.remove(); demons.splice(i, 1); continue; }
-      if (now < d.frozenUntil) continue;
-      d.x -= d.speed * dtS;
 
-      if (!arenaEl) continue;
+      // Burn DoT
+      if (now < d.burnEndTime && d.burnDps > 0) {
+        d.hp -= d.maxHp * d.burnDps * dtS;
+        if (d.el) d.el.classList.add("dod-burning");
+        if (d.hp <= 0) { killDemon(d); continue; }
+      } else {
+        if (d.el) d.el.classList.remove("dod-burning");
+      }
+
+      // Movement
+      if (now >= d.frozenUntil) d.x -= d.speed * dtS;
+
       if (d.x < -CFG.DEMON_WIDTH) {
         lives = Math.max(0, lives - 1);
         flashArena();
@@ -401,65 +631,96 @@ const DiscOfDoom = (() => {
         d.el.style.setProperty("--demon-color", d.type.color);
         d.el.innerHTML = `
           <span class="dod-demon-emoji">${d.type.emoji}</span>
-          ${d.maxHp > 1 ? `<div class="dod-hp-bar"><div class="dod-hp-fill"></div></div>` : ""}
+          <div class="dod-hp-track">
+            <div class="dod-hp-fill"></div>
+            <div class="dod-burn-fill"></div>
+          </div>
         `;
         arenaEl.appendChild(d.el);
       }
+
       d.el.style.left = d.x - CFG.DEMON_WIDTH / 2 + "px";
       d.el.style.top  = d.y - CFG.DEMON_HEIGHT / 2 + "px";
-      if (d.maxHp > 1) {
-        const fill = d.el.querySelector(".dod-hp-fill");
-        if (fill) fill.style.width = (d.hp / d.maxHp * 100) + "%";
+
+      const hpFill = d.el.querySelector(".dod-hp-fill");
+      if (hpFill) hpFill.style.width = Math.max(0, d.hp / d.maxHp * 100) + "%";
+
+      const burnFill = d.el.querySelector(".dod-burn-fill");
+      if (burnFill) {
+        if (now < d.burnEndTime && d.burnDps > 0) {
+          burnFill.style.width   = Math.min(100, ((d.burnEndTime - now) / 1000) * d.burnDps * 100) + "%";
+          burnFill.style.opacity = "1";
+        } else {
+          burnFill.style.opacity = "0";
+        }
       }
-      d.el.classList.toggle("frozen", now < d.frozenUntil);
+
+      d.el.classList.toggle("frozen",     now < d.frozenUntil);
+      d.el.classList.toggle("dod-burning", now < d.burnEndTime && d.burnDps > 0);
     }
   }
 
-  // ── Collisions ────────────────────────────────────
+  function killDemon(d) {
+    d.dead = true; d.hp = 0;
+    score += CFG.SCORE_PER_KILL;
+    seedsEarned += CFG.SEEDS_PER_KILL;
+    coinsEarned += CFG.COINS_PER_KILL;
+    showFX(d.x, d.y, "#fbbf24", "💀");
+    if (d.el) {
+      d.el.style.transition = "transform 0.28s, opacity 0.28s";
+      d.el.style.transform  = "scale(1.6)";
+      d.el.style.opacity    = "0";
+      setTimeout(() => d.el && d.el.remove(), 300);
+    }
+  }
+
+  // ══════════════════════════════════════════════════
+  //  COLLISIONS
+  // ══════════════════════════════════════════════════
   function checkCollisions() {
     for (let fi = fired.length - 1; fi >= 0; fi--) {
       const disc = fired[fi];
       for (let di = demons.length - 1; di >= 0; di--) {
         const demon = demons[di];
         if (demon.dead) continue;
-        const dx = disc.x - demon.x;
-        const dy = disc.y - demon.y;
-        if (Math.sqrt(dx*dx + dy*dy) < CFG.DISC_RADIUS + CFG.DEMON_WIDTH / 2 - 8) {
-          demon.hp -= disc.type.points;
-          score += CFG.SCORE_PER_HIT;
-          seedsEarned += CFG.SEEDS_PER_HIT;
-          showFX(disc.x, disc.y, disc.type.color, "💥");
+        const dx = disc.x - demon.x, dy = disc.y - demon.y;
+        if (Math.sqrt(dx*dx + dy*dy) >= CFG.DISC_RADIUS + CFG.DEMON_WIDTH/2 - 8) continue;
 
-          if (disc.type.freeze) {
-            demon.frozenUntil = performance.now() + 2000;
-            showFX(disc.x, disc.y, "#38bdf8", "❄️");
-          }
-          if (demon.hp <= 0) {
-            demon.dead = true;
-            score += CFG.SCORE_PER_KILL;
-            seedsEarned += CFG.SEEDS_PER_KILL;
-            coinsEarned += CFG.COINS_PER_KILL;
-            showFX(demon.x, demon.y, "#fbbf24", "💀");
-          }
-          if (disc.el) disc.el.remove();
-          fired.splice(fi, 1);
-          break;
+        const now = performance.now();
+        demon.hp -= demon.maxHp * disc.type.direct_dmg;
+        score += CFG.SCORE_PER_HIT;
+        seedsEarned += CFG.SEEDS_PER_HIT;
+        showFX(disc.x, disc.y, disc.type.color, "💥");
+
+        if (disc.type.burn_dps > 0) {
+          demon.burnDps     = disc.type.burn_dps;
+          demon.burnEndTime = now + disc.type.burn_dur * 1000;
+          showFX(disc.x, disc.y, "#f97316", "🔥");
         }
+        if (disc.type.freeze) {
+          demon.frozenUntil = now + disc.type.freeze_dur * 1000;
+          showFX(disc.x, disc.y, "#38bdf8", "❄️");
+        }
+        if (demon.hp <= 0) killDemon(demon);
+
+        disc.el && disc.el.remove();
+        fired.splice(fi, 1);
+        break;
       }
     }
-    // Also render fired positions each frame
-    renderFired();
   }
 
-  // ── FX ───────────────────────────────────────────
+  // ══════════════════════════════════════════════════
+  //  FX
+  // ══════════════════════════════════════════════════
   function showFX(x, y, color, text) {
     if (!arenaEl) return;
-    const fx = document.createElement("div");
-    fx.className = "dod-fx";
-    fx.textContent = text;
-    fx.style.cssText = `left:${x}px;top:${y}px;color:${color}`;
-    arenaEl.appendChild(fx);
-    setTimeout(() => fx.remove(), 700);
+    const el = document.createElement("div");
+    el.className  = "dod-fx";
+    el.textContent= text;
+    el.style.cssText = `left:${x}px;top:${y}px;color:${color}`;
+    arenaEl.appendChild(el);
+    setTimeout(() => el.remove(), 750);
   }
 
   function flashArena() {
@@ -468,28 +729,31 @@ const DiscOfDoom = (() => {
     setTimeout(() => arenaEl.classList.remove("dod-flash"), 400);
   }
 
-  // ── HUD ──────────────────────────────────────────
+  // ══════════════════════════════════════════════════
+  //  HUD
+  // ══════════════════════════════════════════════════
   function updateHUD() {
     if (scorEl)    scorEl.textContent  = score;
     if (seedsEl)   seedsEl.textContent = seedsEarned;
-    if (livesEl)   livesEl.textContent = "❤️".repeat(Math.max(0,lives)) + "🖤".repeat(Math.max(0,CFG.LIVES-lives));
+    if (livesEl)   livesEl.textContent =
+      "❤️".repeat(Math.max(0,lives)) + "🖤".repeat(Math.max(0,CFG.LIVES-lives));
     if (timerFill) timerFill.style.width = (timeLeft / CFG.DURATION_MS * 100) + "%";
   }
 
-  // ── Difficulty Picker ─────────────────────────────
-  function showPicker(screen) {
-    const container = screen.querySelector("#dod-container");
+  // ══════════════════════════════════════════════════
+  //  DIFFICULTY PICKER
+  // ══════════════════════════════════════════════════
+  function showPicker(scr) {
+    const container = scr.querySelector("#dod-container");
     const picker = document.createElement("div");
     picker.className = "bh-result";
     picker.innerHTML = `
       <button class="btn-back" style="align-self:flex-start;margin-bottom:8px" id="dod-pick-back">↶</button>
-      <h2 style="font-size:30px">💿 Choose Difficulty</h2>
+      <h2 style="font-size:28px">💿 Choose Difficulty</h2>
       ${DIFFICULTIES.map((d,i) => `
-        <button class="btn-menu" data-diff="${i}" style="width:min(300px,88vw);text-align:left">
+        <button class="btn-menu" data-diff="${i}">
           ${"🔥".repeat(d.pips)} ${d.name}
-          <span style="font-size:12px;color:rgba(255,255,255,0.45);display:block;margin-top:3px">
-            Speed ×${d.demonSpeedMult} · 🌱${d.reward.seeds} 🪙${d.reward.coins}
-          </span>
+          <span>Demon speed ×${d.demonSpeedMult} · 🌱${d.reward.seeds} 🪙${d.reward.coins}</span>
         </button>`).join("")}
     `;
     picker.querySelector("#dod-pick-back").addEventListener("click", () => {
@@ -502,7 +766,9 @@ const DiscOfDoom = (() => {
     container.appendChild(picker);
   }
 
-  // ── End Game ─────────────────────────────────────
+  // ══════════════════════════════════════════════════
+  //  END GAME
+  // ══════════════════════════════════════════════════
   function endGame() {
     running = false;
     if (animId) { cancelAnimationFrame(animId); animId = null; }
@@ -510,23 +776,25 @@ const DiscOfDoom = (() => {
     demons.forEach(d => d.el && d.el.remove());
     fired = []; demons = [];
 
-    const diff = DIFFICULTIES[currentDiff];
+    const diff   = DIFFICULTIES[currentDiff];
     const reward = diff.reward;
-    const won = score > 0;
+    const won    = score > 0;
     let plantName = "";
 
     if (won) {
       if (typeof Seeds !== "undefined") {
         const sr = Seeds.giveRandomSeeds(reward.seeds);
-        plantName = sr ? (typeof PlantRegistry !== "undefined" ? PlantRegistry.get(sr.plantId)?.name || "" : "") : "";
+        plantName = sr
+          ? (typeof PlantRegistry !== "undefined" ? PlantRegistry.get(sr.plantId)?.name || "" : "")
+          : "";
       }
       if (typeof Player !== "undefined") Player.addCoins(reward.coins);
       if (typeof UI !== "undefined") UI.updateCoinDisplays();
     }
 
-    const screen = document.getElementById("screen-discofdoom");
-    if (!screen) return;
-    const container = screen.querySelector("#dod-container");
+    const scr = document.getElementById("screen-discofdoom");
+    if (!scr) return;
+    const container = scr.querySelector("#dod-container");
 
     const overlay = document.createElement("div");
     overlay.className = "bh-result";
@@ -534,23 +802,23 @@ const DiscOfDoom = (() => {
       <h2>${lives > 0 ? "🏆 Time's Up!" : "💀 Defeated!"}</h2>
       <div class="bh-score-final">Score: ${score} pts</div>
       ${won ? `
-        <div class="bh-seeds-earned">🌱 +${reward.seeds} seeds${plantName ? " → " + plantName : ""}</div>
+        <div class="bh-seeds-earned">🌱 +${reward.seeds} seeds${plantName ? " → "+plantName : ""}</div>
         <div class="bh-seeds-earned" style="color:var(--gold)">🪙 +${reward.coins} coins</div>` : ""}
       <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px">
         ${currentDiff < DIFFICULTIES.length-1
-          ? `<button class="btn-primary" id="dod-harder" style="max-width:200px">Harder: ${DIFFICULTIES[currentDiff+1].name} 🔥</button>` : ""}
-        <button class="btn-primary"   id="dod-replay" style="max-width:200px">🔄 Replay</button>
-        <button class="btn-secondary" id="dod-change" style="max-width:200px">📋 Change Diff</button>
-        <button class="btn-secondary" id="dod-exit"   style="max-width:200px">🏠 Menu</button>
+          ? `<button class="btn-primary" id="dod-harder">Harder: ${DIFFICULTIES[currentDiff+1].name} 🔥</button>` : ""}
+        <button class="btn-primary"   id="dod-replay">🔄 Replay</button>
+        <button class="btn-secondary" id="dod-change">📋 Change Diff</button>
+        <button class="btn-secondary" id="dod-exit">🏠 Menu</button>
       </div>
     `;
     container.appendChild(overlay);
 
     const hb = overlay.querySelector("#dod-harder");
-    if (hb) hb.addEventListener("click", () => { overlay.remove(); startGame(currentDiff + 1); });
+    if (hb) hb.addEventListener("click", () => { overlay.remove(); startGame(currentDiff+1); });
     overlay.querySelector("#dod-replay").addEventListener("click", () => { overlay.remove(); startGame(currentDiff); });
     overlay.querySelector("#dod-change").addEventListener("click", () => { overlay.remove(); startGame(); });
-    overlay.querySelector("#dod-exit").addEventListener("click", () => {
+    overlay.querySelector("#dod-exit").addEventListener("click",   () => {
       if (typeof UI !== "undefined") UI.showScreen("screen-minigames");
     });
   }
