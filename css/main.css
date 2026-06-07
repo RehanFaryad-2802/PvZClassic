@@ -1284,11 +1284,7 @@ html, body {
   cursor: pointer;
   transition: background 0.15s;
 }
-.grid-cell.occupied {
-  background: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-}
+
 /* King minion spawn — no box on the cell */
 .demon-entity {
   background: transparent !important;

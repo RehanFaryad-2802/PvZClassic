@@ -41,6 +41,8 @@ const Boss = (() => {
 
   // ── State ──────────────────────────────────────
   let bossEl = null;
+  let pendingPlantId = null;
+  let pendingCardEl = null;
   let bossHp = CFG.BOSS_HP;
   let bossMaxHp = CFG.BOSS_HP;
   let bossPhase = 1;
@@ -718,16 +720,12 @@ const Boss = (() => {
   }
 
   function selectConveyorPlant(plantId, cardEl) {
-    Core.selectPlantFree(plantId);
-    // Remove card after short delay (simulate picking it up)
+    conveyorEl?.querySelectorAll(".conveyor-card").forEach(c => c.classList.remove("selected"));
     cardEl.classList.add("selected");
-    setTimeout(() => {
-      cardEl.classList.add("slide-out");
-      setTimeout(() => {
-        cardEl.remove();
-        addConveyorCard(); // add new one to replace it
-      }, 350);
-    }, 200);
+    pendingPlantId = plantId;
+    pendingCardEl = cardEl;
+    // Tell Core which plant is selected so onCellClick works
+    Core.selectPlantFree(plantId);
   }
 
   function restoreNormalTray() {
@@ -757,6 +755,20 @@ const Boss = (() => {
       el.classList.remove("visible");
       setTimeout(() => el.remove(), 400);
     }, 1800);
+  }
+
+  function onPlantPlaced(plantId) {
+    // Remove selected card from conveyor and add new one
+    if (pendingCardEl) {
+      pendingCardEl.classList.add("slide-out");
+      const card = pendingCardEl;
+      setTimeout(() => {
+        card.remove();
+        addConveyorCard();
+      }, 350);
+      pendingCardEl = null;
+      pendingPlantId = null;
+    }
   }
 
   function setPlacementEnabled(enabled) {
@@ -811,6 +823,7 @@ const Boss = (() => {
     damageBoss,
     pause,
     resume,
+    onPlantPlaced,
     isBossRunning: () => running,
   };
 })();

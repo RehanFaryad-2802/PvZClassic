@@ -286,7 +286,9 @@ if (demonLayer) {
   }
 
   function onCellClick(row, col) {
-    if (!running || paused) return;
+    // Allow boss mode placement even when core is not running
+    const isBossMode = typeof Boss !== "undefined" && Boss.isBossRunning();
+    if (!isBossMode && (!running || paused)) return;
 
     if (!selectedPlantId) return;
     if (Grid.isOccupied(row, col)) {
@@ -298,7 +300,9 @@ if (demonLayer) {
     if (!def) return;
     const plantLvl = Player.getPlant(def.id)?.level ?? 1;
     const plantCost = def.levelStats?.[plantLvl]?.cost ?? def.cost;
-    if (sun < plantCost) {
+
+    // In boss mode plants are free — skip sun check
+    if (!isBossMode && sun < plantCost) {
       UI.showToast(`Need ☀️${plantCost} sun!`);
       return;
     }
@@ -315,11 +319,16 @@ if (demonLayer) {
 
     if (placed) {
       SoundFX.play("plant_place");
-      spendSun(plantCost);
-      // Use level-accurate cooldown from plant's own stats
-      const levelCd = def.getStats ? def.getStats(level).cooldown : null;
-      trayCooldowns[selectedPlantId] =
-        levelCd || (def.getCooldown ? def.getCooldown() : def.cooldown) || 3000;
+      if (!isBossMode) spendSun(plantCost);
+
+      // In boss mode — remove the conveyor card after placement
+      if (isBossMode) {
+        Boss.onPlantPlaced(selectedPlantId);
+      } else {
+        const levelCd = def.getStats ? def.getStats(level).cooldown : null;
+        trayCooldowns[selectedPlantId] =
+          levelCd || (def.getCooldown ? def.getCooldown() : def.cooldown) || 3000;
+      }
       selectedPlantId = null;
       UI.setSelectedTrayCard(null);
     }
@@ -671,6 +680,10 @@ if (demonLayer) {
 
   function selectPlantFree(plantId) {
     selectedPlantId = plantId;
+    // Make sure running flag doesn't block boss placement
+    if (typeof Boss !== "undefined" && Boss.isBossRunning()) {
+      running = true;
+    }
   }
 
   return {
