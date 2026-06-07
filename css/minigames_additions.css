@@ -416,318 +416,228 @@
    DISC OF DOOM  (minigame 4)
 ═══════════════════════════════════════════════ */
 
-#screen-discofdoom {
-  background: linear-gradient(160deg, #0a0018, #12002a);
-  overflow: hidden;
-}
+#screen-discofdoom { background:linear-gradient(160deg,#0a0018,#12002a); overflow:hidden; }
 
 .dod-container {
-  position: relative;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: 10px 14px;
-  gap: 5px;
+  position:relative; height:100%; display:flex; flex-direction:column;
+  padding:10px 14px; gap:5px;
 }
 
 /* Header */
-.dod-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-shrink: 0;
-}
-.dod-header h2 {
-  font-family: var(--font-display);
-  font-size: 20px;
-  letter-spacing: 3px;
-  color: #a78bfa;
-}
-.dod-stats {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
+.dod-header { display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.dod-header h2 { font-family:var(--font-display); font-size:20px; letter-spacing:3px; color:#a78bfa; }
+.dod-stats { display:flex; gap:8px; align-items:center; }
 .dod-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 10px;
-  padding: 3px 10px;
-  min-width: 48px;
+  display:flex; flex-direction:column; align-items:center;
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
+  border-radius:10px; padding:3px 10px; min-width:48px;
 }
-.dod-stat .stat-val { font-family: var(--font-display); font-size: 16px; color: var(--white); }
-.dod-stat .stat-lbl { font-size: 8px; color: var(--gray); letter-spacing: 1px; text-transform: uppercase; }
-.dod-lives { font-size: 16px; letter-spacing: 2px; }
+.dod-stat .stat-val { font-family:var(--font-display); font-size:16px; color:var(--white); }
+.dod-stat .stat-lbl { font-size:8px; color:var(--gray); letter-spacing:1px; text-transform:uppercase; }
+.dod-lives { font-size:16px; letter-spacing:2px; }
 
 /* Timer */
-.dod-timer-bar {
-  height: 5px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 4px;
-  overflow: hidden;
-  flex-shrink: 0;
+.dod-timer-bar { height:5px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden; flex-shrink:0; }
+.dod-timer-fill { height:100%; background:linear-gradient(90deg,#7c3aed,#a78bfa,#f97316); border-radius:4px; transition:width 0.12s linear; }
+
+/* Play area */
+.dod-play-area { flex:1; display:flex; gap:8px; min-height:0; }
+
+/* ══════════════════════════════════
+   RAIL PANEL
+══════════════════════════════════ */
+.dod-rail-panel {
+  width:64px; flex-shrink:0;
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  background:rgba(167,139,250,0.05); border:1px solid rgba(167,139,250,0.15);
+  border-radius:14px; padding:8px 6px; overflow:hidden;
 }
-.dod-timer-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #7c3aed, #a78bfa, #f97316);
-  border-radius: 4px;
-  transition: width 0.12s linear;
+.dod-rail-label {
+  font-size:8px; color:rgba(167,139,250,0.5);
+  letter-spacing:2px; text-transform:uppercase; text-align:center; flex-shrink:0;
 }
 
-/* ── Play area: queue panel + arena side by side ── */
-.dod-play-area {
-  flex: 1;
-  display: flex;
-  gap: 8px;
-  min-height: 0;
+/* Track — relative container, height set by JS */
+.dod-rail-track { position:relative; width:48px; flex-shrink:0; overflow:hidden; }
+
+/* Real item */
+.dod-rail-item {
+  position:absolute; left:0;
+  width:48px; height:48px;
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  border:2px solid var(--disc-color,#a78bfa);
+  box-shadow:0 0 8px var(--disc-color,#a78bfa);
+  background:rgba(0,0,0,0.5);
+  user-select:none; z-index:2;
+}
+.dod-rail-item:active { transform:scale(0.85) !important; box-shadow:0 0 18px var(--disc-color,#a78bfa); }
+.dod-rail-emoji { font-size:22px; line-height:1; pointer-events:none; }
+
+/* Ghost slot */
+.dod-rail-ghost {
+  position:absolute; left:0;
+  width:48px; height:48px;
+  border-radius:50%;
+  border:1px dashed rgba(167,139,250,0.14);
+  background:rgba(167,139,250,0.02);
+  z-index:1;
 }
 
-/* ── Left queue panel ── */
-.dod-queue-panel {
-  width: 68px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  background: rgba(167,139,250,0.06);
-  border: 1px solid rgba(167,139,250,0.18);
-  border-radius: 14px;
-  padding: 8px 6px;
+/* Separator */
+.dod-rail-sep { width:80%; height:1px; background:rgba(167,139,250,0.22); flex-shrink:0; margin:2px 0; }
+
+/* Loaded slot */
+.dod-loaded-slot {
+  width:52px; height:52px; border-radius:50%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  border:2px dashed rgba(167,139,250,0.28);
+  background:rgba(167,139,250,0.04);
+  flex-shrink:0; transition:border-color 0.2s, box-shadow 0.2s;
 }
-.dod-queue-label {
-  font-size: 9px;
-  color: rgba(167,139,250,0.6);
-  letter-spacing: 2px;
-  text-align: center;
-  text-transform: uppercase;
-  flex-shrink: 0;
+.dod-loaded-slot.dod-loaded-active {
+  border-style:solid;
+  border-color:var(--disc-color,#a78bfa);
+  box-shadow:0 0 16px var(--disc-color,#a78bfa);
+}
+.dod-loaded-empty { font-size:18px; color:rgba(167,139,250,0.22); }
+.dod-loaded-disc {
+  width:44px; height:44px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; font-size:24px;
+  border:2px solid var(--disc-color,#a78bfa);
+  box-shadow:0 0 12px var(--disc-color,#a78bfa);
+  background:rgba(0,0,0,0.5);
+  animation:discSpin 0.7s linear infinite, launcherPulse 1s ease-in-out infinite;
+}
+.dod-loaded-name { font-size:7px; color:rgba(255,255,255,0.32); text-transform:capitalize; margin-top:2px; }
+
+/* Cooldown bar */
+.dod-cooldown-bar-wrap {
+  width:100%; height:4px; background:rgba(255,255,255,0.08);
+  border-radius:2px; overflow:hidden; flex-shrink:0; margin-top:3px;
+  opacity:0; transition:opacity 0.15s;
+}
+.dod-cooldown-bar-wrap.active { opacity:1; }
+.dod-cooldown-bar {
+  height:100%; width:0%;
+  background:linear-gradient(90deg,#a78bfa,#f97316);
+  border-radius:2px; transition:width 0.04s linear;
 }
 
-/* Queue disc slots — stack top to bottom */
-.dod-queue-slots {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  overflow: hidden;
-}
-
-.dod-queue-disc {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  cursor: pointer;
-  border: 2px solid var(--disc-color, #a78bfa);
-  box-shadow: 0 0 8px var(--disc-color, #a78bfa);
-  background: rgba(0,0,0,0.45);
-  user-select: none;
-  flex-shrink: 0;
-  animation: discSpin 1.2s linear infinite, queueDrop 0.25s ease-out;
-  transition: transform 0.12s, box-shadow 0.12s;
-}
-.dod-queue-disc:active {
-  transform: scale(0.88);
-  box-shadow: 0 0 20px var(--disc-color, #a78bfa);
-}
-@keyframes queueDrop {
-  from { opacity: 0; transform: translateY(-20px) scale(0.7); }
-  to   { opacity: 1; transform: translateY(0)     scale(1);   }
-}
-
-/* Launcher at bottom of queue panel */
-.dod-launcher-wrap {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  border-top: 1px solid rgba(167,139,250,0.2);
-  padding-top: 6px;
-}
-.dod-launcher-label {
-  font-size: 8px;
-  color: rgba(167,139,250,0.5);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-.dod-launcher-slot {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 2px dashed rgba(167,139,250,0.35);
-  background: rgba(167,139,250,0.06);
-  position: relative;
-}
-.dod-launcher-empty {
-  font-size: 10px;
-  color: rgba(167,139,250,0.35);
-  text-align: center;
-  line-height: 1.3;
-}
-.dod-launcher-disc {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  border: 2px solid var(--disc-color, #a78bfa);
-  box-shadow: 0 0 14px var(--disc-color, #a78bfa), 0 0 28px var(--disc-color, #a78bfa);
-  background: rgba(0,0,0,0.5);
-  animation: discSpin 0.6s linear infinite, launcherPulse 1s ease-in-out infinite;
-}
-@keyframes launcherPulse {
-  0%,100% { transform: scale(1); }
-  50%     { transform: scale(1.08); }
-}
-.dod-launcher-name {
-  font-size: 8px;
-  color: rgba(255,255,255,0.4);
-  text-transform: capitalize;
-  margin-top: 2px;
-  text-align: center;
-}
-
-/* ── Arena ── */
+/* ══════════════════════════════════
+   ARENA
+══════════════════════════════════ */
 .dod-arena {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.025);
-  border: 1px solid rgba(167,139,250,0.15);
-  cursor: crosshair;
-  /* horizontal row lanes */
-  background-image: repeating-linear-gradient(
-    180deg,
-    transparent,
-    transparent calc(20% - 1px),
-    rgba(167,139,250,0.05) 20%
+  flex:1; position:relative; overflow:hidden;
+  border-radius:12px;
+  background:rgba(255,255,255,0.025);
+  border:1px solid rgba(167,139,250,0.12);
+  background-image:repeating-linear-gradient(
+    180deg, transparent, transparent calc(20% - 1px), rgba(167,139,250,0.04) 20%
   );
-  touch-action: none;
+  touch-action:none;
+  /* no cursor here — fire zone has its own */
+  cursor:default;
 }
 
-/* Aim line — vertical glow on left edge showing fire origin */
+/* Left-edge glow line */
 .dod-arena::before {
-  content: "";
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 3px;
-  background: linear-gradient(180deg, transparent, rgba(167,139,250,0.5), transparent);
-  pointer-events: none;
-  z-index: 1;
+  content:""; position:absolute; left:0; top:0; bottom:0; width:3px;
+  background:linear-gradient(180deg,transparent,rgba(167,139,250,0.4),transparent);
+  pointer-events:none; z-index:1;
 }
 
-.dod-arena.dod-flash {
-  animation: dodFlash 0.4s ease-out;
+.dod-arena.dod-flash     { animation:dodFlash    0.4s ease-out; }
+.dod-arena.dod-star-flash { animation:dodStarFlash 0.8s ease-out; }
+@keyframes dodFlash     { 0%,100%{box-shadow:none} 30%{box-shadow:inset 0 0 40px rgba(239,68,68,0.7)} }
+@keyframes dodStarFlash { 0%{box-shadow:none} 20%{box-shadow:inset 0 0 80px rgba(251,191,36,0.9)} 100%{box-shadow:none} }
+
+/* ── FIRE ZONE ── */
+.dod-fire-zone {
+  position:absolute;
+  left:0; top:0; bottom:0;
+  width:calc(var(--fz-frac, 28%) );   /* set by JS via FIRE_ZONE_FRAC */
+  width:28%;                          /* fallback */
+  cursor:crosshair;
+  background:rgba(167,139,250,0.06);
+  border-right:2px dashed rgba(167,139,250,0.30);
+  display:flex; align-items:center; justify-content:center;
+  z-index:5;
+  transition:background 0.15s;
+  user-select:none;
 }
-@keyframes dodFlash {
-  0%,100% { box-shadow: none; }
-  30%     { box-shadow: inset 0 0 40px rgba(239,68,68,0.7); }
+.dod-fire-zone:hover {
+  background:rgba(167,139,250,0.11);
+}
+.dod-fire-zone.dod-fz-fired {
+  background:rgba(167,139,250,0.28);
+  border-right-color:rgba(167,139,250,0.8);
+}
+.dod-fire-zone-label {
+  font-family:var(--font-display);
+  font-size:10px; letter-spacing:2px;
+  color:rgba(167,139,250,0.40);
+  text-align:center; pointer-events:none;
+  line-height:1.5;
+  writing-mode:vertical-rl;
+  text-orientation:mixed;
+  transform:rotate(180deg);
 }
 
-/* Hint text inside arena */
-.dod-fire-hint {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 13px;
-  color: rgba(167,139,250,0.3);
-  letter-spacing: 1px;
-  pointer-events: none;
-  text-align: center;
-  white-space: nowrap;
-  z-index: 0;
-}
-
-/* ── Fired disc (moving right across arena) ── */
+/* ── Fired disc ── */
 .dod-fired-disc {
-  position: absolute;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  border: 2px solid var(--disc-color, #a78bfa);
-  box-shadow: 0 0 16px var(--disc-color, #a78bfa);
-  background: rgba(0,0,0,0.45);
-  pointer-events: none;
-  z-index: 4;
-  animation: discSpin 0.3s linear infinite;
+  position:absolute; width:52px; height:52px;
+  border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:26px;
+  border:2px solid var(--disc-color,#a78bfa);
+  box-shadow:0 0 14px var(--disc-color,#a78bfa);
+  background:rgba(0,0,0,0.45);
+  pointer-events:none; z-index:4;
+  animation:discSpin 0.28s linear infinite;
 }
 
 /* ── Demon ── */
 .dod-demon {
-  position: absolute;
-  width: 52px;
-  height: 52px;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid var(--demon-color, #ef4444);
-  box-shadow: 0 0 8px var(--demon-color, #ef4444);
-  background: rgba(0,0,0,0.5);
-  z-index: 2;
-  animation: demonWalk 0.5s steps(2) infinite;
+  position:absolute; width:54px; height:62px;
+  border-radius:10px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:3px; padding-bottom:4px;
+  border:2px solid var(--demon-color,#ef4444);
+  box-shadow:0 0 8px var(--demon-color,#ef4444);
+  background:rgba(0,0,0,0.5);
+  z-index:2;
+  animation:demonWalk 0.5s steps(2) infinite;
 }
-.dod-demon-emoji { font-size: 24px; line-height: 1; }
-.dod-demon.frozen { filter: hue-rotate(180deg) brightness(1.4); animation: none !important; }
-@keyframes demonWalk {
-  0%,100% { transform: translateY(0); }
-  50%     { transform: translateY(-3px); }
+.dod-demon-emoji { font-size:24px; line-height:1; }
+.dod-demon.frozen { filter:hue-rotate(180deg) brightness(1.4); animation:none !important; }
+.dod-demon.dod-burning {
+  animation:demonWalk 0.5s steps(2) infinite, burnFlicker 0.35s ease-in-out infinite;
 }
-.dod-hp-bar {
-  width: 80%; height: 4px;
-  background: rgba(255,255,255,0.15);
-  border-radius: 2px; overflow: hidden; margin-top: 2px;
+@keyframes burnFlicker { 0%,100%{box-shadow:0 0 8px #f97316} 50%{box-shadow:0 0 22px #f97316,0 0 40px rgba(249,115,22,0.5)} }
+@keyframes demonWalk   { 0%,100%{transform:translateY(0)}    50%{transform:translateY(-3px)} }
+
+/* HP track */
+.dod-hp-track {
+  position:relative; width:80%; height:5px;
+  background:rgba(255,255,255,0.12); border-radius:3px; overflow:hidden; flex-shrink:0;
 }
-.dod-hp-fill {
-  height: 100%; background: #ef4444;
-  border-radius: 2px; transition: width 0.1s;
-}
+.dod-hp-fill  { position:absolute; left:0; top:0; height:100%; background:#22c55e; border-radius:3px; transition:width 0.1s; }
+.dod-burn-fill{ position:absolute; right:0; top:0; height:100%; background:#f97316; border-radius:3px; opacity:0; transition:opacity 0.2s; }
 
 /* ── FX ── */
 .dod-fx {
-  position: absolute;
-  font-size: 22px;
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  animation: dodFxRise 0.7s ease-out forwards;
+  position:absolute; font-size:20px; pointer-events:none;
+  transform:translate(-50%,-50%); z-index:10;
+  animation:dodFxRise 0.75s ease-out forwards; white-space:nowrap;
 }
-@keyframes dodFxRise {
-  0%   { opacity: 1; transform: translate(-50%,-50%) scale(1.3); }
-  100% { opacity: 0; transform: translate(-50%,-160%) scale(0.7); }
-}
+@keyframes dodFxRise { 0%{opacity:1;transform:translate(-50%,-50%) scale(1.3)} 100%{opacity:0;transform:translate(-50%,-170%) scale(0.8)} }
 
-/* Shared spin */
-@keyframes discSpin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
+/* Shared keyframes */
+@keyframes discSpin      { from{transform:rotate(0deg)}   to{transform:rotate(360deg)} }
+@keyframes launcherPulse { 0%,100%{transform:scale(1)}    50%{transform:scale(1.08)} }
 
 .dod-hint {
-  text-align: center;
-  font-size: 10px;
-  color: rgba(167,139,250,0.4);
-  letter-spacing: 1px;
-  flex-shrink: 0;
+  text-align:center; font-size:10px;
+  color:rgba(167,139,250,0.35); letter-spacing:1px; flex-shrink:0;
 }
