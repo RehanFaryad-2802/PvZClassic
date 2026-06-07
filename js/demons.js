@@ -86,6 +86,22 @@ const Demons = (() => {
     arenaRect = rect;
   }
 
+  function setLayer(layerEl, effectsEl) {
+    if (layerEl) layer = layerEl;
+    if (effectsEl) effectsLayer = effectsEl;
+  }
+
+  function registerBossTarget(fakeDemon) {
+    demons = demons.filter(d => !d.isBoss);
+    demons.push(fakeDemon);
+  }
+
+  function registerBossTarget(fakeDemon) {
+    // Remove any existing boss target first
+    demons = demons.filter(d => !d.isBoss);
+    demons.push(fakeDemon);
+  }
+
   // ── Spawn ─────────────────────────────────────────────────────────────────
   function spawn(cfg) {
     if (!layer || !arenaRect) return;
@@ -584,10 +600,20 @@ const Demons = (() => {
     if (typeof Core !== "undefined") Core.triggerLawnmower(demon.row, demon);
   }
 
-  // ── Damage ────────────────────────────────────────────────────────────────
   function damage(demon, amount, damageType = "physical") {
     if (demon.dead) return;
-    demon.lastDamageType = damageType; // track for death animation
+    // Boss — immune to psychic, delegate damage to Boss system
+    if (demon.isBoss) {
+      if (damageType === "psychic") return; // immune
+      demon.takeDamage(amount);
+      return;
+    }
+    demon.lastDamageType = damageType;
+    if (demon.isBoss) {
+      demon.takeDamage(amount);
+      return;
+    }
+    demon.lastDamageType = damageType;
 
     // GHOST: if invisible, projectile passes through
     if (hasSpecial(demon, "ghost") && !demon.ghostVisible) return;
@@ -1146,6 +1172,11 @@ const Demons = (() => {
         if (demon.hpWrap) demon.hpWrap.remove();
       }, 500);
     } else if (type === "psychic") {
+      // Boss is immune to psychic visuals
+      if (demon && demon.isBoss) {
+        el.remove();
+        return;
+      }
       // ── Confused spin then dissolve in purple ──
       if (imgEl) {
         imgEl.style.transition = "none";
@@ -1535,11 +1566,14 @@ const Demons = (() => {
   return {
     init,
     spawn,
+    clear,
+    registerBossTarget,
     update,
     damage,
     kill,
     freeze,
     slow,
+    setLayer,
     getActive,
     getAll,
     getCount,
