@@ -1011,6 +1011,7 @@ const SoundFX = (() => {
 
   function play(key) {
     if (CFG.MUTED) return;
+    if (!_gestureReceived) return;
 
     // Always ensure audio context is running before any play attempt
     ensureCtx();
@@ -1044,7 +1045,9 @@ const SoundFX = (() => {
   }
 
   // Pre-warm all pools on first user gesture so files are loaded before needed
+  let _gestureReceived = false;
   function _prewarm() {
+    _gestureReceived = true;
     ensureCtx();
     resume();
     Object.entries(CFG.FILES).forEach(([key, path]) => {
@@ -1075,6 +1078,7 @@ const SoundFX = (() => {
   document.addEventListener(
     "click",
     () => {
+      _gestureReceived = true;
       ensureCtx();
       resume();
     },
@@ -1083,6 +1087,7 @@ const SoundFX = (() => {
   document.addEventListener(
     "touchstart",
     () => {
+      _gestureReceived = true;
       ensureCtx();
       resume();
     },

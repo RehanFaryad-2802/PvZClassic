@@ -4,12 +4,11 @@ const Levels = (() => {
     {
       id: 1,
       name: "Inferno Fields",
-      bossLevelIdx: 30, // level 31 (0-based = 30) is the boss
       sub: "Where it all begins",
       emoji: "🔥",
       bgClass: "world-1",
       unlocked: true,
-      levelCount: 31,
+      levelCount: 30,
       demons: [
         "imp",
         "bat",

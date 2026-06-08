@@ -34,12 +34,8 @@ const Core = (() => {
 
   // ── Public: Start Battle ───────────────────────
   function startBattle(worldId, levelIdx, plantIds, tempPlants = []) {
-    // ── Boss level detection ──
-    const world = Levels.getWorld(worldId);
-    if (world && world.bossLevelIdx === levelIdx) {
-      Boss.start(worldId, levelIdx, Levels.getLevel(worldId, levelIdx) || {}, plantIds);
-      return;
-    }
+    running = false;
+    cancelAnimationFrame(rafId);
     currentWorld = worldId;
 // Set world class on demon layer for per-world effects
 const demonLayer = document.getElementById("demons-layer");
@@ -286,10 +282,7 @@ if (demonLayer) {
   }
 
   function onCellClick(row, col) {
-    // Allow boss mode placement even when core is not running
-    const isBossMode = typeof Boss !== "undefined" && Boss.isBossRunning();
-    if (!isBossMode && (!running || paused)) return;
-
+    if (!running || paused) return;
     if (!selectedPlantId) return;
     if (Grid.isOccupied(row, col)) {
       UI.showToast("Cell occupied!");
@@ -301,8 +294,7 @@ if (demonLayer) {
     const plantLvl = Player.getPlant(def.id)?.level ?? 1;
     const plantCost = def.levelStats?.[plantLvl]?.cost ?? def.cost;
 
-    // In boss mode plants are free — skip sun check
-    if (!isBossMode && sun < plantCost) {
+    if (sun < plantCost) {
       UI.showToast(`Need ☀️${plantCost} sun!`);
       return;
     }
@@ -319,16 +311,10 @@ if (demonLayer) {
 
     if (placed) {
       SoundFX.play("plant_place");
-      if (!isBossMode) spendSun(plantCost);
-
-      // In boss mode — remove the conveyor card after placement
-      if (isBossMode) {
-        Boss.onPlantPlaced(selectedPlantId);
-      } else {
-        const levelCd = def.getStats ? def.getStats(level).cooldown : null;
-        trayCooldowns[selectedPlantId] =
-          levelCd || (def.getCooldown ? def.getCooldown() : def.cooldown) || 3000;
-      }
+      spendSun(plantCost);
+      const levelCd = def.getStats ? def.getStats(level).cooldown : null;
+      trayCooldowns[selectedPlantId] =
+        levelCd || (def.getCooldown ? def.getCooldown() : def.cooldown) || 3000;
       selectedPlantId = null;
       UI.setSelectedTrayCard(null);
     }
@@ -678,18 +664,9 @@ if (demonLayer) {
     document.removeEventListener("visibilitychange", onVisibilityChange);
   }
 
-  function selectPlantFree(plantId) {
-    selectedPlantId = plantId;
-    // Make sure running flag doesn't block boss placement
-    if (typeof Boss !== "undefined" && Boss.isBossRunning()) {
-      running = true;
-    }
-  }
-
   return {
     startBattle,
     endBattle,
-    selectPlantFree,
     onCellClick,
     selectPlant,
     toggleShovel,
