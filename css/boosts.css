@@ -1,0 +1,465 @@
+/* css/boosts.css
+   All boost system UI styles.
+   Pre-battle popup, boost cards, HUD timer bar, banners.
+*/
+
+/* ── Pre-battle Popup Overlay ──────────────────────────────────────── */
+.boost-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  animation: boostFadeIn 0.25s ease;
+}
+
+@keyframes boostFadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.boost-popup-box {
+  background: linear-gradient(160deg, #1a0a2e, #0d1a3a);
+  border: 2px solid #6c3fc5;
+  border-radius: 18px;
+  padding: 14px 14px 14px;
+  width: min(420px, 92vw);
+  max-height: 85vh;
+  overflow: hidden;
+  box-shadow: 0 0 40px rgba(108, 63, 197, 0.5);
+  color: #e8d9ff;
+  font-family: inherit;
+}
+
+.boost-popup-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  text-align: center;
+  color: #c084fc;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.boost-popup-sub {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #a78bca;
+  margin-bottom: 14px;
+}
+
+/* ── Selected display ──────────────────────────────────────────────── */
+.boost-selected-display {
+  background: rgba(108, 63, 197, 0.18);
+  border: 1px solid #6c3fc580;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  color: #d4b8ff;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.bp-sel-icon { font-size: 1.3rem; }
+
+/* ── Section title ─────────────────────────────────────────────────── */
+.boost-section-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #9d6ee0;
+  margin: 12px 0 8px;
+}
+
+/* ── Cards row ─────────────────────────────────────────────────────── */
+.boost-cards-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+.boost-sun-section {
+  margin-bottom: 6px;
+}
+
+/* ── Individual boost card ─────────────────────────────────────────── */
+.boost-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(108, 63, 197, 0.35);
+  border-radius: 50%;
+  padding: 0;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.boost-card:hover:not(.boost-empty) {
+  border-color: #a855f7;
+  background: rgba(168, 85, 247, 0.12);
+  transform: translateY(-2px);
+}
+
+.boost-card.boost-selected {
+  border-color: #f0c040;
+  background: rgba(240, 192, 64, 0.12);
+  box-shadow: 0 0 14px rgba(240, 192, 64, 0.35);
+}
+
+.boost-card.boost-empty {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.boost-sun-card {
+  width: 100%;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+}
+
+/* ── Card internals ────────────────────────────────────────────────── */
+.boost-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.boost-fallback-icon {
+  font-size: 1.6rem;
+}
+
+.boost-name {
+  display: none; /* hidden inside circle, shown in selected display */
+}
+
+.boost-qty {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #fff;
+  background: #6c3fc5;
+  border-radius: 8px;
+  padding: 1px 5px;
+  white-space: nowrap;
+}
+
+.boost-desc {
+  display: none; /* shown in selected display only */
+}
+
+.boost-none-label {
+  font-size: 0.72rem;
+  color: #7c6b9a;
+  font-style: italic;
+  text-align: center;
+  padding: 8px 0;
+}
+
+.boost-use-btn {
+  display: none; /* tapping the circle itself selects it */
+}
+
+/* ── Sun Rush level pips ───────────────────────────────────────────── */
+.boost-sun-levels {
+  display: flex;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.sun-lvl-pip {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid #6c3fc5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #9d6ee0;
+  transition: all 0.2s;
+}
+
+.sun-lvl-pip.active {
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  border-color: #fde68a;
+  color: #fff;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+}
+
+/* ── Popup action buttons ──────────────────────────────────────────── */
+.boost-popup-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+  justify-content: center;
+}
+
+.bp-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 11px 28px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.bp-btn:hover { opacity: 0.88; transform: scale(1.04); }
+
+.bp-btn-skip {
+  background: rgba(255,255,255,0.1);
+  color: #c4b5d6;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.bp-btn-start {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(22, 163, 74, 0.4);
+}
+
+/* ── Active boost HUD (in-battle timer bars) ───────────────────────── */
+#boost-active-hud {
+  position: fixed;
+  top: 90px;
+  right: 12px;
+  z-index: 800;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.boost-hud-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(10, 5, 25, 0.78);
+  border: 1px solid #6c3fc566;
+  border-radius: 10px;
+  padding: 5px 9px;
+  min-width: 140px;
+  animation: boostFadeIn 0.3s ease;
+}
+
+.boost-hud-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.boost-hud-bar-wrap {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.boost-hud-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #a855f7, #6366f1);
+  border-radius: 4px;
+  transition: width 0.5s linear;
+}
+
+.boost-hud-timer {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #c084fc;
+  min-width: 24px;
+  text-align: right;
+}
+
+/* ── Sun Rush drop styling ─────────────────────────────────────────── */
+.sun-rush-drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.sun-rush-glow {
+  font-size: 2rem;
+  filter: drop-shadow(0 0 10px #fbbf24) drop-shadow(0 0 20px #f59e0b);
+  animation: sunRushPulse 0.8s ease-in-out infinite alternate;
+}
+
+.sun-rush-value {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #fde68a;
+  text-shadow: 0 0 6px #f59e0b;
+  margin-top: -4px;
+}
+
+@keyframes sunRushPulse {
+  from { transform: scale(1);    filter: drop-shadow(0 0 8px #fbbf24); }
+  to   { transform: scale(1.15); filter: drop-shadow(0 0 18px #f59e0b); }
+}
+
+/* ── Activation / expiry banner ────────────────────────────────────── */
+.boost-activate-banner {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9500;
+  background: linear-gradient(135deg, #4c1d95cc, #1e1b4bcc);
+  border: 1px solid #7c3aed;
+  border-radius: 14px;
+  padding: 10px 24px;
+  color: #e9d5ff;
+  font-size: 1rem;
+  font-weight: 700;
+  pointer-events: none;
+  animation: bannerSlide 2.8s ease forwards;
+  white-space: nowrap;
+}
+
+.boost-expire-banner {
+  background: linear-gradient(135deg, #1f2937cc, #111827cc);
+  border-color: #4b5563;
+  color: #9ca3af;
+  font-size: 0.85rem;
+}
+
+@keyframes bannerSlide {
+  0%   { opacity: 0; top: 60px; }
+  15%  { opacity: 1; top: 80px; }
+  70%  { opacity: 1; top: 80px; }
+  100% { opacity: 0; top: 70px; }
+}
+
+/* ── Mobile adjustments ────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .boost-popup-box { padding: 18px 12px 16px; }
+  .boost-card { width: 100%; min-width: unset; }
+  .boost-cards-row { flex-direction: column; }
+  #boost-active-hud { right: 6px; top: 76px; }
+}
+
+/* ── Shop Boosts Tab ───────────────────────────────────────────────── */
+.shop-boosts-grid {
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.shop-boost-section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #9d6ee0;
+  margin-bottom: 8px;
+}
+
+.shop-boost-circles-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.shop-boost-circle {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 2px solid #6c3fc5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.15s, border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.shop-boost-circle:hover { transform: scale(1.08); border-color: #a855f7; }
+.shop-boost-circle.shop-boost-empty { opacity: 0.45; }
+
+.sbc-icon { font-size: 1.5rem; line-height: 1; }
+.sbc-level, .sbc-name {
+  font-size: 0.5rem;
+  font-weight: 700;
+  color: #c4b5fd;
+  line-height: 1;
+}
+.sbc-qty {
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.58rem;
+  font-weight: 700;
+  background: #6c3fc5;
+  color: #fff;
+  border-radius: 6px;
+  padding: 1px 4px;
+  white-space: nowrap;
+}
+
+/* ── Boost detail panel ────────────────────────────────────────────── */
+.shop-boost-detail {
+  margin-top: 14px;
+  background: rgba(108, 63, 197, 0.15);
+  border: 1px solid #6c3fc566;
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  animation: boostFadeIn 0.2s ease;
+}
+
+.shop-boost-detail.hidden { display: none; }
+
+.sbd-icon { font-size: 2.2rem; }
+.sbd-name { font-size: 1rem; font-weight: 800; color: #e9d5ff; }
+.sbd-desc { font-size: 0.75rem; color: #b49cd8; text-align: center; }
+.sbd-qty, .sbd-obtain {
+  font-size: 0.72rem;
+  color: #9d6ee0;
+}
+.sbd-test-btn {
+  margin-top: 8px;
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 7px 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.sbd-go-hint {
+  font-size: 0.68rem;
+  color: var(--green, #22c55e);
+  font-style: italic;
+  margin-top: 4px;
+}

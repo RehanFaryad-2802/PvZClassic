@@ -1611,12 +1611,9 @@ html, body {
   .world-card-name { font-size: 13px; padding: 6px; }
   .inv-left{min-width: 169px; width: 169px;}
   .shop-packet-rarity,
-  .shop-packet-seeds, .shop-packet-desc{
-    display: none !important;
-  }
-  .shop-packets-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-}
+  .shop-packet-seeds,
+  .shop-packet-desc { display: none !important; }
+  .shop-packets-grid { grid-template-columns: repeat(2, 1fr); }
   .world-lock { font-size: 28px; }
   /* Level select */
   .levelselect-container { padding: 8px; }
