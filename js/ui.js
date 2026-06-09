@@ -1729,49 +1729,79 @@ const UI = (() => {
     },
   ];
 
-  function buildMinigames() {
+ function buildMinigames() {
     const container = document.getElementById("minigames-grid");
     container.innerHTML = "";
     MINIGAMES.forEach((mg) => {
       const isUnlocked = Player.isMinigameUnlocked(mg.id);
+      const hasTut = typeof MiniTutorial !== "undefined" && MiniTutorial.hasTutorial(mg.id);
       const card = document.createElement("div");
       card.className = "mg-card" + (isUnlocked ? "" : " locked");
       card.innerHTML = `
         <div class="mg-thumb">
-          ${
-            mg.image
-              ? `<img src="${mg.image}" alt="${mg.name}" />`
-              : `<div class="mg-thumb-placeholder">${mg.icon}</div>`
-          }
+          ${mg.image
+            ? `<img src="${mg.image}" alt="${mg.name}" />`
+            : `<div class="mg-thumb-placeholder">${mg.icon}</div>`}
           ${!isUnlocked ? `<div class="mg-lock-overlay">🔒</div>` : ""}
-          ${isUnlocked ? `<div class="mg-play-btn">▶</div>` : ""}
+          ${isUnlocked  ? `<div class="mg-play-btn">▶</div>`       : ""}
         </div>
         <div class="mg-info">
           <div class="mg-name">${mg.name}</div>
           <div class="mg-desc">${mg.desc}</div>
           <div class="mg-reward">🎁 ${mg.reward}</div>
+          ${isUnlocked && hasTut
+            ? `<button class="mg-tut-btn" data-mgid="${mg.id}">📖 Tutorial</button>`
+            : ""}
         </div>
       `;
       if (isUnlocked) {
-        card.addEventListener("click", () => launchMinigame(mg.id));
+        // Play button / card click — but NOT if the tutorial button was clicked
+        card.addEventListener("click", (e) => {
+          if (e.target.closest(".mg-tut-btn")) return;
+          launchMinigame(mg.id);
+        });
+        // Tutorial button
+        const tutBtn = card.querySelector(".mg-tut-btn");
+        if (tutBtn) {
+          tutBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            showMinigameTutorial(mg.id);
+          });
+        }
       }
       container.appendChild(card);
     });
   }
 
+  // Show tutorial overlay on top of minigames screen (without launching the game)
+  function showMinigameTutorial(mgId) {
+    const scr = document.getElementById("screen-minigames");
+    if (!scr || typeof MiniTutorial === "undefined") return;
+    MiniTutorial.show(scr, mgId, () => {
+      // After tutorial closes, just stay on minigames screen
+    });
+  }
+
   function launchMinigame(id) {
+    // Auto-show tutorial on first play
+    function afterTutorial(screenId, launchFn) {
+      showScreen(screenId);
+      if (typeof MiniTutorial !== "undefined" && MiniTutorial.shouldAutoShow(id)) {
+        const scr = document.getElementById(screenId);
+        MiniTutorial.show(scr, id, launchFn);
+      } else {
+        launchFn();
+      }
+    }
+
     if (id === "blockhunt") {
-      showScreen("screen-blockhunt");
-      BlockHunt.startGame();
+      afterTutorial("screen-blockhunt", () => BlockHunt.startGame());
     } else if (id === "bombball") {
-      showScreen("screen-bombball");
-      BombBall.startGame();
+      afterTutorial("screen-bombball", () => BombBall.startGame());
     } else if (id === "sharpshoot") {
-      showScreen("screen-sharpshooters");
-      SharpShooters.startGame();
+      afterTutorial("screen-sharpshooters", () => SharpShooters.startGame());
     } else if (id === "discofdoom") {
-      showScreen("screen-discofdoom");
-      DiscOfDoom.startGame();
+      afterTutorial("screen-discofdoom", () => DiscOfDoom.startGame());
     } else {
       showToast("Coming soon! 🚧");
     }

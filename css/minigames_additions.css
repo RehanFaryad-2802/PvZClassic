@@ -641,3 +641,168 @@
   text-align:center; font-size:10px;
   color:rgba(167,139,250,0.35); letter-spacing:1px; flex-shrink:0;
 }
+/* ═══════════════════════════════════════════════
+   MINIGAME TUTORIAL OVERLAY
+═══════════════════════════════════════════════ */
+
+.tut-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.82);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.25s ease;
+  padding: 16px;
+}
+
+.tut-box {
+  background: linear-gradient(160deg, #1a0040, #0d0020);
+  border: 1px solid rgba(167,139,250,0.35);
+  border-radius: 20px;
+  padding: 24px 20px 18px;
+  max-width: 360px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 0 40px rgba(167,139,250,0.25);
+  animation: tutSlideUp 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+
+@keyframes tutSlideUp {
+  from { transform: translateY(30px) scale(0.95); opacity: 0; }
+  to   { transform: translateY(0)    scale(1);    opacity: 1; }
+}
+
+/* Progress pips */
+.tut-progress {
+  display: flex;
+  gap: 6px;
+}
+.tut-pip {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.25);
+  transition: background 0.2s;
+}
+.tut-pip.active {
+  background: #a78bfa;
+  box-shadow: 0 0 8px #a78bfa;
+}
+
+/* Emoji illustration */
+.tut-img {
+  font-size: 52px;
+  line-height: 1;
+  filter: drop-shadow(0 0 14px rgba(167,139,250,0.7));
+}
+
+/* Title */
+.tut-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: #a78bfa;
+  letter-spacing: 2px;
+  text-align: center;
+}
+
+/* Body */
+.tut-body {
+  font-size: 14px;
+  color: rgba(255,255,255,0.75);
+  text-align: center;
+  line-height: 1.6;
+  max-width: 300px;
+}
+
+/* Step label */
+.tut-step-label {
+  font-size: 10px;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 1px;
+}
+
+/* Buttons */
+.tut-btns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.tut-btn-next {
+  padding: 10px 22px;
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-family: var(--font-display);
+  font-size: 15px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.tut-btn-next:active { transform: scale(0.95); }
+
+.tut-btn-prev {
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 12px;
+  color: rgba(255,255,255,0.7);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.tut-btn-prev:active { background: rgba(255,255,255,0.15); }
+
+.tut-btn-cancel {
+  padding: 10px 14px;
+  background: transparent;
+  border: 1px solid rgba(239,68,68,0.35);
+  border-radius: 12px;
+  color: rgba(239,68,68,0.7);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.tut-btn-cancel:hover { background: rgba(239,68,68,0.12); color: #ef4444; }
+.tut-btn-cancel:active { transform: scale(0.95); }
+
+/* Tutorial button on minigame card */
+.mg-tut-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  background: rgba(167,139,250,0.12);
+  border: 1px solid rgba(167,139,250,0.3);
+  border-radius: 8px;
+  color: #a78bfa;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background 0.15s;
+}
+.mg-tut-btn:hover  { background: rgba(167,139,250,0.22); }
+.mg-tut-btn:active { transform: scale(0.95); }
+
+/* Highlight pulse used by tutorial to point at elements */
+.tut-highlight {
+  outline: 3px solid #a78bfa !important;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px rgba(167,139,250,0.25), 0 0 20px rgba(167,139,250,0.5) !important;
+  animation: tutHighlight 1s ease-in-out infinite;
+  position: relative;
+  z-index: 201 !important;
+}
+@keyframes tutHighlight {
+  0%,100% { box-shadow: 0 0 0 4px rgba(167,139,250,0.2), 0 0 14px rgba(167,139,250,0.4); }
+  50%     { box-shadow: 0 0 0 8px rgba(167,139,250,0.35), 0 0 28px rgba(167,139,250,0.7); }
+}

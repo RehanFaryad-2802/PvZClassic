@@ -156,7 +156,7 @@ const BlockHunt = (() => {
     });
   }
 
-  function startGame(diffIdx = 0) {
+function startGame(diffIdx = 0) {
     currentDiff = Math.min(diffIdx, DIFFICULTIES.length - 1);
     state = {
       score: 0,
@@ -177,7 +177,12 @@ const BlockHunt = (() => {
     if (nameEl) nameEl.textContent = DIFFICULTIES[currentDiff].name;
 
     updateHUD();
-    startRound();
+
+    if (typeof MgCountdown !== "undefined") {
+      MgCountdown.show(screen, 3, () => startRound());
+    } else {
+      startRound();
+    }
   }
 
   function startRound() {

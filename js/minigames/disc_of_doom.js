@@ -225,17 +225,36 @@ const DiscOfDoom = (() => {
       if (typeof UI !== "undefined") UI.showScreen("screen-minigames");
     });
 
-    // ── FIRE ZONE click ────────────────────────────
+// ── FIRE ZONE click (ONLY valid fire area) ──────
     fireZoneEl.addEventListener("pointerdown", e => {
       e.stopPropagation();
       if (!loaded || !running) return;
       const now = performance.now();
-      if (now < cooldownUntil) return;        // still on cooldown
-      if (beltSliding) return;               // belt is mid-animation
-
+      if (now < cooldownUntil) return;
+      if (beltSliding) return;
       const rect = arenaEl.getBoundingClientRect();
       const tapY = e.clientY - rect.top;
       triggerFire(tapY);
+    });
+
+    // ── Loaded slot tap = fire at mid-arena height ──
+    // (tap the loaded slot itself to fire at center row)
+    loadedSlotEl.addEventListener("pointerdown", e => {
+      e.stopPropagation();
+      if (!loaded || !running) return;
+      const now = performance.now();
+      if (now < cooldownUntil) return;
+      if (beltSliding) return;
+      // Fire at vertical center of arena
+      const arenaH = arenaEl ? arenaEl.clientHeight : 300;
+      triggerFire(arenaH / 2);
+    });
+
+    // ── Block all other arena taps ──────────────────
+    arenaEl.addEventListener("pointerdown", e => {
+      // Only the fire zone (child element) should fire.
+      // Clicks that bubble up to arena from outside fire zone are ignored.
+      e.stopPropagation();
     });
   }
 

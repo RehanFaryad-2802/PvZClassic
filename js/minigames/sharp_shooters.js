@@ -222,7 +222,11 @@ const SharpShooters = (() => {
     const nameEl = document.getElementById("ss-diff-name");
     if (nameEl) nameEl.textContent = DIFFICULTIES[currentDiff].name;
 
-    updateHUD();
+updateHUD();
+    state.running = true;
+
+    clearInterval(gameTimer);
+    const gameStart = Date.now();updateHUD();
     state.running = true;
 
     clearInterval(gameTimer);

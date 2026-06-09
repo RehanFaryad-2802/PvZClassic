@@ -177,7 +177,7 @@ const BombBall = (() => {
     });
   }
 
-  function startGame(diffIdx = 0) {
+function startGame(diffIdx = 0) {
     currentDiff = Math.min(diffIdx, DIFFICULTIES.length - 1);
     const diff = DIFFICULTIES[currentDiff];
 
@@ -202,7 +202,12 @@ const BombBall = (() => {
     if (nameEl) nameEl.textContent = diff.name;
 
     updateHUD();
-    startRound();
+
+    if (typeof MgCountdown !== "undefined") {
+      MgCountdown.show(screen, 3, () => startRound());
+    } else {
+      startRound();
+    }
   }
 
   let rafId = null;
