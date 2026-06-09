@@ -226,10 +226,6 @@ updateHUD();
     state.running = true;
 
     clearInterval(gameTimer);
-    const gameStart = Date.now();updateHUD();
-    state.running = true;
-
-    clearInterval(gameTimer);
     const gameStart = Date.now();
     gameTimer = setInterval(() => {
       state.timeLeft = Math.max(
@@ -262,9 +258,16 @@ updateHUD();
     }, spawnMs);
 
     lastTs = null;
-    cancelAnimationFrame(rafId);
-    rafId = requestAnimationFrame(tick);
-  }
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(tick);
+    }; // end actuallyStart
+
+    if (typeof MgCountdown !== "undefined") {
+      MgCountdown.show(screen, 3, actuallyStart);
+    } else {
+      actuallyStart();
+    }
+  
 
   function tick(ts) {
     if (!state || !state.running) return;

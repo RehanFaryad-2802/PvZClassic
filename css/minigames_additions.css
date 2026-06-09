@@ -557,8 +557,7 @@
 .dod-fire-zone {
   position:absolute;
   left:0; top:0; bottom:0;
-  width:calc(var(--fz-frac, 28%) );   /* set by JS via FIRE_ZONE_FRAC */
-  width:28%;                          /* fallback */
+  width:18%;
   cursor:crosshair;
   background:rgba(167,139,250,0.06);
   border-right:2px dashed rgba(167,139,250,0.30);

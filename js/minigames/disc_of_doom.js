@@ -27,7 +27,7 @@ const DiscOfDoom = (() => {
     FIRE_COOLDOWN_MS: 600,
 
     // Fire zone: fraction of arena width player can click to fire
-    FIRE_ZONE_FRAC: 0.28,            // left 28% of arena
+    FIRE_ZONE_FRAC: 0.18,            // left 18% of arena
 
     // Fired disc
     FIRED_SPEED_PX_S: 740,
@@ -54,7 +54,7 @@ const DiscOfDoom = (() => {
     DISC_TYPES: [
       { id:"normal", emoji:"💿", color:"#a78bfa", direct_dmg:0.30, burn_dps:0,    burn_dur:0, freeze:false, freeze_dur:0, star:false },
       { id:"fire",   emoji:"🔥", color:"#f97316", direct_dmg:0.25, burn_dps:0.06, burn_dur:5, freeze:false, freeze_dur:0, star:false },
-      { id:"ice",    emoji:"❄️",  color:"#38bdf8", direct_dmg:0.20, burn_dps:0,    burn_dur:0, freeze:true,  freeze_dur:2.5, star:false },
+     { id:"ice",    emoji:"❄️",  color:"#38bdf8", direct_dmg:0,    burn_dps:0,    burn_dur:0, freeze:true,  freeze_dur:2.5, star:false },
       { id:"star",   emoji:"⭐", color:"#fbbf24", direct_dmg:0,    burn_dps:0,    burn_dur:0, freeze:false, freeze_dur:0, star:true  },
     ],
 
@@ -147,11 +147,16 @@ const DiscOfDoom = (() => {
     renderRail(false);
     renderLoaded();
 
-    showCountdown(scr, 3, () => {
+    const startLoop = () => {
       running = true;
       lastTs = performance.now();
       animId = requestAnimationFrame(loop);
-    });
+    };
+    if (typeof MgCountdown !== "undefined") {
+      MgCountdown.show(scr, 3, startLoop);
+    } else {
+      showCountdown(scr, 3, startLoop);
+    }
   }
 
   // ══════════════════════════════════════════════════

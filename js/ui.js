@@ -2465,7 +2465,7 @@ Boosts.showPreBattlePopup(worldId, levelIdx, ownedIds, tempPlants);
     initButtons();
     BlockHunt.init();
     BombBall.init();
-    SharpShooters.init();
+    // SharpShooters inits on launch, not on page load
 
     // Check if player already has a name → skip name screen
     if (Player.hasName()) {
