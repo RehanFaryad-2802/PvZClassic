@@ -460,7 +460,7 @@ const UI = (() => {
 
     // Always skip picker — send ALL owned plants straight to battle
     selectedPlants = [...ownedIds];
-    Core.startBattle(worldId, levelIdx, ownedIds, tempPlants);
+Boosts.showPreBattlePopup(worldId, levelIdx, ownedIds, tempPlants);
   }
 
   function buildPickerAvailable(tempPlants = []) {
@@ -2004,15 +2004,96 @@ const UI = (() => {
   }
 
   function renderBoostsTab(container) {
-    container.innerHTML = `
-      <div class="shop-coming-soon">
-        <div style="font-size:48px">⚡</div>
-        <div style="font-size:18px;font-weight:900;color:var(--gold)">Boosts Coming Soon!</div>
-        <div style="color:var(--gray);font-size:13px;margin-top:8px">
-          Sun boosts, damage multipliers, XP boosters and more.
-        </div>
-      </div>
+    if (typeof BoostRegistry === "undefined" || typeof Boosts === "undefined") {
+      container.innerHTML = `<div class="shop-empty">Boosts not loaded.</div>`;
+      return;
+    }
+
+    const allBoosts = BoostRegistry.getAll();
+
+    // Group: sun rush levels together, others separate
+    const sunRushLevels = BoostRegistry.getSunRushLevels();
+    const otherBoosts = allBoosts.filter(b => !b.id.startsWith("sun_rush"));
+
+    const grid = document.createElement("div");
+    grid.className = "shop-boosts-grid";
+    container.appendChild(grid);
+
+    // ── Sun Rush section ──
+    const srTitle = document.createElement("div");
+    srTitle.className = "shop-boost-section-title";
+    srTitle.textContent = "☀️ Sun Rush Bottles";
+    grid.appendChild(srTitle);
+
+    const srRow = document.createElement("div");
+    srRow.className = "shop-boost-circles-row";
+    grid.appendChild(srRow);
+
+    sunRushLevels.forEach(def => {
+      const qty = Boosts.getCount(def.id);
+      const card = document.createElement("div");
+      card.className = "shop-boost-circle" + (qty === 0 ? " shop-boost-empty" : "");
+      card.innerHTML = `
+        <div class="sbc-icon">${def.fallbackIcon}</div>
+        <div class="sbc-level">Lv.${def.level}</div>
+        <div class="sbc-qty">×${qty}</div>
+      `;
+      card.title = `${def.name} — ${def.description}`;
+      card.addEventListener("click", () => _showBoostShopDetail(def));
+      srRow.appendChild(card);
+    });
+
+    // ── Other boosts section ──
+    const otTitle = document.createElement("div");
+    otTitle.className = "shop-boost-section-title";
+    otTitle.style.marginTop = "14px";
+    otTitle.textContent = "⚔️ Battle Boosts";
+    grid.appendChild(otTitle);
+
+    const otRow = document.createElement("div");
+    otRow.className = "shop-boost-circles-row";
+    grid.appendChild(otRow);
+
+    otherBoosts.forEach(def => {
+      const qty = Boosts.getCount(def.id);
+      const card = document.createElement("div");
+      card.className = "shop-boost-circle" + (qty === 0 ? " shop-boost-empty" : "");
+      card.innerHTML = `
+        <div class="sbc-icon">${def.fallbackIcon}</div>
+        <div class="sbc-name">${def.name.split(" ")[0]}</div>
+        <div class="sbc-qty">×${qty}</div>
+      `;
+      card.title = `${def.name} — ${def.description}`;
+      card.addEventListener("click", () => _showBoostShopDetail(def));
+      otRow.appendChild(card);
+    });
+
+    // ── Detail panel (shown when circle tapped) ──
+    const detail = document.createElement("div");
+    detail.className = "shop-boost-detail hidden";
+    detail.id = "shop-boost-detail";
+    grid.appendChild(detail);
+  }
+
+  function _showBoostShopDetail(def) {
+    const panel = document.getElementById("shop-boost-detail");
+    if (!panel) return;
+    const qty = Boosts.getCount(def.id);
+    panel.classList.remove("hidden");
+    panel.innerHTML = `
+      <div class="sbd-icon">${def.fallbackIcon}</div>
+      <div class="sbd-name">${def.name}</div>
+      <div class="sbd-desc">${def.description}</div>
+      <div class="sbd-qty">You own: <b>×${qty}</b></div>
+      <div class="sbd-obtain">📍 How to get: <b>${def.obtainedFrom === "merge_minigame" ? "Merge Minigame" : "Minigames"}</b></div>
+      <div class="sbd-go-hint">Play minigames to earn this boost!</div>
     `;
+    panel.querySelector(".sbd-test-btn").addEventListener("click", (e) => {
+      const id = e.target.dataset.id;
+      Boosts.addBoost(id, 1);
+      showToast(`Added 1× ${def.name}!`);
+      renderShopTab("boosts");
+    });
   }
 
   function renderPlantsTab(container) {

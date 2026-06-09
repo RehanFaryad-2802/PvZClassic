@@ -103,7 +103,8 @@ if (demonLayer) {
     }
 
     Grid.init(arenaEl);
-    Grid.clear();
+Grid.clear();
+Boosts.applyIronBarkToGrid();
 
     // Get arena rect after rendering
     requestAnimationFrame(() => {
@@ -177,6 +178,7 @@ if (demonLayer) {
     Demons.update(dt);
     Projectiles.update(dt);
     PlantRegistry.tick(dt);
+Boosts.tick(dt);
     Grid.updateFreezeTimers(dt);
 
     // Check victory every frame
@@ -414,7 +416,7 @@ if (demonLayer) {
     cancelAnimationFrame(rafId);
 
     if (won) {
-      const coinReward = Coins.getLevelReward(currentWorld);
+      const coinReward = Math.floor(Coins.getLevelReward(currentWorld) * Boosts.getCoinMult());
       Player.setLevelStars(currentWorld, currentLevel, 3);
       Levels.checkWorldUnlocks();
 
@@ -467,10 +469,11 @@ if (demonLayer) {
         .querySelectorAll(".sun-token, .sky-sun, .float-text")
         .forEach((el) => el.remove());
     }
-    Grid.clear();
-    Demons.clear();
-    Projectiles.clear();
-    PlantRegistry.clearTimers();
+   Grid.clear();
+Demons.clear();
+Projectiles.clear();
+PlantRegistry.clearTimers();
+Boosts.clearBattle();
   }
 
   // ── Pause ──────────────────────────────────────
@@ -667,6 +670,7 @@ if (demonLayer) {
   return {
     startBattle,
     endBattle,
+    isRunning: () => running,
     onCellClick,
     selectPlant,
     toggleShovel,
