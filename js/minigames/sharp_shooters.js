@@ -223,8 +223,6 @@ const SharpShooters = (() => {
     if (nameEl) nameEl.textContent = DIFFICULTIES[currentDiff].name;
 
 updateHUD();
-    state.running = true;
-
     clearInterval(gameTimer);
     const gameStart = Date.now();
     gameTimer = setInterval(() => {
@@ -257,16 +255,20 @@ updateHUD();
       if (state.running) spawnDemon(DIFFICULTIES[currentDiff]);
     }, spawnMs);
 
-    lastTs = null;
+    const actuallyStart = () => {
+      state.running = true;
+      lastTs = null;
       cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(tick);
-    }; // end actuallyStart
+    };
+
+    state.running = false;
 
     if (typeof MgCountdown !== "undefined") {
       MgCountdown.show(screen, 3, actuallyStart);
     } else {
       actuallyStart();
-    }
+    }}
   
 
   function tick(ts) {

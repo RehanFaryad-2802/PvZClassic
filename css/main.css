@@ -1654,3 +1654,106 @@ html, body {
 
 @import url('mobile.css');
 .plant-hp-bar{display: none;}
+
+.boost-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.boost-popup-box {
+  background: #1a0a2e;
+  border: 2px solid #7c3aed;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 480px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  color: white;
+  font-family: sans-serif;
+}
+
+.boost-popup-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #a78bfa;
+  margin-bottom: 4px;
+}
+
+.boost-popup-sub {
+  font-size: 13px;
+  color: #9ca3af;
+  margin-bottom: 12px;
+}
+
+.boost-selected-display {
+  background: #2d1b4e;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #d1d5db;
+  margin-bottom: 16px;
+  min-height: 36px;
+}
+
+.boost-section-title {
+  font-size: 13px;
+  font-weight: bold;
+  color: #7c3aed;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.boost-cards-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.boost-card {
+  background: #2d1b4e;
+  border: 2px solid #4c1d95;
+  border-radius: 10px;
+  padding: 10px;
+  width: 100px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.boost-card:hover { border-color: #7c3aed; }
+.boost-card.boost-selected { border-color: #a78bfa; background: #3b1f6e; }
+.boost-card.boost-empty { opacity: 0.4; cursor: default; }
+
+.boost-icon { font-size: 28px; margin-bottom: 4px; }
+.boost-name { font-size: 11px; font-weight: bold; color: #e5e7eb; }
+.boost-qty  { font-size: 11px; color: #a78bfa; }
+.boost-desc { font-size: 10px; color: #9ca3af; margin-top: 4px; }
+.boost-none-label { font-size: 10px; color: #6b7280; margin-top: 4px; }
+
+.boost-popup-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.bp-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.bp-btn-skip  { background: #374151; color: #9ca3af; }
+.bp-btn-start { background: #7c3aed; color: white; }
+.bp-btn-start:hover { background: #6d28d9; }
