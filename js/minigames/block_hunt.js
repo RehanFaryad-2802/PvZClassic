@@ -8,6 +8,7 @@ const BlockHunt = (() => {
       time: 8,
       similarCount: 0,
       reward: { seeds: 1, coins: 2 },
+      targetScore: 5,
     },
     {
       name: "Medium",
@@ -17,6 +18,7 @@ const BlockHunt = (() => {
       time: 7,
       similarCount: 2,
       reward: { seeds: 2, coins: 9 },
+      targetScore: 7,
     },
     {
       name: "Hard",
@@ -26,6 +28,7 @@ const BlockHunt = (() => {
       time: 5,
       similarCount: 4,
       reward: { seeds: 4, coins: 15 },
+      targetScore: 9,
     },
     {
       name: "Expert",
@@ -35,15 +38,17 @@ const BlockHunt = (() => {
       time: 4,
       similarCount: 6,
       reward: { seeds: 6, coins: 30 },
+      targetScore: 11,
     },
     {
       name: "Insane",
       pips: 5,
       cols: 15,
       rows: 8,
-      time: 3,
+      time: 4,
       similarCount: 8,
-      reward: { seeds: 9, coins: 45 },
+      reward: { seeds: 9, coins: 45, looms: 5 },
+      targetScore: 12,
     },
   ];
 
@@ -137,7 +142,7 @@ const BlockHunt = (() => {
       <button class="btn-menu" data-diff="${i}" style="width:480px;text-align:center">
         ${"🔥".repeat(d.pips)} ${d.name}
         <span style="font-size:14px;color:var(--gold);display:block">
-          ${d.cols}×${d.rows} grid · ${d.time}s · 🌱${d.reward.seeds} 🪙${d.reward.coins}
+         ${d.cols}×${d.rows} grid · ${d.time}s · Target: ${d.targetScore} · 🌱${d.reward.seeds} 🪙${d.reward.coins}${d.reward.looms ? ` <img src="assets/shop/loom.png" style="width:14px;height:14px;vertical-align:middle">+${d.reward.looms}` : ""}
         </span>
       </button>`,
     ).join("")}
@@ -314,7 +319,7 @@ function startGame(diffIdx = 0) {
     clearInterval(timerInterval);
     const diff = DIFFICULTIES[currentDiff];
     const reward = diff.reward;
-    const won = state.score > 16;
+    const won = state.score >= (diff.targetScore || 16);
 
     let plantName = "";
     if (won) {
@@ -327,6 +332,7 @@ function startGame(diffIdx = 0) {
           : "";
       }
       if (typeof Player !== "undefined") Player.addCoins(reward.coins);
+      if (reward.looms && typeof Player !== "undefined") Player.addLooms(reward.looms);
       if (typeof UI !== "undefined") UI.updateCoinDisplays();
     }
 
@@ -340,7 +346,8 @@ function startGame(diffIdx = 0) {
         won
           ? `
         <div class="bh-seeds-earned">🌱 +${reward.seeds} seeds${plantName ? " → " + plantName : ""}</div>
-        <div class="bh-seeds-earned" style="color:var(--gold)">🪙 +${reward.coins} coins</div>`
+        <div class="bh-seeds-earned" style="color:var(--gold)">🪙 +${reward.coins} coins</div>
+        ${reward.looms ? `<div class="bh-seeds-earned" style="color:#c084fc"><img src="assets/shop/loom.png" style="width:20px;height:20px;vertical-align:middle;margin-right:4px"> +${reward.looms} Looms</div>` : ""}`
           : ""
       }
       <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px">

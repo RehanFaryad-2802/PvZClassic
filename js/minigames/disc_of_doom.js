@@ -80,7 +80,7 @@ const DiscOfDoom = (() => {
     { name:"Medium", pips:2, fallMult:0.85, demonSpeedMult:0.90, hpMult:1.0, spawnMult:0.82, reward:{seeds:2,  coins:12 }},
     { name:"Hard",   pips:3, fallMult:0.70, demonSpeedMult:1.15, hpMult:1.4, spawnMult:0.65, reward:{seeds:4,  coins:22 }},
     { name:"Expert", pips:4, fallMult:0.55, demonSpeedMult:1.40, hpMult:1.9, spawnMult:0.48, reward:{seeds:7,  coins:38 }},
-    { name:"Insane", pips:5, fallMult:0.38, demonSpeedMult:1.80, hpMult:2.6, spawnMult:0.32, reward:{seeds:11, coins:58 }},
+    { name:"Insane", pips:5, fallMult:0.38, demonSpeedMult:1.80, hpMult:2.6, spawnMult:0.32, reward:{seeds:11, coins:58, looms:5 }},
   ];
 
   let currentDiff = 0;
@@ -777,7 +777,7 @@ const DiscOfDoom = (() => {
       ${DIFFICULTIES.map((d,i) => `
         <button class="btn-menu" data-diff="${i}">
           ${"🔥".repeat(d.pips)} ${d.name}
-          <span>Demon speed ×${d.demonSpeedMult} · 🌱${d.reward.seeds} 🪙${d.reward.coins}</span>
+          <span>Demon speed ×${d.demonSpeedMult} · 🌱${d.reward.seeds} 🪙${d.reward.coins}${d.reward.looms ? ` <img src="assets/shop/loom.png" style="width:14px;height:14px;vertical-align:middle">+${d.reward.looms}` : ""}</span>
         </button>`).join("")}
     `;
     picker.querySelector("#dod-pick-back").addEventListener("click", () => {
@@ -813,6 +813,7 @@ const DiscOfDoom = (() => {
           : "";
       }
       if (typeof Player !== "undefined") Player.addCoins(reward.coins);
+      if (reward.looms && typeof Player !== "undefined") Player.addLooms(reward.looms);
       if (typeof UI !== "undefined") UI.updateCoinDisplays();
     }
 
@@ -827,7 +828,8 @@ const DiscOfDoom = (() => {
       <div class="bh-score-final">Score: ${score} pts</div>
       ${won ? `
         <div class="bh-seeds-earned">🌱 +${reward.seeds} seeds${plantName ? " → "+plantName : ""}</div>
-        <div class="bh-seeds-earned" style="color:var(--gold)">🪙 +${reward.coins} coins</div>` : ""}
+        <div class="bh-seeds-earned" style="color:var(--gold)">🪙 +${reward.coins} coins</div>
+        ${reward.looms ? `<div class="bh-seeds-earned" style="color:#c084fc"><img src="assets/shop/loom.png" style="width:20px;height:20px;vertical-align:middle;margin-right:4px"> +${reward.looms} Looms</div>` : ""}` : ""}
       <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px">
         ${currentDiff < DIFFICULTIES.length-1
           ? `<button class="btn-primary" id="dod-harder">Harder: ${DIFFICULTIES[currentDiff+1].name} 🔥</button>` : ""}

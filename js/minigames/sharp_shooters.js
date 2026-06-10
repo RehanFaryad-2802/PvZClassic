@@ -72,7 +72,7 @@ const SharpShooters = (() => {
       spawnMult: 0.27,
       bossChance: 0.3,
       batChance: 0.35,
-      reward: { seeds: 11, coins: 65 },
+      reward: { seeds: 11, coins: 65, looms: 5 },
     },
   ];
 
@@ -173,8 +173,7 @@ const SharpShooters = (() => {
         <button class="btn-menu" data-diff="${i}" style="width:290px;text-align:center">
           ${"🔥".repeat(d.pips)} ${d.name}
           <span style="font-size:13px;color:var(--gold,#fbbf24);display:block">
-            Speed ×${d.speedMult} · Boss ${Math.round(d.bossChance * 100)}% · 🌱${d.reward.seeds} 🪙${d.reward.coins}
-          </span>
+            Speed ×${d.speedMult} · Boss ${Math.round(d.bossChance * 100)}% · 🌱${d.reward.seeds} 🪙${d.reward.coins}${d.reward.looms ? ` <img src="assets/shop/loom.png" style="width:14px;height:14px;vertical-align:middle">+${d.reward.looms}` : ""}
         </button>`,
       ).join("")}
     `;
@@ -518,6 +517,7 @@ updateHUD();
           : "";
       }
       if (typeof Player !== "undefined") Player.addCoins(reward.coins);
+      if (reward.looms && typeof Player !== "undefined") Player.addLooms(reward.looms);
       if (typeof UI !== "undefined") UI.updateCoinDisplays();
     }
 
@@ -530,7 +530,8 @@ updateHUD();
       ${
         won
           ? `<div class="bh-seeds-earned">🌱 +${reward.seeds} seeds${plantName ? " → " + plantName : ""}</div>
-             <div class="bh-seeds-earned" style="color:var(--gold,#fbbf24)">🪙 +${reward.coins} coins</div>`
+             <div class="bh-seeds-earned" style="color:var(--gold,#fbbf24)">🪙 +${reward.coins} coins</div>
+             ${reward.looms ? `<div class="bh-seeds-earned" style="color:#c084fc"><img src="assets/shop/loom.png" style="width:20px;height:20px;vertical-align:middle;margin-right:4px"> +${reward.looms} Looms</div>` : ""}`
           : ""
       }
       <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px">

@@ -64,7 +64,7 @@ const BombBall = (() => {
       fallMult: 0.3,
       spawnMult: 0.28,
       poisonChance: 0.3,
-      reward: { seeds: 10, coins: 60 },
+      reward: { seeds: 10, coins: 60, looms: 5 },
     },
   ];
 
@@ -158,7 +158,7 @@ const BombBall = (() => {
           ${"🔥".repeat(d.pips)} ${d.name}
           <span style="font-size:13px;color:var(--gold,#fbbf24);display:block">
             ${d.fallMult < 0.5 ? "Fast" : d.fallMult < 0.8 ? "Medium" : "Slow"} bombs ·
-            ☠️ ${Math.round(d.poisonChance * 100)}% · 🌱${d.reward.seeds} 🪙${d.reward.coins}
+            ☠️ ${Math.round(d.poisonChance * 100)}% · 🌱${d.reward.seeds} 🪙${d.reward.coins}${d.reward.looms ? ` <img src="assets/shop/loom.png" style="width:14px;height:14px;vertical-align:middle">+${d.reward.looms}` : ""}
           </span>
         </button>`,
       ).join("")}
@@ -491,7 +491,8 @@ function startGame(diffIdx = 0) {
             : ""
           : "";
       }
-      if (typeof Player !== "undefined") Player.addCoins(reward.coins);
+     if (typeof Player !== "undefined") Player.addCoins(reward.coins);
+      if (reward.looms && typeof Player !== "undefined") Player.addLooms(reward.looms);
       if (typeof UI !== "undefined") UI.updateCoinDisplays();
     }
 
@@ -504,7 +505,8 @@ function startGame(diffIdx = 0) {
       ${
         won
           ? `<div class="bh-seeds-earned">🌱 +${reward.seeds} seeds${plantName ? " → " + plantName : ""}</div>
-             <div class="bh-seeds-earned" style="color:var(--gold,#fbbf24)">🪙 +${reward.coins} coins</div>`
+             <div class="bh-seeds-earned" style="color:var(--gold,#fbbf24)">🪙 +${reward.coins} coins</div>
+             ${reward.looms ? `<div class="bh-seeds-earned" style="color:#c084fc"><img src="assets/shop/loom.png" style="width:20px;height:20px;vertical-align:middle;margin-right:4px"> +${reward.looms} Looms</div>` : ""}`
           : ""
       }
       <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px">

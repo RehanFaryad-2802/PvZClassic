@@ -906,16 +906,7 @@ html, body {
 }
 
 .mg-play-btn {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 40px;
-  color: white;
-  background: rgba(0,0,0,0.35);
-  opacity: 0;
-  transition: opacity 0.2s;
+  display: none;
 }
 
 .mg-card:not(.locked):hover .mg-play-btn {

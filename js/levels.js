@@ -321,7 +321,7 @@ const Levels = (() => {
   const MINIGAME_UNLOCKS = [
     { worldId: 1, levelIdx: 3, minigameId: "blockhunt" }, // W1 Level 4
     { worldId: 1, levelIdx: 3, minigameId: "bombball" }, // W1 Level 4
-    { worldId: 1, levelIdx: 3, minigameId: "sharpshooters" }, // W1 Level 4
+    { worldId: 1, levelIdx: 0, minigameId: "sharpshoot" }, // W1 Level 4
     { worldId: 1, levelIdx: 0, minigameId: "discofdoom" }, // W1 Level 1
   ];
 
