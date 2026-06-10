@@ -8,7 +8,6 @@ PlantRegistry.register({
   name: "Lily Beam",
   image: "assets/plants/lilybeam.png",
   cost: 200,
-  fireDistance: 9,
   cooldown: 6000,
   fireDistance: 7,
   hitCount: 99,
@@ -227,8 +226,15 @@ PlantRegistry.register({
   },
 
   onDamage(row, col, plantData) {
+    if (plantData.shieldReady) {
+      plantData.shieldReady = false;
+      plantData.shieldTimer = 0;
+      showShieldEffect(row, col, false);
+      showShieldBreak(row, col);
+      return true; // absorbed — skip visual damage
+    }
     const img = Grid.getCellEl(row, col)?.querySelector(".plant-entity");
-    if (!img) return;
+    if (!img) return false;
     img.classList.remove("lb-idle", "lb-charge", "lb-fire");
     img.classList.add("lb-damaged");
     setTimeout(() => {
@@ -238,18 +244,6 @@ PlantRegistry.register({
         plantData.firing = false;
       }
     }, 500);
-  },
-
-  // Called from grid.js when plant takes damage
-  onDamage(row, col, plantData) {
-    if (plantData.shieldReady) {
-      // Absorb hit
-      plantData.shieldReady = false;
-      plantData.shieldTimer = 0;
-      showShieldEffect(row, col, false);
-      showShieldBreak(row, col);
-      return true; // absorbed
-    }
     return false;
   },
 });

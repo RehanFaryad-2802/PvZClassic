@@ -189,12 +189,12 @@
 /* ── Shooting arena ───────────────────────────── */
 .ss-arena {
   flex: 1;
+  cursor: crosshair;
   position: relative;
   overflow: hidden;
   border-radius: 12px;
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.07);
-  cursor: none;
 }
 
 /* Lane dividers */
@@ -217,6 +217,7 @@
   position: absolute;
   display: flex;
   flex-direction: column;
+  cursor: crosshair;
   align-items: center;
   justify-content: center;
   border-radius: 10px;
@@ -314,6 +315,7 @@
 .ss-cursor {
   position: fixed;
   font-size: 28px;
+  display: none;
   pointer-events: none;
   transform: translate(-50%, -50%);
   z-index: 999;

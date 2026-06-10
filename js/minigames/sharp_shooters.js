@@ -136,7 +136,7 @@ const SharpShooters = (() => {
           <span>❄️ Freeze</span><span>⚡ Frenzy</span><span>💥 Nuke</span>
         </div>
         <div class="ss-arena" id="ss-arena"></div>
-        <div class="ss-cursor" id="ss-cursor">🎯</div>
+        <div class="ss-cursor" id="ss-cursor"></div>
       </div>
     `;
 
@@ -158,14 +158,6 @@ const SharpShooters = (() => {
       },
       { passive: false },
     );
-
-    screen.addEventListener("mousemove", (e) => {
-      const cursor = document.getElementById("ss-cursor");
-      if (cursor) {
-        cursor.style.left = e.clientX + "px";
-        cursor.style.top = e.clientY + "px";
-      }
-    });
   }
 
   function showDifficultyPicker() {

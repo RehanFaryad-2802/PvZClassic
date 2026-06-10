@@ -57,11 +57,11 @@ const Levels = (() => {
     {
       id: 4,
       name: "Shadow Realm",
-      sub: "Tthe final darkness",
+      sub: "The final darkness",
       emoji: "🌑",
       bgClass: "world-4",
       unlocked: false,
-      unlockAfterWorld: 2,
+      unlockAfterWorld: 3,
       levelCount: 30,
       demons: ["imp", "bat", "ice", "armored", "brute"],
     },
@@ -177,7 +177,7 @@ const Levels = (() => {
       reward: "imp",
       damageModifiers: {
         physical: 1, // 30% less from everything
-        ice: 0,
+        ice: 1,
         fire: 0,
         electric: 1,
         psychic: 1.4, // BUT psychic deals 40% MORE

@@ -23,6 +23,7 @@ const Core = (() => {
   let elapsed = 0;
   let allWavesSpawned = false;
   let demonsDead = 0;
+  let battleEnding = false;
   let totalDemons = 0;
   let currentTempPlants = [];
 
@@ -50,9 +51,7 @@ if (demonLayer) {
     // Reset state
     // Reset state
     sun = levelData.startingSun;
-    running = true;
     paused = false;
-    requestAnimationFrame(loop);
     document.getElementById("pause-overlay")?.classList.add("hidden");
     elapsed = 0;
     currentWaveIdx = 0;
@@ -103,7 +102,6 @@ if (demonLayer) {
     }
 
     Grid.init(arenaEl);
-Grid.clear();
 
     // Get arena rect after rendering
     requestAnimationFrame(() => {
@@ -115,6 +113,7 @@ Grid.clear();
       Projectiles.init(projLayer);
       Projectiles.setArenaRect(rect);
       Demons.setArenaRect(rect);
+      running = true;
     });
 
     PlantRegistry.clearTimers();
@@ -180,9 +179,9 @@ Grid.clear();
     Grid.updateFreezeTimers(dt);
 
     // Check victory every frame
-    if (allWavesSpawned && running && Demons.getCount() === 0) {
+    if (allWavesSpawned && running && !battleEnding && Demons.getCount() === 0) {
+      battleEnding = true;
       setTimeout(() => endBattle(true), 1200);
-      allWavesSpawned = false; // prevent multiple triggers
     }
 
     // Update tray cooldowns
@@ -411,6 +410,7 @@ Grid.clear();
   function endBattle(won) {
     if (!running) return;
     running = false;
+    battleEnding = false;
     cancelAnimationFrame(rafId);
 
     if (won) {
@@ -528,7 +528,7 @@ PlantRegistry.clearTimers();
     overlay.classList.remove("hidden");
 
     // Countdown 5..1
-    let count = 6;
+    let count = 5;
     cdEl.textContent = count;
     const cdTimer = setInterval(() => {
       count--;
