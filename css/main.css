@@ -1767,7 +1767,7 @@ html, body {
   align-items: center;
   gap: 5px;
   background: rgba(0,0,0,0.55);
-  border: none;
+  border: 1px solid rgba(251,191,36,0.3);
   border-radius: 20px;
   padding: 3px 10px 3px 6px;
   box-shadow: 0 0 8px rgba(251,191,36,0.2);
@@ -1824,7 +1824,8 @@ html, body {
   height: 40px;
   font-size: 18px;
   background: rgba(0,0,0,0.5);
-  border: none;
+  /* yellow border */
+  border: 1px solid rgba(251,191,36,0.3);
   border-radius: 10px;
   color: white;
   cursor: pointer;
@@ -1905,4 +1906,13 @@ html, body {
 .wm-right-bar .pvz2-currency-val {
   font-size: 13px;
   min-width: 32px;
+}
+/* ── Menu hero image ────────────────────────── */
+.menu-hero-img {
+  width: 70%;
+  height: 35%;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 2px solid rgba(255,255,255,0.15);
+  box-shadow: 0 0 24px rgba(100,200,100,0.25), 0 4px 16px rgba(0,0,0,0.5);
 }

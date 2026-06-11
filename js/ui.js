@@ -98,6 +98,14 @@ const UI = (() => {
   // ── Menu ───────────────────────────────────────
   function buildMenu() {
     document.getElementById("menu-player-name").textContent = Player.getName();
+
+    // Random homepage image
+    const heroImgs = [
+      "assets/homepage/page1.png",
+      // add more here as: "assets/homepage/page2.png",
+    ];
+    const img = document.getElementById("menu-hero-img");
+    if (img) img.src = heroImgs[Math.floor(Math.random() * heroImgs.length)];
   }
   function buildWorldMap() {
     Levels.checkWorldUnlocks();
