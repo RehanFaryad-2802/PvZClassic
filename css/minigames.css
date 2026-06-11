@@ -457,7 +457,6 @@
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
-  active: background rgba(255,255,255,0.2);
 }
 
 .gg-btn-move:active {

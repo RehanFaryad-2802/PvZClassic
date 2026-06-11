@@ -161,6 +161,14 @@ const SharpShooters = (() => {
   }
 
   function showDifficultyPicker() {
+    if (typeof MiniTutorial !== "undefined" && MiniTutorial.shouldAutoShow("sharpshooters")) {
+      MiniTutorial.show(screen, "sharpshooters", () => _showDifficultyPicker());
+      return;
+    }
+    _showDifficultyPicker();
+  }
+
+  function _showDifficultyPicker() {
     const container = document.getElementById("ss-container");
     const picker = document.createElement("div");
     picker.className = "bh-result";
@@ -189,6 +197,8 @@ const SharpShooters = (() => {
         startGame(parseInt(btn.dataset.diff));
       });
     });
+
+   
   }
 
   function startGame(diffIdx = 0) {

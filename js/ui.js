@@ -1689,11 +1689,11 @@ const UI = (() => {
       reward: "Seeds",
     },
     {
-      id: "sharpshoot",
+      id: "sharpshooters",
       name: "Sharp Shooters",
       icon: "🎯",
       image: "assets/minigames/shartshooter.png",
-      desc: "Shoot demons before they escape!",
+      desc: "Shoot demons with your peashooters, but watch out for the reloading time!",
       reward: "Seeds",
     },
     {
@@ -1807,7 +1807,7 @@ const UI = (() => {
       afterTutorial("screen-blockhunt", () => BlockHunt.startGame());
     } else if (id === "bombball") {
       afterTutorial("screen-bombball", () => BombBall.startGame());
-    } else if (id === "sharpshoot") {
+    } else if (id === "sharpshooters") {
       afterTutorial("screen-sharpshooters", () => SharpShooters.startGame());
     } else if (id === "discofdoom") {
       afterTutorial("screen-discofdoom", () => DiscOfDoom.startGame());
