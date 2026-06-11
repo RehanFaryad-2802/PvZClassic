@@ -952,7 +952,6 @@ html, body {
   display: flex;
   flex-direction: column;
   padding: 20px;
-  gap: 20px;
 }
 .shop-grid {
   display: grid;
@@ -1604,7 +1603,7 @@ html, body {
   .shop-packet-rarity,
   .shop-packet-seeds,
   .shop-packet-desc { display: none !important; }
-  .shop-packets-grid { grid-template-columns: repeat(2, 1fr); }
+  .shop-packets-grid { grid-template-columns: repeat(4, 1fr); }
   .world-lock { font-size: 28px; }
   /* Level select */
   .levelselect-container { padding: 8px; }

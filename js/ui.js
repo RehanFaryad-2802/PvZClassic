@@ -1983,13 +1983,11 @@ const UI = (() => {
       const inv = Player.getInventory();
       const owned = inv.find((i) => i.id === def.id);
       const qty = owned ? owned.quantity : 0;
-      const color = rarityColors[def.rarity] || "#fff";
 
       const card = document.createElement("div");
       card.className = "shop-packet-card";
-      card.style.borderColor = color;
       card.innerHTML = `
-        <div class="shop-packet-rarity" style="color:${color}">${def.rarity.toUpperCase()}</div>
+        <div class="shop-packet-rarity">${def.rarity.toUpperCase()}</div>
         <div class="shop-packet-emoji">${getPacketEmoji(def.id)}</div>
         <div class="shop-packet-name">${def.name}</div>
         <div class="shop-packet-desc">${def.description || ""}</div>

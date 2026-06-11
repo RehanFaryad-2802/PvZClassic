@@ -647,7 +647,9 @@
 ═══════════════════════════════════════════════ */
 
 .tut-overlay {
-  position: absolute;
+  position: fixed;
+  top: 0;
+  left: 0;
   inset: 0;
   background: rgba(0,0,0,0.82);
   z-index: 200;
