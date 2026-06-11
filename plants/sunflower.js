@@ -105,6 +105,7 @@ PlantRegistry.register({
       // Exact center of cell relative to effects layer
       const x = rect.left - eRect.left + rect.width * 0.5 - 28;
       const y = rect.top - eRect.top + rect.height * 0.5 - 28;
+      SoundFX.play("sun_produce");
       spawnSunToken(x, y, stats.sunValue);
 
       // Pulse ring

@@ -1356,6 +1356,7 @@ const Demons = (() => {
             }
           }
         }
+         SoundFX.play("demon_king_spawn");
       }, i * 300); // stagger spawns slightly
     });
   }

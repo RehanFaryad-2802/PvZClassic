@@ -14,7 +14,7 @@ const SoundFX = (() => {
     // Volume per category (0.0 – 1.0)
     VOL_UI: 0.45,
     VOL_DEMON: 0.55,
-    VOL_PLANT: 0.4,
+    VOL_PLANT: 0.6,
     VOL_MUSIC: 0.2,
 
     // Master mute
@@ -33,11 +33,12 @@ const SoundFX = (() => {
       ice_shoot:       null,   // icepea freeze sound
       fire_shoot:      null,   // lavaburst attack sound
       beam_shoot:      "assets/audio/plants/beam.mp3",   // lilybeam fire sound
+      demon_king_spawn: "assets/audio/plants/demonKingSpawn.mp3", // played on each king-spawned minion
       electric_shoot:  null,   // voltlotus lightning sound
       bonk_punch:      null,   // bonkchoy punch sound
       plant_hurt:      null,   // any plant taking damage
       plant_die:       null,   // plant death sound
-      sun_produce:     null,  
+      sun_produce: "assets/audio/plants/produceSun.mp3",  
     },
 
     // World battle music — keyed by worldId (number or string)
@@ -71,6 +72,7 @@ const SoundFX = (() => {
       // ── Demons ──────────────────────────────────────
       demon_spawn: { cat: "demon" },
       king_roar: { cat: "demon" },
+      demon_king_spawn: { cat: "demon" },
       demon_chomp: { cat: "demon" },
       demon_die: { cat: "demon" },
       demon_die_ice: { cat: "demon" },
@@ -888,14 +890,29 @@ const SoundFX = (() => {
     ramp(
       g,
       [
-        [0, 0.18],
-        [0.05, 0.18],
+        [0, 0.7],
+        [0.05, 0.6],
         [0.25, 0],
       ],
       t(),
     );
     o.start(t());
     o.stop(t() + 0.25);
+    // Second harmonic layer for body
+    const g2 = env("plant");
+    const o2 = osc("triangle", 350, g2);
+    o2.frequency.linearRampToValueAtTime(525, t() + 0.15);
+    ramp(
+      g2,
+      [
+        [0, 0.4],
+        [0.04, 0.35],
+        [0.2, 0],
+      ],
+      t(),
+    );
+    o2.start(t());
+    o2.stop(t() + 0.2);
   }
 
   function s_victory() {
@@ -1012,6 +1029,8 @@ const SoundFX = (() => {
   function play(key) {
     if (CFG.MUTED) return;
     if (!_gestureReceived) return;
+    // Clear cached pool if file path exists (ensures fresh load after config change)
+    if (CFG.FILES[key] && _pools[key]) delete _pools[key];
 
     // Always ensure audio context is running before any play attempt
     ensureCtx();
@@ -1020,9 +1039,8 @@ const SoundFX = (() => {
     const filePath = CFG.FILES[key];
     if (filePath) {
       try {
+        delete _pools[key]; // always rebuild pool so config changes take effect
         const pool = _getPool(key, filePath);
-        // Round-robin: pick next clip that isn't in the middle of playing
-        // (or just use next in rotation — instant, no seek needed)
         const clip = pool.clips[pool.idx % POOL_SIZE];
         pool.idx++;
         clip.currentTime = 0;
@@ -1031,7 +1049,8 @@ const SoundFX = (() => {
       return;
     }
 
-    // Fall back to synthesized sound
+    // Fall back to synthesized sound (skip keys that have a real file defined)
+    if (CFG.FILES[key] !== undefined) return;
     if (!ensureCtx()) return;
     resume();
     const fn = FNS[key];
