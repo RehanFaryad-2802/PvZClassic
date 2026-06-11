@@ -249,6 +249,8 @@ const Levels = (() => {
       biteRate: 1200,
       special: "freeze", // freezes plants it attacks (slows their fire rate)
       reward: "ice",
+      freezeImmune: true,   // immune to all freeze effects
+      slowImmune: true,     // immune to all slow effects
     },
     armored: {
       id: "armored",
@@ -260,6 +262,7 @@ const Levels = (() => {
       biteRate: 1500,
       special: "armor", // 40% dmg reduction
       reward: "armored",
+      slowResist: 0.5,      // slow duration reduced by 50%
     },
     brute: {
       id: "brute",

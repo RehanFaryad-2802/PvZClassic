@@ -156,6 +156,11 @@
     <button class="sb-btn orange" onclick="spawnAllRows()">👹×5<span class="kb-hint">A</span></button>
     <button class="sb-btn gray"   onclick="toggleShortcuts()">⌨️ Keys<span class="kb-hint">?</span></button>
     <a href="index.html" class="sb-btn gray" style="text-decoration:none">← Game</a>
+    <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:#c8ff44;font-weight:800;background:rgba(0,0,0,0.3);border-radius:8px;padding:3px 8px;border:1px solid rgba(200,255,68,0.3)">
+      Lv <input id="sb-place-level" type="number" min="1" max="15" value="1"
+        style="width:34px;background:rgba(0,0,0,0.4);border:1px solid rgba(200,255,68,0.4);border-radius:5px;color:#c8ff44;font-weight:900;font-size:11px;text-align:center;padding:1px 2px"/>
+      <span style="opacity:0.6">place</span>
+    </label>
     <div id="sb-speed-badge">⚡ 1×</div>
     <div id="sb-mode-badge">🌿 PLANT MODE</div>
   </div>
@@ -590,7 +595,8 @@ function placePlant(row, col) {
   if (!def) return;
   if (sun<def.cost) { showIndicator(`❌ Need ${def.cost} ☀️`); return; }
 
-  Grid.placePlant(row, col, {...def, level:15, owned:true});
+  const placeLevel = parseInt(document.getElementById('sb-place-level')?.value)||1;
+  Grid.placePlant(row, col, {...def, level:placeLevel, owned:true});
   sun-=def.cost;
   document.getElementById('sb-sun').textContent=sun;
 
@@ -694,7 +700,7 @@ function buildPlantPicker(){
       <img src="${def.image||''}" alt="${def.name}" onerror="this.src='';this.style.fontSize='26px';this.style.lineHeight='44px';this.textContent='🌿'"/>
       <div class="ename">${def.name}</div>
       <div class="ecost">☀️${def.cost}</div>
-      <div class="ehp">❤️${def.hp} · ${atkInfo}</div>
+      <div class="ehp" id="plant-btn-hp-${def.id}">❤️${def.hp} · ${atkInfo}</div>
       ${idx<9?`<div class="ekb">[${idx+1}]</div>`:''}
     `;
     btn.addEventListener('click',()=>{
@@ -748,7 +754,7 @@ function openPlantProps(plantData, row, col) {
   const hpColor=hpPct>60?'#22aa44':hpPct>30?'#ffaa00':'#cc2222';
   const isMelee=def?.meleeAttack||def?.attackType==='melee';
   const rateKey=isMelee?'punchRate':'fireRate';
-  const rateMs=def?.[rateKey]||def?.fireRate||1500;
+  const rateMs=stats?.[rateKey] || def?.[rateKey] || def?.fireRate || 1500;
   const pps=(1000/rateMs).toFixed(2);
 
   editor.innerHTML=`
@@ -785,7 +791,23 @@ function openPlantProps(plantData, row, col) {
     </div>
     <div class="prop-group">
       <div class="prop-group-title">📈 Level</div>
-      ${propRow('Level (1-15)', plantData.level, v=>{ plantData.level=Math.min(15,Math.max(1,+v)); openPlantProps(plantData,row,col); })}
+      ${propRow('Level (1-15)', plantData.level, v=>{
+        const newLv=Math.min(15,Math.max(1,+v));
+        plantData.level=newLv;
+        const ldef=PlantRegistry.get(plantData.plantId);
+        const lStats=ldef?.levelStats?.[newLv];
+        if(lStats){
+          if(lStats.hp!==undefined){ plantData.hp=lStats.hp; plantData.maxHp=lStats.hp; if(plantData.hpBar)plantData.hpBar.style.width='100%'; }
+          if(lStats.damage!==undefined&&ldef.levelStats[newLv]) ldef.levelStats[newLv].damage=lStats.damage;
+          if(lStats.shieldCooldown!==undefined) plantData.shieldCooldown=lStats.shieldCooldown;
+          if(lStats.freezeDuration!==undefined) plantData.freezeDuration=lStats.freezeDuration;
+          if(lStats.effectDuration!==undefined) plantData.effectDuration=lStats.effectDuration;
+          if(lStats.slowDuration!==undefined) plantData.slowDuration=lStats.slowDuration;
+        }
+        // Re-run onPlace so shield ring, timers, etc. reset for the plant
+        PlantRegistry.onPlace(plantData.plantId, row, col, plantData);
+        openPlantProps(plantData,row,col);
+      })}
     </div>
     <div class="prop-group">
       <div class="prop-group-title">🔧 Actions</div>

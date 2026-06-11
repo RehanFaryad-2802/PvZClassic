@@ -566,12 +566,6 @@
   50%       { opacity: 1; }
 }
 
-/* ── Slowed: animations run at 30% speed ─────────── */
-.demon-entity.slowed,
-.demon-entity.slowed * {
-  animation-duration: calc(var(--base-dur, 1s) * 3.3) !important;
-}
-
 .demon-entity.slowed img,
 .demon-entity.slowed video {
   filter:
@@ -580,16 +574,22 @@
     saturate(0.8)
     drop-shadow(0 0 6px rgba(103,232,249,0.5)) !important;
 }
+/* ── Slowed: animations run at 30% speed ─────────── */
+/* .demon-entity.slowed,
+.demon-entity.slowed * {
+  animation-duration: calc(var(--base-dur, 1s) * 3.3) !important;
+}
+
 
 /* Slow overlay — lighter blue tint */
-.demon-entity.slowed::after {
+/* .demon-entity.slowed::after {
   content: "";
   position: absolute;
   inset: 0;
   background: rgba(103,232,249,0.08);
   pointer-events: none;
   z-index: 24;
-}
+} */
 /* ══════════════════════════════════════════════════
    IMP VARIANT UNIQUE ANIMATIONS
    imp_axe / imp_shield / imp_heavy / imp_king
