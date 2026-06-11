@@ -52,7 +52,7 @@ const UI = (() => {
         if (el) el.textContent = coins;
       });
     document
-      .querySelectorAll("#menu-looms, #shop-looms, #inv-looms")
+      .querySelectorAll("#menu-looms, #shop-looms, #inv-looms, #wm-looms")
       .forEach((el) => {
         if (el) el.textContent = looms;
       });
@@ -662,7 +662,7 @@ const UI = (() => {
       // Re-wire back button
       document
         .getElementById("btn-back-collection")
-        .addEventListener("click", () => showScreen("screen-menu"));
+        .addEventListener("click", () => showScreen("screen-worldmap"));
 
       // Tab switching
       document.getElementById("inv-tabs").addEventListener("click", (e) => {
@@ -2265,20 +2265,15 @@ const UI = (() => {
     document
       .getElementById("btn-play")
       .addEventListener("click", () => showScreen("screen-worldmap"));
-    document
-      .getElementById("btn-collection")
-      .addEventListener("click", () => showScreen("screen-collection"));
-    document
-      .getElementById("btn-minigames")
-      .addEventListener("click", () => showScreen("screen-minigames"));
-    document
-      .getElementById("btn-shop")
-      .addEventListener("click", () => showScreen("screen-shop"));
+    document.getElementById("btn-collection")?.addEventListener("click", () => showScreen("screen-collection"));
+    document.getElementById("btn-minigames")?.addEventListener("click", () => showScreen("screen-minigames"));
+    document.getElementById("btn-shop")?.addEventListener("click", () => showScreen("screen-shop"));
 
-    // World map back
-    document
-      .getElementById("btn-back-worldmap")
-      .addEventListener("click", () => showScreen("screen-menu"));
+    // World map back + toolbar
+    document.getElementById("btn-back-worldmap")?.addEventListener("click", () => showScreen("screen-menu"));
+    document.getElementById("btn-wm-minigames")?.addEventListener("click", () => showScreen("screen-minigames"));
+    document.getElementById("btn-wm-inventory")?.addEventListener("click", () => showScreen("screen-collection"));
+    document.getElementById("btn-wm-shop")?.addEventListener("click", () => showScreen("screen-shop"));
     // Level select back
     document
       .getElementById("btn-back-levelselect")
@@ -2295,9 +2290,7 @@ const UI = (() => {
       .getElementById("btn-back-collection")
       .addEventListener("click", () => showScreen("screen-menu"));
     // Minigames back
-    document
-      .getElementById("btn-back-minigames")
-      .addEventListener("click", () => showScreen("screen-menu"));
+    document.getElementById("btn-back-minigames")?.addEventListener("click", () => showScreen("screen-worldmap"));
     // Shop back
     document
       .getElementById("btn-back-shop")
@@ -2484,7 +2477,7 @@ const UI = (() => {
         <div class="packet-cards-area" id="packet-cards-area"></div>
         <div class="packet-summary hidden" id="packet-summary"></div>
         <div style="display:flex;gap:10px;justify-content:center;margin-top:8px">
-          <button class="packet-close-btn hidden" id="packet-skip-btn" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:var(--gray);font-size:13px;padding:8px 18px;border-radius:8px;cursor:pointer">⏭ Skip</button>
+          <button class="packet-close-btn hidden" id="packet-skip-btn">⏭ Skip</button>
           <button class="packet-close-btn hidden" id="packet-close-btn">✓ Done</button>
         </div>
       </div>
@@ -2554,6 +2547,7 @@ const UI = (() => {
       cardsArea.classList.add("hidden");
       summary.classList.remove("hidden");
       closeBtn.classList.remove("hidden");
+      if (skipBtn) { skipBtn.style.display = "none"; }
 
       const entries = Object.values(summaryMap);
       summary.innerHTML = `
@@ -2577,6 +2571,7 @@ const UI = (() => {
     const skipBtn = overlay.querySelector("#packet-skip-btn");
     if (skipBtn) {
       skipBtn.classList.remove("hidden");
+      skipBtn.style.display = "inline-flex";
       skipBtn.addEventListener("click", () => {
         while (i < results.length) {
           const r = results[i++];
@@ -2670,6 +2665,10 @@ const UI = (() => {
       summary.classList.remove("hidden");
       closeBtn.classList.remove("hidden");
       skipBtn.classList.add("hidden");
+      skipBtn.style.display = "none";
+      skipBtn.style.visibility = "hidden";
+      skipBtn.style.opacity = "0";
+      skipBtn.style.pointerEvents = "none";
       summary.innerHTML = `
         <div class="packet-summary-title">🎉 You received!</div>
         <div class="packet-summary-grid">
@@ -2690,6 +2689,7 @@ const UI = (() => {
     }
 
     skipBtn.classList.remove("hidden");
+    skipBtn.style.cssText = "display:inline-flex !important;visibility:visible !important;opacity:1 !important;pointer-events:auto !important;";
     skipBtn.addEventListener("click", () => {
       while (i < results.length) summaryItems.push(results[i++]);
       showSummary();

@@ -128,21 +128,20 @@
     <div id="screen-menu" class="screen">
       <div class="menu-bg"></div>
       <div class="menu-container">
-        <div class="menu-header">
-          <div class="game-logo small">
+        <!-- Top-left: settings icon only -->
+        <button class="menu-corner-btn menu-corner-left" id="btn-settings" title="Settings">⚙️</button>
+        <!-- Top-right: shop icon only -->
+        <button class="menu-corner-btn menu-corner-right" id="btn-shop" title="Seed Shop">🛒</button>
+
+        <div class="menu-center-layout">
+          <!-- Game name label -->
+          <div class="menu-game-title">
             <span class="logo-pvz">PvZ</span><span class="logo-3">Classic</span>
           </div>
-          <div class="player-info-bar">
-            <span id="menu-player-name">Hero</span>
-            <span class="coin-display">🪙 <span id="menu-coins">0</span></span>
-          </div>
-        </div>
-        <div class="menu-buttons">
-          <button class="btn-menu" id="btn-play">🌱 Play</button>
-          <button class="btn-menu" id="btn-collection">📦 Invetory</button>
-          <button class="btn-menu" id="btn-minigames">🎮 Minigames</button>
-          <button class="btn-menu" id="btn-shop">🛒 Seed Shop</button>
-          <button class="btn-menu" id="btn-settings">⚙️ Settings</button>
+          <!-- Username read-only display -->
+          <div class="menu-username-display" id="menu-player-name">Hero</div>
+          <!-- Play button -->
+          <button class="btn-menu-play" id="btn-play">▶ PLAY</button>
         </div>
         <div class="menu-deco" style="display: none">
           <img src="assets/plants/sunflower.png" class="deco-plant p1" alt="" />
@@ -220,9 +219,24 @@
       <div class="worldmap-bg"></div>
       <div class="worldmap-container">
         <div class="worldmap-header">
-          <button class="btn-back" id="btn-back-worldmap">↶</button>
-          <h2>Choose World</h2>
-          <span class="coin-display">🪙 <span id="wm-coins">0</span></span>
+          <!-- Left icon toolbar (PvZ2 style) -->
+          <div class="wm-icon-toolbar">
+            <button class="wm-icon-btn" id="btn-back-worldmap" title="Back">↶</button>
+            <button class="wm-icon-btn" id="btn-wm-minigames" title="Minigames">🎮</button>
+            <button class="wm-icon-btn" id="btn-wm-inventory" title="Inventory">📦</button>
+          </div>
+          <!-- Right: currencies + shop -->
+          <div class="wm-right-bar">
+            <div class="pvz2-currency-pill">
+              <span class="pvz2-currency-icon">🪙</span>
+              <span class="pvz2-currency-val" id="wm-coins">0</span>
+            </div>
+            <div class="pvz2-currency-pill">
+              <img src="assets/shop/loom.png" class="loom-icon-sm" alt="Loom" style="width:15px;height:15px;object-fit:contain;">
+              <span class="pvz2-currency-val" id="wm-looms">0</span>
+            </div>
+            <button class="wm-icon-btn" id="btn-wm-shop" title="Shop">🛒</button>
+          </div>
         </div>
         <div class="worlds-grid" id="worlds-grid">
           <!-- Worlds injected by levels.js -->
@@ -581,6 +595,10 @@
           { passive: false },
         );
       });
+
+      // World map toolbar shortcuts
+      document.getElementById("btn-wm-minigames")?.addEventListener("click", () => UI.showScreen("screen-minigames"));
+      document.getElementById("btn-wm-inventory")?.addEventListener("click", () => UI.showScreen("screen-collection"));
 
       // Service worker for offline/APK
       if ("serviceWorker" in navigator) {

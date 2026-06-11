@@ -1587,7 +1587,6 @@ html, body {
   .worldmap-header h2 { font-size: 12px; }
   .worlds-grid { gap: 8px; }
   .world-card .world-name{ font-size: 12px; }
-  .world-card { height: 120px; }
   .world-card-name { font-size: 14px; }
   .level-orb::before{top: 5px; left: 5px;}
   .world-lock-overlay{font-size: 15px;}
@@ -1597,7 +1596,8 @@ html, body {
     gap: 8px; 
     padding: 0 8px 8px 8px;
   }
-  .world-card { height: 260px; width: 150px; ; border-radius: 10px;}
+  .hidden{display: none !important;}
+  .world-card { height: 100%; width: 27%; ; border-radius: 10px;}
   .world-img-wrap {box-shadow: none !important; }
   .world-card-name { font-size: 13px; padding: 6px; }
   .inv-left{min-width: 169px; width: 169px;}
@@ -1748,3 +1748,161 @@ html, body {
 .bp-btn-skip  { background: #374151; color: #9ca3af; }
 .bp-btn-start { background: #7c3aed; color: white; }
 .bp-btn-start:hover { background: #6d28d9; }
+
+/* ── PvZ2-style currency pill ───────────────── */
+.pvz2-currency-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pvz2-player-name {
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: var(--white);
+  letter-spacing: 1px;
+  opacity: 0.85;
+}
+.pvz2-currency-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0,0,0,0.55);
+  border: none;
+  border-radius: 20px;
+  padding: 3px 10px 3px 6px;
+  box-shadow: 0 0 8px rgba(251,191,36,0.2);
+}
+.pvz2-currency-icon { font-size: 15px; line-height: 1; }
+.pvz2-currency-val {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: #fbbf24;
+  font-weight: 700;
+  min-width: 24px;
+}
+
+/* ── Menu corner icon buttons ───────────────── */
+.menu-corner-btn {
+  position: absolute;
+  top: 10px;
+  width: 42px;
+  height: 42px;
+  font-size: 20px;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: background 0.15s, transform 0.15s;
+}
+.menu-corner-btn:active { background: rgba(255,255,255,0.15); transform: scale(0.92); }
+.menu-corner-left  { left: 10px; }
+.menu-corner-right { right: 10px; }
+
+/* ── Play button — small inline style ──────── */
+.btn-menu-play {
+  background: linear-gradient(135deg, #15803d, #16a34a) !important;
+  border-color: #22c55e !important;
+  font-size: 15px !important;
+  padding: 8px 28px !important;
+  max-width: 180px !important;
+  align-self: center;
+}
+
+/* ── World Map icon toolbar (PvZ2 style) ───── */
+.wm-icon-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.wm-icon-btn {
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+  background: rgba(0,0,0,0.5);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.1s;
+}
+.wm-icon-btn:active { background: rgba(255,255,255,0.2); transform: scale(0.91); }
+.wm-currency-bar {
+  margin-left: auto;
+}
+.worldmap-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  gap: 8px;
+}
+/* ── Menu center layout ─────────────────────── */
+.menu-center-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 10px;
+}
+.menu-game-title {
+  font-family: var(--font-display);
+  font-size: 32px;
+  letter-spacing: 2px;
+  line-height: 1;
+}
+.menu-game-title .logo-pvz { color: #22c55e; }
+.menu-game-title .logo-3   { color: #f97316; }
+
+.menu-username-display {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 2px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 4px 16px;
+  pointer-events: none;
+  user-select: none;
+}
+
+.btn-menu-play {
+  background: linear-gradient(135deg, #15803d, #16a34a);
+  border: 2px solid #22c55e;
+  border-radius: 30px;
+  color: white;
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 3px;
+  padding: 12px 48px;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(34,197,94,0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn-menu-play:active {
+  transform: scale(0.95);
+  box-shadow: 0 0 10px rgba(34,197,94,0.2);
+}
+/* ── World map right bar ────────────────────── */
+.wm-right-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+.wm-right-bar .pvz2-currency-pill {
+  padding: 4px 10px 4px 7px;
+  min-width: 64px;
+}
+.wm-right-bar .pvz2-currency-val {
+  font-size: 13px;
+  min-width: 32px;
+}
