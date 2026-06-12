@@ -8,7 +8,7 @@
 @import url('inventory.css');
 @import url('effects.css');
 @import url('setting.css');
-
+@import url('mobile.css');
 
 /* ─── CSS Variables ─────────────────────────────── */
 :root {
@@ -1642,7 +1642,6 @@ html, body {
   .result-container { padding: 16px; gap: 12px; }
 }
 
-@import url('mobile.css');
 .plant-hp-bar{display: none;}
 
 .boost-popup-overlay {

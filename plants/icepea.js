@@ -58,14 +58,25 @@ PlantRegistry.register({
     });
   },
 
+  // Returns what effect this shot applies based on level
+  _getEffect(level) {
+    const roll = Math.random();
+    if (level >= 10) return roll < 0.70 ? "freeze" : "slow";
+    if (level >= 5)  return roll < 0.40 ? "freeze" : "slow";
+    return "slow";
+  },
+
   onTick(row, col, plantData) {
     if (!PlantRegistry.isDemonInRange(row, col, this.fireDistance)) return;
     const stats = this.getStats(plantData.level);
+    const effect = this._getEffect(plantData.level);
     SoundFX.play("pea_shoot");
-    Projectiles.spawn("ice-pea", row, col, stats.damage, {
-      slow: true,
-      slowDuration: stats.slowDuration,
-    });
+    Projectiles.spawn(effect === "freeze" ? "ice-rock" : "ice-pea", row, col, stats.damage, {
+  slow: effect === "slow",
+  slowDuration: stats.slowDuration,
+  freeze: effect === "freeze",
+  freezeDuration: stats.slowDuration,
+});
 
     // Shoot animation + crystal muzzle flash
     const cell = Grid.getCellEl(row, col);

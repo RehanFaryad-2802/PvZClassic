@@ -45,8 +45,8 @@
 /* Ice muzzle flash — crystal burst not circle */
 .ip-muzzle {
   position: absolute;
-  width: 20px;
-  height: 20px;
+  width: 12px;
+  height: 12px;
   pointer-events: none;
   z-index: 18;
   animation: ipMuzzle 0.22s ease-out forwards;
@@ -113,4 +113,27 @@
   0%   { filter: drop-shadow(0 0 12px #fff) brightness(3) saturate(0); }
   50%  { filter: drop-shadow(0 0 6px rgba(103,232,249,0.8)) brightness(1.5) saturate(0.5); }
   100% { filter: drop-shadow(0 0 12px #fff) brightness(3) saturate(0); }
+}
+/* ── Ice Rock projectile (freeze shot) ───────────── */
+.projectile.ice-rock {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  background: radial-gradient(circle at 30% 30%, #ffffff, #a8eeff 25%, #30b8e8 55%, #0a6a9a 85%, #053d60);
+  border: 3px solid rgba(255,255,255,0.95);
+  box-shadow:
+    0 0 12px rgba(103,232,249,1),
+    0 0 28px rgba(147,197,253,0.9),
+    0 0 50px rgba(103,232,249,0.5),
+    inset 0 0 8px rgba(255,255,255,0.7),
+    inset 2px 2px 4px rgba(255,255,255,0.9);
+  transform: translate(-50%, -50%) rotate(20deg);
+  animation: iceRockSpin 0.5s linear infinite;
+  z-index: 15;
+}
+
+@keyframes iceRockSpin {
+  0%   { transform: translate(-50%, -50%) rotate(0deg)   scale(1);    }
+  50%  { transform: translate(-50%, -50%) rotate(180deg) scale(1.1);  }
+  100% { transform: translate(-50%, -50%) rotate(360deg) scale(1);    }
 }

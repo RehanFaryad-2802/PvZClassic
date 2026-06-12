@@ -18,20 +18,20 @@ PlantRegistry.register({
 
   levelStats: {
     1:  { hp: 300,  fireRate: 1500, damage: 20,  cost: 100 },
-    2:  { hp: 370,  fireRate: 1400, damage: 27,  cost: 100 },
-    3:  { hp: 450,  fireRate: 1300, damage: 35,  cost: 100 },
-    4:  { hp: 550,  fireRate: 1200, damage: 45,  cost: 100 },
-    5:  { hp: 660,  fireRate: 1100, damage: 57,  cost: 100 },
-    6:  { hp: 790,  fireRate: 1000, damage: 72,  cost: 100 },
-    7:  { hp: 940,  fireRate:  920, damage: 90,  cost: 100 },
-    8:  { hp: 1110, fireRate:  840, damage: 112, cost: 100 },
-    9:  { hp: 1300, fireRate:  770, damage: 138, cost: 100 },
-    10: { hp: 1510, fireRate:  700, damage: 170, cost: 100 },
-    11: { hp: 1750, fireRate:  640, damage: 208, cost: 100 },
-    12: { hp: 2020, fireRate:  580, damage: 252, cost: 100 },
-    13: { hp: 2320, fireRate:  530, damage: 304, cost: 100 },
-    14: { hp: 2660, fireRate:  480, damage: 365, cost: 100 },
-    15: { hp: 3040, fireRate:  430, damage: 438, cost: 100 },
+    2:  { hp: 370,  fireRate: 1400, damage: 20,  cost: 100 },
+    3:  { hp: 450,  fireRate: 1300, damage: 20,  cost: 100 },
+    4:  { hp: 550,  fireRate: 1200, damage: 20,  cost: 100 },
+    5:  { hp: 660,  fireRate: 1100, damage: 20,  cost: 100 },
+    6:  { hp: 790,  fireRate: 1000, damage: 20,  cost: 100 },
+    7:  { hp: 940,  fireRate:  920, damage: 20,  cost: 100 },
+    8:  { hp: 1110, fireRate:  840, damage: 20, cost: 100 },
+    9:  { hp: 1300, fireRate:  770, damage: 20, cost: 100 },
+    10: { hp: 1510, fireRate:  700, damage: 20, cost: 100 },
+    11: { hp: 1750, fireRate:  640, damage: 20, cost: 100 },
+    12: { hp: 2020, fireRate:  580, damage: 20, cost: 100 },
+    13: { hp: 2320, fireRate:  530, damage: 20, cost: 100 },
+    14: { hp: 2660, fireRate:  480, damage: 20, cost: 100 },
+    15: { hp: 3040, fireRate:  430, damage: 20, cost: 100 },
   },
 
   getStats(level) {
@@ -54,8 +54,27 @@ PlantRegistry.register({
   onTick(row, col, plantData) {
     if (!PlantRegistry.isDemonInRange(row, col, this.fireDistance)) return;
     const stats = this.getStats(plantData.level);
-    SoundFX.play("pea_shoot");
-    Projectiles.spawn("pea", row, col, stats.damage, { damageType: "physical" });
+
+    // How many peas to fire based on level
+    const peaCount =
+      plantData.level >= 13 ? 4 :
+      plantData.level >= 8  ? 3 :
+      plantData.level >= 4  ? 2 : 1;
+
+    // Vertical offsets so multi-peas spread slightly (center, above, below, far above)
+    const offsets = [0, -8, 8, -16];
+
+    for (let i = 0; i < peaCount; i++) {
+      const delay = i * 80; // 80ms stagger between each pea
+      setTimeout(() => {
+        if (!Grid.getPlant(row, col)) return; // plant removed mid-burst
+        SoundFX.play("pea_shoot");
+        Projectiles.spawn("pea", row, col, stats.damage, {
+          damageType: "physical",
+          yOffset: offsets[i] || 0,
+        });
+      }, delay);
+    }
 
     // Shoot animation
     const cell = Grid.getCellEl(row, col);
