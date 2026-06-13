@@ -101,7 +101,8 @@ if (demonLayer) {
       effectsLayer.querySelectorAll(".demon-hp-wrap, .float-text, .sun-token, .sky-sun").forEach(el => el.remove());
     }
 
-    Grid.init(arenaEl);
+    Grid.setWorld(worldId);
+Grid.init(arenaEl, worldId);
 
     // Get arena rect after rendering
     requestAnimationFrame(() => {
@@ -177,6 +178,7 @@ if (demonLayer) {
     Projectiles.update(dt);
     PlantRegistry.tick(dt);
     Grid.updateFreezeTimers(dt);
+    Grid.updateGroundEffects(dt, Demons);
 
     // Check victory every frame
     if (allWavesSpawned && running && !battleEnding && Demons.getCount() === 0) {
