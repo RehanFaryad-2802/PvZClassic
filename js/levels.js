@@ -318,6 +318,7 @@ const Levels = (() => {
     { worldId: 1, levelIdx: 0,plantId: "sporepuff" },
     { worldId: 1, levelIdx: 0,plantId: "lavaburst" },
     { worldId: 1, levelIdx: 0,plantId: "voltlotus" },
+    { worldId: 1, levelIdx: 0,plantId: "emberdoze" },
   ];
 
   // ── Minigame Unlock Table ──────────────────────

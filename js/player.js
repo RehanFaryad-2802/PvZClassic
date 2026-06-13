@@ -38,6 +38,7 @@ const Player = (() => {
       peashooter: { owned: false, level: 1, seeds: 0, unlockedByLevel: false },
       icepea: { owned: false, level: 1, seeds: 0, unlockedByLevel: false },
       bonkchoy: { owned: false, level: 1, seeds: 0 },
+      emberdoze: { owned: false, level: 1, seeds: 0 },
       lilybeam: { owned: false, level: 1, seeds: 0 },
       sporepuff: { owned: false, level: 1, seeds: 0 },
       voltlotus: { owned: false, level: 1, seeds: 0 },

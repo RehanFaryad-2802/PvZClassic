@@ -10,6 +10,7 @@ const Projectiles = (() => {
 
   const SPEED = {
     pea: 320, // px/sec
+    thorn: 260,
     "ice-pea": 280,
     bonk: 0, // melee, instant
   };
