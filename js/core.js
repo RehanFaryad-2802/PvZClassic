@@ -276,6 +276,10 @@ if (demonLayer) {
       UI.showToast(`Need ☀️${plantCost} sun!`);
       return;
     }
+    if (trayCooldowns[plantId] > 0) {
+      UI.showToast(`Still recharging!`);
+      return;
+    }
     selectedPlantId = plantId;
     UI.setSelectedTrayCard(plantId);
   }
