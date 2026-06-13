@@ -12,6 +12,7 @@ const Projectiles = (() => {
     pea: 320, // px/sec
     thorn: 260,
     "ice-pea": 280,
+    "ice-rock": 280,   // heavier, slower
     bonk: 0, // melee, instant
   };
 
@@ -34,9 +35,9 @@ const Projectiles = (() => {
     const cellRect = cellEl.getBoundingClientRect();
     const layerRect = layerEl.getBoundingClientRect();
 
-    // Fire from right edge of cell, centered vertically in that cell
+    // Fire from right edge of cell, centered vertically + optional yOffset for multi-pea spread
     const x = cellRect.right - layerRect.left;
-    const y = cellRect.top - layerRect.top + cellRect.height * 0.5 - 7;
+    const y = cellRect.top - layerRect.top + cellRect.height * 0.5 - 7 + (extra.yOffset || 0);
 
     const el = document.createElement("div");
     el.className = `projectile ${type}`;
@@ -137,13 +138,24 @@ const Projectiles = (() => {
     Demons.damage(demon, dmg, proj.type === "ice-pea" ? "ice" : (proj.extra?.damageType || proj.damageType || "physical"));
     Effects.showDamageNumber(dmg, demon.x + demon.width / 2, demon.y);
 
-    // Ice slow
-    if (proj.type === "ice-pea" && proj.extra.slow) {
-      Demons.freeze(demon, proj.extra.slowDuration || 3000);
-      Effects.spawnFreezeEffect(
-        demon.x + demon.width / 2,
-        demon.y + demon.height / 2,
-      );
+    // Ice pea effect — freeze or slow depending on roll
+    if (proj.type === "ice-pea" || proj.type === "ice-rock") {
+      const dStats = Levels.getDemonStats(demon.type);
+      if (proj.extra.freeze) {
+        if (!dStats?.freezeImmune) {
+          Demons.freeze(demon, proj.extra.freezeDuration || 3000);
+          Effects.spawnFreezeEffect(
+            demon.x + demon.width / 2,
+            demon.y + demon.height / 2,
+          );
+        }
+      } else if (proj.extra.slow) {
+        if (!dStats?.slowImmune) {
+          let dur = proj.extra.slowDuration || 2500;
+          if (dStats?.slowResist) dur = Math.floor(dur * (1 - dStats.slowResist));
+          if (dur > 0) Demons.slow(demon, dur, 0.5);
+        }
+      }
     }
   }
 

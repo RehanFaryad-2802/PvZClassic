@@ -430,7 +430,8 @@ function init() {
     onReachedEnd: ()  => showIndicator('💀 Demon reached end!'),
     onAllDefeated: () => showIndicator('🎉 All demons defeated!'),
   });
-  Projectiles.init(document.getElementById('projectiles-layer'), arenaRect);
+  Projectiles.init(document.getElementById('projectiles-layer'));
+Projectiles.setArenaRect(arenaRect);
 
   patchGridCells();
   buildPlantPicker();

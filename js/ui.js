@@ -2300,7 +2300,7 @@ const UI = (() => {
     // Shop back
     document
       .getElementById("btn-back-shop")
-      .addEventListener("click", () => showScreen("screen-menu"));
+      .addEventListener("click", () => showScreen("screen-worldmap"));
 
     // Settings open/back
     document
