@@ -2352,7 +2352,7 @@ const UI = (() => {
       SoundFX.play("btn_skip");
       document.getElementById("pause-overlay").classList.add("hidden");
       Core.endBattle(false);
-      showScreen("screen-menu");
+      showScreen("screen-worldmap");
     });
 
     // Result buttons

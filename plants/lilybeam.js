@@ -30,7 +30,18 @@ PlantRegistry.register({
   hitCount: 99,
   hp: 350,
   fireRate: 2500,
-  description: "Fires an ice beam — slows or freezes demons depending on level.",
+  description: `Fires a piercing <b style="color:#22d3ee">Ice Beam</b> at all demons in its lane. Also has a <b style="color:#22d3ee">Crystal Shield</b> that absorbs 1 hit automatically, then recharges.
+<div style="margin-top:8px;display:flex;flex-direction:column;gap:5px">
+  <div style="background:rgba(34,211,238,0.08);border-left:3px solid rgba(34,211,238,0.5);border-radius:4px;padding:5px 8px;font-size:10px;color:var(--white)">
+    🔵 <b style="color:#7dd3fc">Lv 1–4:</b> Beam deals damage only. No status effect. Shield absorbs 1 hit then recharges.
+  </div>
+  <div style="background:rgba(147,210,255,0.08);border-left:3px solid rgba(147,210,255,0.5);border-radius:4px;padding:5px 8px;font-size:10px;color:var(--white)">
+    🧊 <b style="color:#bae6fd">Lv 5–9:</b> Beam now applies a <b style="color:#bae6fd">50% Slow</b> to First demon it hits. Slow-immune demons are unaffected.
+  </div>
+  <div style="background:rgba(103,232,249,0.08);border-left:3px solid rgba(103,232,249,0.6);border-radius:4px;padding:5px 8px;font-size:10px;color:var(--white)">
+    ❄️ <b style="color:#67e8f9">Lv 10–15:</b> Beam now fully <b style="color:#67e8f9">Freezes</b> First demon it hits. Freeze-immune demons are unaffected.
+  </div>
+</div>`,
 
   levelStats: {
     1:  { hp: 350,  damage: 18,  effectDuration: 0,    shieldCooldown: 8000 },
@@ -111,23 +122,33 @@ PlantRegistry.register({
 
     SoundFX.play("beam_shoot");
 
+    // Find closest demon in row for status effect
+    let closestDemon = null, closestDist = Infinity;
+    active.forEach((d) => {
+      if (d.dead || d.row !== row) return;
+      const dRect = d.el.getBoundingClientRect();
+      if (dRect.left <= cellRect.left) return;
+      const dist = dRect.left - cellRect.left;
+      if (dist < closestDist) { closestDist = dist; closestDemon = d; }
+    });
+
     active.forEach((d) => {
       if (d.dead || d.row !== row) return;
       const dRect = d.el.getBoundingClientRect();
       if (dRect.left <= cellRect.left) return;
 
-      // Always deal damage
+      // Always deal damage to all demons in row
       Demons.damage(d, stats.damage, "beam");
 
-      // Apply status based on tier
+      // Apply status only to the closest demon
+      if (d !== closestDemon) return;
+
       if (tier === "freeze") {
-        // Respect freeze immunity
         const dStats = Levels.getDemonStats(d.type);
         if (dStats && dStats.freezeImmune) return;
         Demons.freeze(d, stats.effectDuration);
 
       } else if (tier === "slow") {
-        // Respect slow immunity and resistance
         const dStats = Levels.getDemonStats(d.type);
         if (dStats && dStats.slowImmune) return;
         let duration = stats.effectDuration;
@@ -138,7 +159,6 @@ PlantRegistry.register({
           Demons.slow(d, duration, LILYBEAM_CFG.SLOW_MULTIPLIER);
         }
       }
-      // tier === "none": damage only, nothing extra
     });
 
     // Charge → fire animation

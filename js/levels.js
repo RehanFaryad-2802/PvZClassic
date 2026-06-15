@@ -3,7 +3,7 @@ const Levels = (() => {
   const WORLDS = [
     {
       id: 1,
-      name: "Inferno Fields",
+      name: "Nature Valley",
       sub: "Where it all begins",
       emoji: "🔥",
       bgClass: "world-1",
@@ -34,8 +34,8 @@ const Levels = (() => {
     },
     {
       id: 2,
-      name: "Frozen Wastes",
-      sub: "Chill to the bone",
+      name: "Sandstorm Dunes",
+      sub: "Beware the hot winds",
       emoji: "❄️",
       bgClass: "world-2",
       unlocked: false,
@@ -45,8 +45,8 @@ const Levels = (() => {
     },
     {
       id: 3,
-      name: "Iron Fortress",
-      sub: "Steel walls, demon halls",
+      name: "Sea Fortress",
+      sub: "Waves of darkness",
       emoji: "⚔️",
       bgClass: "world-3",
       unlocked: false,
@@ -56,8 +56,8 @@ const Levels = (() => {
     },
     {
       id: 4,
-      name: "Shadow Realm",
-      sub: "The final darkness",
+      name: "Lava Pits",
+      sub: "The heat is on",
       emoji: "🌑",
       bgClass: "world-4",
       unlocked: false,

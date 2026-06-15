@@ -33,7 +33,18 @@ PlantRegistry.register({
   hitCount: 1,
   hp: 250,
   fireRate: 4000,
-  description: "Lobs poison spore balls in a high arc. Higher levels add toxic clouds and splash.",
+  description: `Lobs poisonous spore balls in a <b style="color:#d8b4fe">high arc</b> at the nearest demon. Each hit applies <b style="color:#86efac">Poison</b> — deals damage every 0.5s and turns the demon green. Poison refreshes on re-hit but does not stack.
+<div style="margin-top:8px;display:flex;flex-direction:column;gap:5px">
+  <div style="background:rgba(168,85,247,0.12);border-left:3px solid rgba(168,85,247,0.6);border-radius:4px;padding:5px 8px;font-size:10px;color:var(--white)">
+    🟢 <b style="color:#d8b4fe">Lv 1–4:</b> Single spore ball arcs to target. Poisons on impact.
+  </div>
+  <div style="background:rgba(74,222,128,0.10);border-left:3px solid rgba(74,222,128,0.5);border-radius:4px;padding:5px 8px;font-size:10px;color:var(--white)">
+    ⚗️ <b style="color:#86efac">Lv 5–9:</b> Every ${MUSHPUFF_CFG.CLOUD_SHOT_EVERY} shot drops a <b style="color:#86efac">Toxic Cloud</b> on landing. Lingers 3s — poisons any demon that walks through it.
+  </div>
+  <div style="background:rgba(240,171,252,0.10);border-left:3px solid rgba(240,171,252,0.5);border-radius:4px;padding:5px 8px;font-size:10px;color:var(--white)">
+    💥 <b style="color:#f0abfc">Lv 10–15:</b> Every ${MUSHPUFF_CFG.BURST_SHOT_EVERY} shot becomes a <b style="color:#f0abfc">Spore Burst</b> — explodes on impact and poisons all nearby demons in the lane.
+  </div>
+</div>`,
 
   // ── Level stats ──────────────────────────────────────────────
 levelStats: {
@@ -116,17 +127,16 @@ levelStats: {
     const gridEl   = document.getElementById("grid-container");
     const gridRect = gridEl ? gridEl.getBoundingClientRect() : null;
 
-    // Find farthest demon in lane (Melon-pult targets farthest, not closest)
-    let target = null, farthestDist = -Infinity;
-    active.forEach((d) => {
-      if (d.dead || d.row !== row) return;
-      const dRect = d.el.getBoundingClientRect();
-      if (dRect.left <= cellRect.left) return;
-      if (gridRect && dRect.left > gridRect.right) return;
-      const dist = dRect.left - cellRect.right;
-      if (dist > farthestDist) { farthestDist = dist; target = d; }
-    });
-    if (!target) return;
+    // Find closest demon in lane
+let target = null, closestDist = Infinity;
+active.forEach((d) => {
+  if (d.dead || d.row !== row) return;
+  const dRect = d.el.getBoundingClientRect();
+  if (dRect.left <= cellRect.left) return;
+  if (gridRect && dRect.left > gridRect.right) return;
+  const dist = dRect.left - cellRect.right;
+  if (dist < closestDist) { closestDist = dist; target = d; }
+});
 
     plantData.lastFireTime = now;
     plantData.shotCount    = (plantData.shotCount || 0) + 1;

@@ -185,8 +185,27 @@
   position: relative;
   background: transparent;
 }
+/* ═══════════════════════════════════════════════════
+   GRID LAYOUT
+═══════════════════════════════════════════════════ */
+.grid-container {
+  position: absolute;
+  left: 72px;
+  top: 0; bottom: 0;
+  right: 50px;
+  display: grid;
+  grid-template-rows: repeat(5, 1fr);
+  z-index: 5;
+}
+.grid-row {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  position: relative;
+  border-bottom: 1px solid rgba(0,0,0,0.18);
+}
+.grid-row:last-child { border-bottom: none; }
 
-/* ─── Base cell ──────────────────────────────────── */
+/* Base cell */
 .grid-cell {
   position: relative;
   cursor: pointer;
@@ -194,264 +213,226 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  transition: filter 0.12s;
+  transition: filter 0.12s, box-shadow 0.12s;
 }
 .grid-cell.occupied { cursor: default; }
+.grid-cell.occupied:hover { filter: none; }
 
 /* ═══════════════════════════════════════════════════
-   WORLD 1 — Inferno Fields
-   PvZ classic lawn: lush green grass tiles,
-   darker stripe every other row like real turf lanes
+   WORLD 1 — Nature Valley
+   Classic PvZ lush green turf lanes
 ═══════════════════════════════════════════════════ */
-
-/* Row lanes — alternating turf colours */
 .arena-bg.world-1 ~ .grid-container .grid-row:nth-child(odd) {
-  background: linear-gradient(180deg, #2d6a1a 0%, #1e5012 100%);
+  background: linear-gradient(180deg, #2e7d1e 0%, #1e5c12 100%);
 }
 .arena-bg.world-1 ~ .grid-container .grid-row:nth-child(even) {
-  background: linear-gradient(180deg, #1a4a0e 0%, #133808 100%);
+  background: linear-gradient(180deg, #1a5510 0%, #123a08 100%);
 }
-
-/* Cell: grass texture via repeating stripes + noise */
 .arena-bg.world-1 ~ .grid-container .grid-cell {
-  border-right: 1px solid rgba(0,0,0,0.25);
-  border-bottom: none;
-  border-top: none;
-  border-left: none;
-  background:
-    repeating-linear-gradient(
-      90deg,
-      transparent,
-      transparent 3px,
-      rgba(0,0,0,0.04) 3px,
-      rgba(0,0,0,0.04) 4px
-    );
-}
-
-/* Odd row cells: bright turf */
-.arena-bg.world-1 ~ .grid-container .grid-row:nth-child(odd) .grid-cell {
+  border-right: 1px solid rgba(0,0,0,0.20);
+  border-left: none; border-top: none; border-bottom: none;
   background:
     repeating-linear-gradient(
       0deg,
-      rgba(255,255,255,0.03) 0px,
-      rgba(255,255,255,0.03) 2px,
-      transparent 2px,
-      transparent 6px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      rgba(0,0,0,0.05) 0px,
-      rgba(0,0,0,0.05) 1px,
-      transparent 1px,
-      transparent 8px
+      rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 2px,
+      transparent 2px, transparent 7px
     );
 }
-
-/* Every 3rd cell: subtle soil patch */
+/* Bright soil patch on every 3rd cell */
 .arena-bg.world-1 ~ .grid-container .grid-cell:nth-child(3n) {
   background-image:
-    radial-gradient(ellipse 60% 40% at 50% 80%, rgba(80,40,10,0.18) 0%, transparent 100%),
+    radial-gradient(ellipse 70% 45% at 50% 85%, rgba(90,50,15,0.22) 0%, transparent 100%),
     repeating-linear-gradient(
-      0deg,
-      rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px,
-      transparent 2px, transparent 6px
+      0deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px,
+      transparent 2px, transparent 7px
     );
 }
-
-/* Top edge highlight — sunlit grass tip */
+/* Sunlit grass tip on top edge */
 .arena-bg.world-1 ~ .grid-container .grid-cell::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, rgba(120,220,60,0.40), transparent);
-  pointer-events: none;
-  z-index: 1;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(130,230,60,0.45), transparent);
+  pointer-events: none; z-index: 1;
 }
-
-/* Hover: sun-kissed glow */
+/* Hover: bright sun glow */
 .arena-bg.world-1 ~ .grid-container .grid-cell:not(.occupied):hover {
-  filter: brightness(1.35) saturate(1.5);
-}
-.arena-bg.world-1 ~ .grid-container .grid-cell:not(.occupied):hover::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 50% 60%, rgba(150,255,80,0.22) 0%, transparent 75%);
-  pointer-events: none;
-  z-index: 2;
+  filter: brightness(1.40) saturate(1.5);
+  box-shadow: inset 0 0 14px rgba(100,255,50,0.25);
 }
 
 /* ═══════════════════════════════════════════════════
-   WORLD 2 — Frozen Wastes
-   Cracked ice tiles, blue-white with frost veins
+   WORLD 2 — Sandstorm Dunes
+   Sandy desert tiles with heat shimmer
 ═══════════════════════════════════════════════════ */
+.arena-bg.world-2 {
+  background: linear-gradient(180deg, #3d2200 0%, #1e1000 60%, #0e0800 100%);
+}
 .arena-bg.world-2 ~ .grid-container .grid-row:nth-child(odd) {
-  background: linear-gradient(180deg, #a8d8f0 0%, #7ab8e0 100%);
+  background: linear-gradient(180deg, #b87a20 0%, #8c5a10 100%);
 }
 .arena-bg.world-2 ~ .grid-container .grid-row:nth-child(even) {
-  background: linear-gradient(180deg, #7ab8e0 0%, #4a90c0 100%);
+  background: linear-gradient(180deg, #8c5a10 0%, #6a4008 100%);
 }
-
-/* Ice crack texture using crossed diagonals */
 .arena-bg.world-2 ~ .grid-container .grid-cell {
-  border: 1px solid rgba(180,230,255,0.30);
+  border: 1px solid rgba(180,120,30,0.30);
   background:
     repeating-linear-gradient(
       45deg,
-      transparent,
-      transparent 8px,
-      rgba(255,255,255,0.06) 8px,
-      rgba(255,255,255,0.06) 9px
+      transparent, transparent 5px,
+      rgba(255,200,80,0.06) 5px, rgba(255,200,80,0.06) 6px
     ),
     repeating-linear-gradient(
       -45deg,
-      transparent,
-      transparent 12px,
-      rgba(180,230,255,0.08) 12px,
-      rgba(180,230,255,0.08) 13px
+      transparent, transparent 8px,
+      rgba(200,140,40,0.05) 8px, rgba(200,140,40,0.05) 9px
     );
 }
-
-/* Frost vein highlight on top */
+/* Sand ripple on top */
 .arena-bg.world-2 ~ .grid-container .grid-cell::before {
   content: '';
   position: absolute;
-  top: 0; left: 10%; right: 10%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.70), transparent);
+  top: 20%; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,220,120,0.50), transparent);
   pointer-events: none; z-index: 1;
 }
-
-/* Shimmer animation — light slides across each cell */
+/* Heat shimmer slide */
 .arena-bg.world-2 ~ .grid-container .grid-cell::after {
   content: '';
   position: absolute;
-  top: 0; left: -100%; width: 60%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
-  animation: iceShimmer 4s linear infinite;
+  top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,200,80,0.14), transparent);
+  animation: sandShimmer 3.5s linear infinite;
   pointer-events: none; z-index: 1;
 }
-@keyframes iceShimmer {
-  0%   { left: -60%; }
-  100% { left: 120%; }
+@keyframes sandShimmer {
+  from { left: -60%; }
+  to   { left: 120%; }
 }
-/* Stagger shimmer per column */
 .arena-bg.world-2 ~ .grid-container .grid-cell:nth-child(2)::after { animation-delay: 0.4s; }
-.arena-bg.world-2 ~ .grid-container .grid-cell:nth-child(3)::after { animation-delay: 0.8s; }
-.arena-bg.world-2 ~ .grid-container .grid-cell:nth-child(4)::after { animation-delay: 1.2s; }
-.arena-bg.world-2 ~ .grid-container .grid-cell:nth-child(5)::after { animation-delay: 1.6s; }
-.arena-bg.world-2 ~ .grid-container .grid-cell:nth-child(6)::after { animation-delay: 2.0s; }
-.arena-bg.world-2 ~ .grid-container .grid-cell:nth-child(7)::after { animation-delay: 2.4s; }
-.arena-bg.world-2 ~ .grid-container .grid-cell:nth-child(8)::after { animation-delay: 2.8s; }
-.arena-bg.world-2 ~ .grid-container .grid-cell:nth-child(9)::after { animation-delay: 3.2s; }
-
+.arena-bg.world-2 ~ .grid-container .grid-cell:nth-child(3)::after { animation-delay: 0.9s; }
+.arena-bg.world-2 ~ .grid-container .grid-cell:nth-child(4)::after { animation-delay: 1.4s; }
+.arena-bg.world-2 ~ .grid-container .grid-cell:nth-child(5)::after { animation-delay: 1.9s; }
+.arena-bg.world-2 ~ .grid-container .grid-cell:nth-child(6)::after { animation-delay: 2.4s; }
+.arena-bg.world-2 ~ .grid-container .grid-cell:nth-child(7)::after { animation-delay: 2.9s; }
+.arena-bg.world-2 ~ .grid-container .grid-cell:nth-child(8)::after { animation-delay: 0.2s; }
+.arena-bg.world-2 ~ .grid-container .grid-cell:nth-child(9)::after { animation-delay: 1.1s; }
 .arena-bg.world-2 ~ .grid-container .grid-cell:not(.occupied):hover {
-  filter: brightness(1.25) saturate(0.7);
+  filter: brightness(1.30) saturate(1.3);
+  box-shadow: inset 0 0 14px rgba(255,180,40,0.28);
 }
 
 /* ═══════════════════════════════════════════════════
-   WORLD 3 — Iron Fortress
-   Stone/cobblestone floor tiles with mortar lines
+   WORLD 3 — Sea Fortress
+   Stone cobblestone with inner bevel + rivets
 ═══════════════════════════════════════════════════ */
+.arena-bg.world-3 {
+  background: linear-gradient(180deg, #0a1520 0%, #060e16 60%, #030810 100%);
+}
 .arena-bg.world-3 ~ .grid-container .grid-row:nth-child(odd) {
-  background: linear-gradient(180deg, #5a5a68 0%, #42424e 100%);
+  background: linear-gradient(180deg, #2a4060 0%, #1c2e48 100%);
 }
 .arena-bg.world-3 ~ .grid-container .grid-row:nth-child(even) {
-  background: linear-gradient(180deg, #42424e 0%, #2e2e38 100%);
+  background: linear-gradient(180deg, #1c2e48 0%, #101e30 100%);
 }
-
-/* Stone texture: crosshatch + inner bevel */
 .arena-bg.world-3 ~ .grid-container .grid-cell {
-  border: 2px solid #232328;
-  box-shadow: inset 1px 1px 0px rgba(255,255,255,0.10),
-              inset -1px -1px 0px rgba(0,0,0,0.40);
+  border: 2px solid #0a1520;
+  box-shadow: inset 1px 1px 0 rgba(255,255,255,0.12),
+              inset -1px -1px 0 rgba(0,0,0,0.45);
   background:
     repeating-linear-gradient(
-      0deg,
-      rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px,
-      transparent 1px, transparent 7px
+      0deg, rgba(0,0,0,0.07) 0px, rgba(0,0,0,0.07) 1px,
+      transparent 1px, transparent 6px
     ),
     repeating-linear-gradient(
-      90deg,
-      rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px,
-      transparent 1px, transparent 7px
+      90deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px,
+      transparent 1px, transparent 6px
     );
 }
-/* Top-left bevel shine */
+/* Bevel shine top */
 .arena-bg.world-3 ~ .grid-container .grid-cell::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.18) 0%, transparent 100%);
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, rgba(100,160,220,0.25) 0%, transparent 100%);
   pointer-events: none; z-index: 1;
 }
-/* Occasional metal rivet — every 4th cell */
+/* Barnacle/rivet every 4th cell */
 .arena-bg.world-3 ~ .grid-container .grid-cell:nth-child(4n)::after {
   content: '';
   position: absolute;
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #888 0%, #444 100%);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  width: 5px; height: 5px; border-radius: 50%;
+  background: radial-gradient(circle, #5080a0 0%, #203050 100%);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.7);
   top: 4px; right: 4px;
   pointer-events: none; z-index: 1;
 }
 .arena-bg.world-3 ~ .grid-container .grid-cell:not(.occupied):hover {
-  filter: brightness(1.30);
+  filter: brightness(1.35);
+  box-shadow: inset 0 0 12px rgba(80,160,255,0.20),
+              inset 1px 1px 0 rgba(255,255,255,0.12),
+              inset -1px -1px 0 rgba(0,0,0,0.45);
 }
 
 /* ═══════════════════════════════════════════════════
-   WORLD 4 — Shadow Realm
-   Dark void tiles with purple rune glow veins
+   WORLD 4 — Lava Pits
+   Charred black ground with glowing lava cracks
 ═══════════════════════════════════════════════════ */
+.arena-bg.world-4 {
+  background: linear-gradient(180deg, #0f000f 0%, #080008 60%, #030003 100%);
+}
 .arena-bg.world-4 ~ .grid-container .grid-row:nth-child(odd) {
-  background: linear-gradient(180deg, #1a0030 0%, #0d0018 100%);
+  background: linear-gradient(180deg, #1e0800 0%, #120400 100%);
 }
 .arena-bg.world-4 ~ .grid-container .grid-row:nth-child(even) {
-  background: linear-gradient(180deg, #120020 0%, #08000e 100%);
+  background: linear-gradient(180deg, #120400 0%, #080200 100%);
 }
-
 .arena-bg.world-4 ~ .grid-container .grid-cell {
-  border: 1px solid rgba(120,0,180,0.25);
+  border: 1px solid rgba(180,60,0,0.25);
   background:
-    radial-gradient(ellipse 80% 60% at 50% 100%, rgba(100,0,150,0.15) 0%, transparent 100%);
+    radial-gradient(ellipse 80% 55% at 50% 100%, rgba(200,80,0,0.18) 0%, transparent 100%),
+    repeating-linear-gradient(
+      45deg,
+      rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 2px,
+      transparent 2px, transparent 8px
+    );
 }
-
-/* Rune glow on corners */
+/* Glowing lava crack on bottom */
 .arena-bg.world-4 ~ .grid-container .grid-cell::before {
   content: '';
   position: absolute;
-  inset: 0;
-  border: 1px solid transparent;
-  border-image: linear-gradient(135deg, rgba(168,85,247,0.50), transparent 50%, rgba(168,85,247,0.50)) 1;
+  bottom: 0; left: 15%; right: 15%; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,100,0,0.80), transparent);
+  animation: lavaCrack 2.5s ease-in-out infinite;
   pointer-events: none; z-index: 1;
 }
-/* Pulsing purple floor vein */
+@keyframes lavaCrack {
+  0%,100% { opacity: 0.4; box-shadow: none; }
+  50%      { opacity: 1.0; box-shadow: 0 0 8px rgba(255,80,0,0.90); }
+}
+/* Ember glow from below */
 .arena-bg.world-4 ~ .grid-container .grid-cell::after {
   content: '';
   position: absolute;
-  bottom: 0; left: 20%; right: 20%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(168,85,247,0.60), transparent);
-  animation: runeGlow 3s ease-in-out infinite;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 110%, rgba(255,60,0,0.12) 0%, transparent 65%);
+  animation: emberGlow 3s ease-in-out infinite;
   pointer-events: none; z-index: 1;
 }
-@keyframes runeGlow {
-  0%,100% { opacity: 0.3; }
-  50%      { opacity: 1.0; box-shadow: 0 0 8px rgba(168,85,247,0.8); }
+@keyframes emberGlow {
+  0%,100% { opacity: 0.5; }
+  50%      { opacity: 1.0; }
 }
-.arena-bg.world-4 ~ .grid-container .grid-cell:nth-child(even)::after {
-  animation-delay: 1.5s;
-}
+.arena-bg.world-4 ~ .grid-container .grid-cell:nth-child(even)::before { animation-delay: 1.25s; }
+.arena-bg.world-4 ~ .grid-container .grid-cell:nth-child(3n)::after   { animation-delay: 0.8s; }
 .arena-bg.world-4 ~ .grid-container .grid-cell:not(.occupied):hover {
   filter: brightness(1.5) saturate(2);
+  box-shadow: inset 0 0 16px rgba(255,80,0,0.35);
 }
 
 /* ═══════════════════════════════════════════════════
    WORLD 5 — Cyber Neon
-   Dark circuit board tiles, glowing cyan grid lines
+   Dark circuit board with glowing cyan grid traces
 ═══════════════════════════════════════════════════ */
 .arena-bg.world-5 ~ .grid-container .grid-row:nth-child(odd) {
   background: linear-gradient(180deg, #001520 0%, #000d14 100%);
@@ -459,59 +440,52 @@
 .arena-bg.world-5 ~ .grid-container .grid-row:nth-child(even) {
   background: linear-gradient(180deg, #000d14 0%, #00080d 100%);
 }
-
 .arena-bg.world-5 ~ .grid-container .grid-cell {
-  border: 1px solid rgba(0,255,180,0.25);
+  border: 1px solid rgba(0,255,180,0.22);
+  box-shadow: inset 0 0 6px rgba(0,255,180,0.05);
   background:
     repeating-linear-gradient(
-      0deg,
-      transparent, transparent 5px,
+      0deg, transparent, transparent 5px,
       rgba(0,255,180,0.03) 5px, rgba(0,255,180,0.03) 6px
     ),
     repeating-linear-gradient(
-      90deg,
-      transparent, transparent 5px,
+      90deg, transparent, transparent 5px,
       rgba(0,255,180,0.03) 5px, rgba(0,255,180,0.03) 6px
     );
-  box-shadow: inset 0 0 6px rgba(0,255,180,0.06);
 }
-/* Glowing circuit trace on bottom */
+/* Glowing bottom trace */
 .arena-bg.world-5 ~ .grid-container .grid-cell::before {
   content: '';
   position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent 10%, rgba(0,255,180,0.70) 50%, transparent 90%);
+  bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 5%, rgba(0,255,180,0.75) 50%, transparent 95%);
   pointer-events: none; z-index: 1;
 }
-/* Neon corner dot */
+/* Blinking corner node */
 .arena-bg.world-5 ~ .grid-container .grid-cell::after {
   content: '';
   position: absolute;
   top: 3px; left: 3px;
-  width: 3px; height: 3px;
-  border-radius: 50%;
-  background: rgba(0,255,180,0.70);
-  box-shadow: 0 0 4px rgba(0,255,180,0.90);
+  width: 3px; height: 3px; border-radius: 50%;
+  background: rgba(0,255,180,0.80);
+  box-shadow: 0 0 5px rgba(0,255,180,1.0);
+  animation: neonBlink 2s ease-in-out infinite;
   pointer-events: none; z-index: 1;
-  animation: neonDot 2s ease-in-out infinite;
 }
-@keyframes neonDot {
-  0%,100% { opacity: 0.4; }
+@keyframes neonBlink {
+  0%,100% { opacity: 0.3; }
   50%      { opacity: 1.0; }
 }
-.arena-bg.world-5 ~ .grid-container .grid-cell:nth-child(even)::after {
-  animation-delay: 1s;
-}
+.arena-bg.world-5 ~ .grid-container .grid-cell:nth-child(even)::after { animation-delay: 1s; }
+.arena-bg.world-5 ~ .grid-container .grid-cell:nth-child(3n)::after   { animation-delay: 0.5s; }
 .arena-bg.world-5 ~ .grid-container .grid-cell:not(.occupied):hover {
   filter: brightness(1.4);
-  box-shadow: inset 0 0 14px rgba(0,255,180,0.30) !important;
+  box-shadow: inset 0 0 16px rgba(0,255,180,0.30);
 }
 
 /* ═══════════════════════════════════════════════════
    WORLD 6 — Jungle Abyss
-   Dense jungle floor: mossy mud, root lines,
-   deep green with organic brown earthy texture
+   Dense dark jungle floor, mossy mud + root veins
 ═══════════════════════════════════════════════════ */
 .arena-bg.world-6 ~ .grid-container .grid-row:nth-child(odd) {
   background: linear-gradient(180deg, #1a3d0a 0%, #0f2605 100%);
@@ -519,149 +493,133 @@
 .arena-bg.world-6 ~ .grid-container .grid-row:nth-child(even) {
   background: linear-gradient(180deg, #142e07 0%, #0a1c03 100%);
 }
-
 .arena-bg.world-6 ~ .grid-container .grid-cell {
-  border-right: 1px solid rgba(30,80,10,0.50);
-  border-bottom: 1px solid rgba(50,20,5,0.40);
+  border-right: 1px solid rgba(30,80,10,0.45);
+  border-bottom: 1px solid rgba(50,20,5,0.35);
   border-top: none; border-left: none;
   background:
-    radial-gradient(ellipse 90% 50% at 50% 100%, rgba(60,30,5,0.35) 0%, transparent 100%),
+    radial-gradient(ellipse 90% 50% at 50% 100%, rgba(60,30,5,0.30) 0%, transparent 100%),
     repeating-linear-gradient(
-      15deg,
-      transparent, transparent 10px,
-      rgba(0,0,0,0.06) 10px, rgba(0,0,0,0.06) 11px
+      15deg, transparent, transparent 9px,
+      rgba(0,0,0,0.06) 9px, rgba(0,0,0,0.06) 10px
     );
 }
-/* Moss patch highlight top */
+/* Moss highlight on top */
 .arena-bg.world-6 ~ .grid-container .grid-cell::before {
   content: '';
   position: absolute;
-  top: 0; left: 5%; right: 5%;
-  height: 4px;
-  background: linear-gradient(90deg, transparent, rgba(80,200,40,0.28), transparent);
+  top: 0; left: 8%; right: 8%; height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(90,210,40,0.30), transparent);
   pointer-events: none; z-index: 1;
 }
-/* Root line crossing diagonal — every other cell */
+/* Root vein diagonal */
 .arena-bg.world-6 ~ .grid-container .grid-cell:nth-child(odd)::after {
   content: '';
   position: absolute;
-  top: 30%; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(80,40,10,0.45), transparent);
-  transform: rotate(-8deg);
+  top: 35%; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(80,40,10,0.50), transparent);
+  transform: rotate(-6deg);
   pointer-events: none; z-index: 1;
 }
 .arena-bg.world-6 ~ .grid-container .grid-cell:not(.occupied):hover {
-  filter: brightness(1.40) saturate(1.6);
+  filter: brightness(1.45) saturate(1.6);
+  box-shadow: inset 0 0 12px rgba(80,220,40,0.20);
 }
 
 /* ═══════════════════════════════════════════════════
    WORLD 7 — Ice Age
-   Ancient glacier: deep blue packed ice, 
-   lighter than world 2, with pressure cracks
+   Ancient deep-blue glacier with pressure cracks
 ═══════════════════════════════════════════════════ */
 .arena-bg.world-7 ~ .grid-container .grid-row:nth-child(odd) {
-  background: linear-gradient(180deg, #c8e8ff 0%, #90c8f0 100%);
+  background: linear-gradient(180deg, #c0deff 0%, #88b8e8 100%);
 }
 .arena-bg.world-7 ~ .grid-container .grid-row:nth-child(even) {
-  background: linear-gradient(180deg, #90c8f0 0%, #60a0d8 100%);
+  background: linear-gradient(180deg, #88b8e8 0%, #5090c8 100%);
 }
-
 .arena-bg.world-7 ~ .grid-container .grid-cell {
-  border: 1px solid rgba(255,255,255,0.35);
-  box-shadow: inset 0 2px 4px rgba(255,255,255,0.30),
-              inset 0 -2px 4px rgba(0,60,120,0.20);
+  border: 1px solid rgba(255,255,255,0.38);
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.32),
+              inset 0 -2px 4px rgba(0,60,120,0.22);
   background:
     repeating-linear-gradient(
-      30deg,
-      transparent, transparent 6px,
-      rgba(255,255,255,0.08) 6px, rgba(255,255,255,0.08) 7px
+      30deg,  transparent, transparent 6px, rgba(255,255,255,0.08) 6px, rgba(255,255,255,0.08) 7px
     ),
     repeating-linear-gradient(
-      -30deg,
-      transparent, transparent 6px,
-      rgba(200,230,255,0.05) 6px, rgba(200,230,255,0.05) 7px
+      -30deg, transparent, transparent 6px, rgba(200,230,255,0.05) 6px, rgba(200,230,255,0.05) 7px
     );
 }
-/* Bright pressure crack */
+/* Pressure crack vertical */
 .arena-bg.world-7 ~ .grid-container .grid-cell::before {
   content: '';
   position: absolute;
-  top: 20%; bottom: 20%; left: 50%;
+  top: 15%; bottom: 15%; left: 48%;
   width: 1px;
-  background: linear-gradient(180deg, transparent, rgba(255,255,255,0.55), transparent);
+  background: linear-gradient(180deg, transparent, rgba(255,255,255,0.60), transparent);
   pointer-events: none; z-index: 1;
 }
 .arena-bg.world-7 ~ .grid-container .grid-cell:nth-child(even)::before {
-  left: 30%;
-  transform: rotate(20deg);
+  left: 28%; transform: rotate(18deg);
 }
 .arena-bg.world-7 ~ .grid-container .grid-cell:not(.occupied):hover {
-  filter: brightness(1.20) saturate(0.6);
+  filter: brightness(1.22) saturate(0.7);
+  box-shadow: inset 0 0 14px rgba(180,230,255,0.30);
 }
 
 /* ═══════════════════════════════════════════════════
    WORLD 8 — Spooky Mansion
-   Dark wooden floorboards with candlelight flicker
+   Dark wood floorboards with candlelight amber flicker
 ═══════════════════════════════════════════════════ */
 .arena-bg.world-8 ~ .grid-container .grid-row:nth-child(odd) {
-  background: linear-gradient(180deg, #2a1a0a 0%, #1a0e05 100%);
+  background: linear-gradient(180deg, #2e1c0a 0%, #1c0e05 100%);
 }
 .arena-bg.world-8 ~ .grid-container .grid-row:nth-child(even) {
-  background: linear-gradient(180deg, #1e1208 0%, #120b04 100%);
+  background: linear-gradient(180deg, #201408 0%, #140a04 100%);
 }
-
 .arena-bg.world-8 ~ .grid-container .grid-cell {
-  border-right: 2px solid rgba(0,0,0,0.55);
-  border-bottom: 1px solid rgba(80,40,10,0.30);
-  border-top: 1px solid rgba(120,70,20,0.20);
+  border-right: 2px solid rgba(0,0,0,0.60);
+  border-bottom: 1px solid rgba(80,40,10,0.28);
+  border-top: 1px solid rgba(120,70,20,0.18);
   border-left: none;
   background:
     repeating-linear-gradient(
       180deg,
-      rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px,
+      rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px,
       transparent 1px, transparent 5px
     ),
-    linear-gradient(180deg, rgba(100,50,10,0.10) 0%, rgba(40,15,0,0.20) 100%);
+    linear-gradient(180deg, rgba(100,50,10,0.10) 0%, rgba(40,15,0,0.18) 100%);
 }
-/* Wood grain highlight */
+/* Wood grain line */
 .arena-bg.world-8 ~ .grid-container .grid-cell::before {
   content: '';
   position: absolute;
-  top: 25%; left: 5%; right: 5%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(180,100,30,0.30), transparent);
+  top: 30%; left: 5%; right: 5%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(180,100,30,0.28), transparent);
   pointer-events: none; z-index: 1;
 }
-/* Candlelight amber glow flicker */
+/* Candlelight flicker */
 .arena-bg.world-8 ~ .grid-container .grid-cell::after {
   content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 50% 100%, rgba(255,140,20,0.08) 0%, transparent 70%);
-  animation: candleFlicker 3s ease-in-out infinite;
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 100%, rgba(255,140,20,0.10) 0%, transparent 70%);
+  animation: candleFlicker 3.2s ease-in-out infinite;
   pointer-events: none; z-index: 1;
 }
 @keyframes candleFlicker {
-  0%,100% { opacity: 0.5; }
-  25%      { opacity: 1.0; }
-  50%      { opacity: 0.3; }
-  75%      { opacity: 0.9; }
+  0%,100% { opacity: 0.45; }
+  22%      { opacity: 1.00; }
+  48%      { opacity: 0.25; }
+  70%      { opacity: 0.85; }
 }
-.arena-bg.world-8 ~ .grid-container .grid-cell:nth-child(even)::after {
-  animation-delay: 1.2s;
-}
-.arena-bg.world-8 ~ .grid-container .grid-cell:nth-child(3n)::after {
-  animation-delay: 0.7s;
-}
+.arena-bg.world-8 ~ .grid-container .grid-cell:nth-child(even)::after { animation-delay: 1.3s; }
+.arena-bg.world-8 ~ .grid-container .grid-cell:nth-child(3n)::after   { animation-delay: 0.7s; }
 .arena-bg.world-8 ~ .grid-container .grid-cell:not(.occupied):hover {
   filter: brightness(1.6) sepia(0.4);
+  box-shadow: inset 0 0 14px rgba(255,140,20,0.25);
 }
 
 /* ═══════════════════════════════════════════════════
    WORLD 9 — Crystal Caverns
-   Gem-encrusted cave floor, deep blue with
-   sparkling facets and prismatic edge reflections
+   Deep blue gem floor with random sparkling facets
 ═══════════════════════════════════════════════════ */
 .arena-bg.world-9 ~ .grid-container .grid-row:nth-child(odd) {
   background: linear-gradient(180deg, #0a2040 0%, #051428 100%);
@@ -669,118 +627,105 @@
 .arena-bg.world-9 ~ .grid-container .grid-row:nth-child(even) {
   background: linear-gradient(180deg, #051428 0%, #030c1c 100%);
 }
-
 .arena-bg.world-9 ~ .grid-container .grid-cell {
-  border: 1px solid rgba(140,200,255,0.22);
+  border: 1px solid rgba(140,200,255,0.20);
+  box-shadow: inset 0 0 8px rgba(80,160,255,0.07);
   background:
     repeating-linear-gradient(
-      60deg,
-      transparent, transparent 7px,
-      rgba(120,190,255,0.05) 7px, rgba(120,190,255,0.05) 8px
+      60deg,  transparent, transparent 7px, rgba(120,190,255,0.05) 7px, rgba(120,190,255,0.05) 8px
     ),
     repeating-linear-gradient(
-      -60deg,
-      transparent, transparent 7px,
-      rgba(180,230,255,0.04) 7px, rgba(180,230,255,0.04) 8px
+      -60deg, transparent, transparent 7px, rgba(180,230,255,0.04) 7px, rgba(180,230,255,0.04) 8px
     );
-  box-shadow: inset 0 0 8px rgba(80,160,255,0.08);
 }
-/* Crystal facet shimmer — top edge */
+/* Crystal facet edge */
 .arena-bg.world-9 ~ .grid-container .grid-cell::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
+  top: 0; left: 0; right: 0; height: 2px;
   background: linear-gradient(90deg,
-    transparent 0%,
-    rgba(200,240,255,0.70) 30%,
+    transparent 0%, rgba(200,240,255,0.70) 35%,
     rgba(255,255,255,0.90) 50%,
-    rgba(200,240,255,0.70) 70%,
-    transparent 100%
+    rgba(200,240,255,0.70) 65%, transparent 100%
   );
   pointer-events: none; z-index: 1;
 }
-/* Spark twinkle — random per cell */
+/* Twinkle spark — staggered per column */
 .arena-bg.world-9 ~ .grid-container .grid-cell::after {
   content: '';
   position: absolute;
-  width: 4px; height: 4px;
-  border-radius: 50%;
+  width: 4px; height: 4px; border-radius: 50%;
   background: white;
   box-shadow: 0 0 6px 2px rgba(180,230,255,0.90);
   top: 20%; left: 25%;
-  animation: crystalSpark 2.5s ease-in-out infinite;
+  animation: crystalSpark 2.8s ease-in-out infinite;
   pointer-events: none; z-index: 2;
 }
 @keyframes crystalSpark {
-  0%,80%,100% { opacity: 0; transform: scale(0); }
-  85%         { opacity: 1; transform: scale(1.2); }
-  92%         { opacity: 0.6; transform: scale(0.8); }
+  0%,78%,100% { opacity: 0; transform: scale(0); }
+  83%         { opacity: 1; transform: scale(1.3); }
+  93%         { opacity: 0.5; transform: scale(0.7); }
 }
-.arena-bg.world-9 ~ .grid-container .grid-cell:nth-child(2)::after  { animation-delay: 0.5s; top: 60%; left: 70%; }
-.arena-bg.world-9 ~ .grid-container .grid-cell:nth-child(3)::after  { animation-delay: 1.0s; top: 30%; left: 80%; }
-.arena-bg.world-9 ~ .grid-container .grid-cell:nth-child(4)::after  { animation-delay: 1.5s; top: 70%; left: 20%; }
-.arena-bg.world-9 ~ .grid-container .grid-cell:nth-child(5)::after  { animation-delay: 2.0s; top: 15%; left: 55%; }
-.arena-bg.world-9 ~ .grid-container .grid-cell:nth-child(6)::after  { animation-delay: 0.3s; top: 80%; left: 40%; }
-.arena-bg.world-9 ~ .grid-container .grid-cell:nth-child(7)::after  { animation-delay: 1.8s; top: 40%; left: 10%; }
-.arena-bg.world-9 ~ .grid-container .grid-cell:nth-child(8)::after  { animation-delay: 0.9s; top: 55%; left: 85%; }
-.arena-bg.world-9 ~ .grid-container .grid-cell:nth-child(9)::after  { animation-delay: 1.3s; top: 25%; left: 60%; }
+.arena-bg.world-9 ~ .grid-container .grid-cell:nth-child(2)::after  { animation-delay: 0.5s; top: 65%; left: 70%; }
+.arena-bg.world-9 ~ .grid-container .grid-cell:nth-child(3)::after  { animation-delay: 1.1s; top: 30%; left: 80%; }
+.arena-bg.world-9 ~ .grid-container .grid-cell:nth-child(4)::after  { animation-delay: 1.7s; top: 72%; left: 18%; }
+.arena-bg.world-9 ~ .grid-container .grid-cell:nth-child(5)::after  { animation-delay: 2.2s; top: 15%; left: 55%; }
+.arena-bg.world-9 ~ .grid-container .grid-cell:nth-child(6)::after  { animation-delay: 0.3s; top: 80%; left: 42%; }
+.arena-bg.world-9 ~ .grid-container .grid-cell:nth-child(7)::after  { animation-delay: 1.9s; top: 42%; left: 10%; }
+.arena-bg.world-9 ~ .grid-container .grid-cell:nth-child(8)::after  { animation-delay: 0.8s; top: 58%; left: 88%; }
+.arena-bg.world-9 ~ .grid-container .grid-cell:nth-child(9)::after  { animation-delay: 1.4s; top: 22%; left: 62%; }
 .arena-bg.world-9 ~ .grid-container .grid-cell:not(.occupied):hover {
   filter: brightness(1.5) saturate(1.8);
+  box-shadow: inset 0 0 16px rgba(150,220,255,0.28);
 }
 
 /* ═══════════════════════════════════════════════════
    WORLD 10 — Sky Castle
-   White marble/cloud floor tiles with gold inlay,
-   soft heavenly glow
+   White marble/cloud tiles, gold inlay + heaven rays
 ═══════════════════════════════════════════════════ */
 .arena-bg.world-10 ~ .grid-container .grid-row:nth-child(odd) {
-  background: linear-gradient(180deg, #e8eeff 0%, #d0d8f8 100%);
+  background: linear-gradient(180deg, #e8eeff 0%, #ccd8f8 100%);
 }
 .arena-bg.world-10 ~ .grid-container .grid-row:nth-child(even) {
-  background: linear-gradient(180deg, #d0d8f8 0%, #b8c4f0 100%);
+  background: linear-gradient(180deg, #ccd8f8 0%, #b0c0ee 100%);
 }
-
 .arena-bg.world-10 ~ .grid-container .grid-cell {
-  border: 1px solid rgba(255,255,255,0.60);
+  border: 1px solid rgba(255,255,255,0.65);
   box-shadow:
-    inset 1px 1px 0 rgba(255,255,255,0.80),
-    inset -1px -1px 0 rgba(160,170,220,0.30);
+    inset 1px 1px 0 rgba(255,255,255,0.85),
+    inset -1px -1px 0 rgba(160,170,220,0.28);
   background:
-    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(255,255,255,0.50) 0%, transparent 60%);
+    radial-gradient(ellipse 130% 80% at 50% 0%, rgba(255,255,255,0.55) 0%, transparent 60%);
 }
-/* Gold inlay border */
+/* Gold inlay inner border */
 .arena-bg.world-10 ~ .grid-container .grid-cell::before {
   content: '';
   position: absolute;
   inset: 2px;
-  border: 1px solid rgba(220,180,80,0.20);
+  border: 1px solid rgba(220,180,60,0.22);
   border-radius: 1px;
   pointer-events: none; z-index: 1;
 }
-/* Heavenly ray — soft diagonal light */
+/* Heavenly diagonal light ray */
 .arena-bg.world-10 ~ .grid-container .grid-cell::after {
   content: '';
   position: absolute;
-  top: -20%; left: -20%;
-  width: 60%; height: 140%;
-  background: linear-gradient(135deg, rgba(255,255,255,0.22) 0%, transparent 100%);
-  pointer-events: none; z-index: 1;
+  top: -20%; left: -20%; width: 55%; height: 140%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.24) 0%, transparent 100%);
   animation: heavenRay 5s ease-in-out infinite;
+  pointer-events: none; z-index: 1;
 }
 @keyframes heavenRay {
-  0%,100% { opacity: 0.4; }
-  50%      { opacity: 0.9; }
+  0%,100% { opacity: 0.35; }
+  50%      { opacity: 0.90; }
 }
-.arena-bg.world-10 ~ .grid-container .grid-cell:nth-child(even)::after {
-  animation-delay: 2.5s;
-}
+.arena-bg.world-10 ~ .grid-container .grid-cell:nth-child(even)::after { animation-delay: 2.5s; }
 .arena-bg.world-10 ~ .grid-container .grid-cell:not(.occupied):hover {
-  filter: brightness(1.15);
-  box-shadow: inset 0 0 16px rgba(220,180,80,0.25),
-              inset 1px 1px 0 rgba(255,255,255,0.80) !important;
+  filter: brightness(1.18);
+  box-shadow:
+    inset 0 0 18px rgba(220,180,60,0.28),
+    inset 1px 1px 0 rgba(255,255,255,0.85);
 }
-
 /* ─── Row separator lines (depth feel) ──────────── */
 .grid-row {
   border-bottom: 1px solid rgba(0,0,0,0.15);
