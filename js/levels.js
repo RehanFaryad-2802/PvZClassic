@@ -280,7 +280,7 @@ const Levels = (() => {
   // ── World Plant Pools (for seed packets) ───────
   // These are the plants that can appear in seed packets for each world
   const WORLD_PLANTS = {
-    1: ["sunflower", "peashooter", "icepea", "bonkchoy", "lilybeam", "sporepuff", "voltlotus", "lavaburst", "glacierbud"],
+    1: ["sunflower", "mushpuff","peashooter", "icepea", "bonkchoy", "lilybeam", "sporepuff", "voltlotus", "lavaburst", "glacierbud"],
     2: ["icepea", "glacierbud", "sporepuff", "lilybeam", "voltlotus"],
     3: ["bonkchoy", "peashooter", "lavaburst", "voltlotus", "sporepuff"],
     4: ["shadowspore", "sporepuff", "lavaburst", "bonkchoy", "glacierbud"],
@@ -319,6 +319,7 @@ const Levels = (() => {
     { worldId: 1, levelIdx: 0,plantId: "lavaburst" },
     { worldId: 1, levelIdx: 0,plantId: "voltlotus" },
     { worldId: 1, levelIdx: 0,plantId: "emberdoze" },
+    { worldId: 1, levelIdx: 0,plantId: "mushpuff" },
   ];
 
   // ── Minigame Unlock Table ──────────────────────
