@@ -44,6 +44,7 @@ const Player = (() => {
       voltlotus: { owned: false, level: 1, seeds: 0 },
       lavaburst: { owned: false, level: 1, seeds: 0 },
       glacierbud: { owned: false, level: 1, seeds: 0, unlockedByLevel: false },
+      glaciespore: { owned: false, level: 1, seeds: 0 },
       acornblast: { owned: false, level: 1, seeds: 0 },
       berryburst: { owned: false, level: 1, seeds: 0 },
       cactusneedle: { owned: false, level: 1, seeds: 0 },

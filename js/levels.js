@@ -280,7 +280,7 @@ const Levels = (() => {
   // ── World Plant Pools (for seed packets) ───────
   // These are the plants that can appear in seed packets for each world
   const WORLD_PLANTS = {
-    1: ["sunflower", "mushpuff","peashooter", "icepea", "bonkchoy", "lilybeam", "sporepuff", "voltlotus", "lavaburst", "glacierbud"],
+    1: ["sunflower", "mushpuff","peashooter", "icepea", "bonkchoy", "lilybeam", "sporepuff", "voltlotus", "lavaburst", "glacierbud", "emberdoze", "glaciespore"],
     2: ["icepea", "glacierbud", "sporepuff", "lilybeam", "voltlotus"],
     3: ["bonkchoy", "peashooter", "lavaburst", "voltlotus", "sporepuff"],
     4: ["shadowspore", "sporepuff", "lavaburst", "bonkchoy", "glacierbud"],
@@ -320,6 +320,7 @@ const Levels = (() => {
     { worldId: 1, levelIdx: 0,plantId: "voltlotus" },
     { worldId: 1, levelIdx: 0,plantId: "emberdoze" },
     { worldId: 1, levelIdx: 0,plantId: "mushpuff" },
+    { worldId: 1, levelIdx: 0,plantId: "glaciespore" },
   ];
 
   // ── Minigame Unlock Table ──────────────────────
@@ -343,7 +344,7 @@ const Levels = (() => {
 
   // ── Starting sun per level ─────────────────────
   function getStartingSun(worldId, levelIdx) {
-    if (worldId === 1 && levelIdx === 0) return 500; // Level 1
+    if (worldId === 1 && levelIdx === 0) return 1000; // Level 1
     if (worldId === 1 && levelIdx === 1) return 250; // Level 2
     return 100 + Math.min(levelIdx * 5, 50); // Rest normal
   }
@@ -655,13 +656,15 @@ const Levels = (() => {
     const unlocked = [];
     for (const mg of MINIGAME_UNLOCKS) {
       if (mg.worldId === worldId && mg.levelIdx === levelIdx) {
-        Player.unlockMinigame(mg.minigameId);
-        unlocked.push(mg.minigameId);
+        const alreadyOwned = Player.hasMinigame && Player.hasMinigame(mg.minigameId);
+        if (!alreadyOwned) {
+          Player.unlockMinigame(mg.minigameId);
+          unlocked.push(mg.minigameId);
+        }
       }
     }
     return unlocked;
   }
-
   function getTempPlants(worldId, levelIdx) {
     return LEVEL_TEMP_PLANTS[`${worldId}-${levelIdx}`] || [];
   }
