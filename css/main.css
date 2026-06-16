@@ -49,7 +49,11 @@ html, body {
 /* img{
   mix-blend-mode: multiply;
 } */
-
+.game-icon{
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
 /* ─── Screen System ──────────────────────────────── */
 .screen {
   position: absolute;
@@ -146,6 +150,9 @@ html, body {
   transition: transform 0.1s;
   width: 100%;
 }
+#btn-back-shop{
+  padding: 0 !important;
+}
 .btn-secondary:active { transform: translateY(2px); }
 .btn-back {
   background: none;
@@ -192,16 +199,16 @@ html, body {
 /* ─── Toast ──────────────────────────────────────── */
 .toast {
   position: fixed;
-  bottom: 80px;
+  bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0,0,0,0.85);
   border: 1px solid var(--purple-light);
   color: var(--white);
-  padding: 12px 28px;
+  padding: 6px 15px;
   border-radius: 30px;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 8px;
   z-index: 999;
   pointer-events: none;
   transition: opacity 0.4s;
@@ -391,6 +398,10 @@ html, body {
   align-items: center;
   justify-content: space-between;
 }
+.shop-header{
+  margin: 0 !important;
+  margin-top: 10px !important;
+}
 .levelselect-header h2,
 .collection-header h2, .minigames-header h2,
 .shop-header h2 {
@@ -405,6 +416,7 @@ html, body {
   display: flex;
   flex-direction: row;
   gap: 24px;
+  margin-top: 15px;
   overflow-x: auto;
   overflow-y: hidden;
   flex: 1;
@@ -951,7 +963,7 @@ html, body {
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 0 20px;
 }
 .shop-grid {
   display: grid;
@@ -1586,24 +1598,23 @@ html, body {
   .worldmap-header h2 { font-size: 12px; }
   .worlds-grid { gap: 8px; }
   .world-card .world-name{ font-size: 12px; }
-  .world-card-name { font-size: 14px; }
   .level-orb::before{top: 5px; left: 5px;}
   .world-lock-overlay{font-size: 15px;}
-  .world-difficulty { font-size: 6px !important; }
+  .world-difficulty { font-size: 6px !important; }  
   .worlds-grid { 
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 8px; 
     padding: 0 8px 8px 8px;
   }
   .hidden{display: none !important;}
-  .world-card { height: 100%; width: 27%; ; border-radius: 10px;}
+  .world-card { height: 100%; width: 22%; ; border-radius: 10px;}
   .world-img-wrap {box-shadow: none !important; }
   .world-card-name { font-size: 13px; padding: 6px; }
   .inv-left{min-width: 169px; width: 169px;}
-  .shop-packet-rarity,
+  /* .shop-packet-rarity,
   .shop-packet-seeds,
-  .shop-packet-desc { display: none !important; }
-  .shop-packets-grid { grid-template-columns: repeat(4, 1fr); }
+  .shop-packet-desc { display: none !important; } */
+  .shop-packets-grid { grid-template-columns: repeat(5, 1fr); }
   .world-lock { font-size: 28px; }
   /* Level select */
   .levelselect-container { padding: 8px; }
@@ -1619,8 +1630,8 @@ html, body {
   .coin-display { font-size: 13px; padding: 4px 10px; }
 
   /* Shop */
-  .shop-header h2 { font-size: 18px; }
-  .shop-tab { font-size: 13px; padding: 6px 10px; }
+  .shop-header h2 { font-size: 18px; margin: 0 !important; }
+  .shop-tab { font-size: 8px; padding: 3px 8px; }
   .packet-card { padding: 10px 8px; }
   .packet-img { width: 56px; height: 56px; }
   .packet-name { font-size: 14px; }
@@ -1767,13 +1778,13 @@ html, body {
   background: rgba(0,0,0,0.55);
   border: 1px solid rgba(251,191,36,0.3);
   border-radius: 20px;
-  padding: 3px 10px 3px 6px;
   box-shadow: 0 0 8px rgba(251,191,36,0.2);
+  padding: 2px 3px;
 }
-.pvz2-currency-icon { font-size: 15px; line-height: 1; }
+.pvz2-currency-icon { line-height: 1; }
 .pvz2-currency-val {
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: 10px;
   color: #fbbf24;
   font-weight: 700;
   min-width: 24px;
@@ -1782,13 +1793,14 @@ html, body {
 /* ── Menu corner icon buttons ───────────────── */
 .menu-corner-btn {
   position: absolute;
-  top: 10px;
-  width: 42px;
-  height: 42px;
-  font-size: 20px;
+  top: 20px;
+  width: 20px;
+  height: 20px;
+  margin: auto 20px;
+  font-size: 16pxpx;
   background: rgba(0,0,0,0.45);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 12px;
+  border: none;
+  border-radius: 2px;
   color: white;
   cursor: pointer;
   display: flex;
@@ -1815,16 +1827,16 @@ html, body {
 .wm-icon-toolbar {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
 }
 .wm-icon-btn {
-  width: 40px;
-  height: 40px;
-  font-size: 18px;
+  width: 20px;
+  height: 20px;
+  font-size: 15px;
   background: rgba(0,0,0,0.5);
   /* yellow border */
-  border: 1px solid rgba(251,191,36,0.3);
-  border-radius: 10px;
+  border: none;
+  border-radius: 2px;
   color: white;
   cursor: pointer;
   display: flex;
@@ -1839,13 +1851,13 @@ html, body {
 .worldmap-header {
   display: flex;
   align-items: center;
-  padding: 8px 12px;
   gap: 8px;
 }
 /* ── Menu center layout ─────────────────────── */
 .menu-center-layout {
   display: flex;
   flex-direction: column;
+  height: 100%;
   align-items: center;
   justify-content: center;
   flex: 1;
@@ -1898,11 +1910,10 @@ html, body {
   margin-left: auto;
 }
 .wm-right-bar .pvz2-currency-pill {
-  padding: 4px 10px 4px 7px;
   min-width: 64px;
 }
 .wm-right-bar .pvz2-currency-val {
-  font-size: 13px;
+  font-size: 10px;
   min-width: 32px;
 }
 /* ── Menu hero image ────────────────────────── */

@@ -89,7 +89,7 @@ const BlockHunt = (() => {
     screen.innerHTML = `
       <div class="bh-container" id="bh-container">
         <div class="bh-header">
-          <button class="btn-back" id="bh-back">↶</button>
+          <button class="btn-back" id="bh-back"><img src="assets/icons/back.png" alt="back" class="game-icon"></button>
           <h2>🎯 Block Hunt</h2>
           <div class="bh-stats">
             <div class="bh-stat"><span class="stat-val" id="bh-score">0</span><span class="stat-lbl">Score</span></div>
@@ -135,7 +135,7 @@ const BlockHunt = (() => {
     picker.className = "bh-result";
     picker.id = "bh-diff-picker";
     picker.innerHTML = `
-    <button class="btn-back" style="align-self:flex-start;margin-bottom:8px" id="bh-pick-back">↶</button>
+    <button class="btn-back" style="align-self:flex-start;margin-bottom:8px" id="bh-pick-back"><img src="assets/icons/back.png" alt="back" class="game-icon"></button>
     <h2 style="font-size:36px">Choose Difficulty</h2>
     ${DIFFICULTIES.map(
       (d, i) => `

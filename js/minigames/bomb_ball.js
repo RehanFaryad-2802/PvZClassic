@@ -98,7 +98,7 @@ const BombBall = (() => {
     screen.innerHTML = `
       <div class="bb-container" id="bb-container">
         <div class="bb-header">
-          <button class="btn-back" id="bb-back">↶</button>
+          <button class="btn-back" id="bb-back"><img src="assets/icons/back.png" alt="back" class="game-icon"></button>
           <h2>💣 Bomb Ball</h2>
           <div class="bh-stats">
             <div class="bh-stat"><span class="stat-val" id="bb-score">0</span><span class="stat-lbl">Score</span></div>
@@ -150,7 +150,7 @@ const BombBall = (() => {
     picker.className = "bh-result";
     picker.id = "bb-diff-picker";
     picker.innerHTML = `
-      <button class="btn-back" style="align-self:flex-start;margin-bottom:8px" id="bb-pick-back">↶</button>
+      <button class="btn-back" style="align-self:flex-start;margin-bottom:8px" id="bb-pick-back"><img src="assets/icons/back.png" alt="back" class="game-icon"></button>
       <h2 style="font-size:32px">💣 Choose Difficulty</h2>
       ${DIFFICULTIES.map(
         (d, i) => `

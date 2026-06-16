@@ -130,9 +130,9 @@
       <div class="menu-bg"></div>
       <div class="menu-container">
         <!-- Top-left: settings icon only -->
-        <button class="menu-corner-btn menu-corner-left" id="btn-settings" title="Settings">⚙️</button>
+        <button class="menu-corner-btn menu-corner-left" id="btn-settings" title="Settings"><img src="assets/icons/setting.png" alt="icon" class="game-icon"></button>
         <!-- Top-right: shop icon only -->
-        <button class="menu-corner-btn menu-corner-right" id="btn-shop" title="Seed Shop"><img src="assets/icons/shop.png" style="width:24px;height:24px;object-fit:contain;"></button>
+        <button class="menu-corner-btn menu-corner-right" id="btn-shop" title="Seed Shop"><img src="assets/icons/shop.png" class="game-icon"></button>
 
         <div class="menu-center-layout">
           <!-- Game name label -->
@@ -166,7 +166,9 @@
       <div class="menu-bg"></div>
       <div class="settings-container">
         <div class="settings-header">
-          <button class="btn-back" id="btn-back-settings">↶</button>
+          <button class="btn-back" id="btn-back-settings">
+            <img src="assets/icons/back.png" alt="back" class="game-icon">
+          </button>
           <h2>⚙️ Settings</h2>
         </div>
         <div class="settings-body">
@@ -224,21 +226,23 @@
         <div class="worldmap-header">
           <!-- Left icon toolbar (PvZ2 style) -->
           <div class="wm-icon-toolbar">
-            <button class="wm-icon-btn" id="btn-back-worldmap" title="Back">↶</button>
-            <button class="wm-icon-btn" id="btn-wm-minigames" title="Minigames"><img src="assets/icons/minigames.png" style="width:26px;height:26px;object-fit:contain;"></button>
-            <button class="wm-icon-btn" id="btn-wm-inventory" title="Inventory"><img src="assets/icons/inventory.png" style="width:26px;height:26px;object-fit:contain;"></button>
+            <button class="wm-icon-btn" id="btn-back-worldmap" title="Back"><img src="assets/icons/back.png" alt="back" class="game-icon"></button>
+            <button class="wm-icon-btn" id="btn-wm-minigames" title="Minigames"><img src="assets/icons/minigames.png" class="game-icon"></button>
+            <button class="wm-icon-btn" id="btn-wm-inventory" title="Inventory"><img src="assets/icons/inventory.png" class="game-icon"></button>
           </div>
           <!-- Right: currencies + shop -->
           <div class="wm-right-bar">
             <div class="pvz2-currency-pill">
-              <span class="pvz2-currency-icon">🪙</span>
+              <span class="pvz2-currency-icon">
+                <img src="assets/icons/gold.png" alt="gold" class="loom-icon-sm">
+              </span>
               <span class="pvz2-currency-val" id="wm-coins">0</span>
             </div>
             <div class="pvz2-currency-pill">
               <img src="assets/shop/loom.png" class="loom-icon-sm" alt="Loom" style="width:15px;height:15px;object-fit:contain;">
               <span class="pvz2-currency-val" id="wm-looms">0</span>
             </div>
-            <button class="wm-icon-btn" id="btn-wm-shop" title="Shop"><img src="assets/icons/shop.png" style="width:26px;height:26px;object-fit:contain;"></button>
+            <button class="wm-icon-btn" id="btn-wm-shop" title="Shop"><img src="assets/icons/shop.png" class="game-icon"></button>
           </div>
         </div>
         <div class="worlds-grid" id="worlds-grid">
@@ -254,10 +258,11 @@
       <div class="levelselect-bg"></div>
       <div class="levelselect-container">
         <div class="levelselect-header">
-          <button class="btn-back" id="btn-back-levelselect">↶</button>
+          <button class="btn-back" id="btn-back-levelselect"><img src="assets/icons/back.png" alt="back" class="game-icon"></button>
           <h2 id="levelselect-world-name">World 1</h2>
           <span class="coin-display">🪙 <span id="ls-coins">0</span></span>
         </div>
+        
         <div class="levels-grid" id="levels-grid">
           <!-- Levels injected by levels.js -->
         </div>
@@ -271,7 +276,7 @@
       <div class="picker-bg"></div>
       <div class="picker-container">
         <div class="picker-header">
-          <button class="btn-back" id="btn-back-picker">↶</button>
+          <button class="btn-back" id="btn-back-picker"><img src="assets/icons/back.png" alt="back" class="game-icon"></button>
           <h2>Choose Your Plants</h2>
           <span class="picker-slots-info"
             >Select up to <span id="picker-max">5</span></span
@@ -385,7 +390,7 @@
       <div class="collection-bg"></div>
       <div class="collection-container">
         <div class="collection-header">
-          <button class="btn-back" id="btn-back-collection">↶</button>
+          <button class="btn-back" id="btn-back-collection"><img src="assets/icons/back.png" alt="back" class="game-icon"></button>
           <h2>Plant Collection</h2>
         </div>
         <div class="collection-grid" id="collection-grid">
@@ -401,7 +406,7 @@
       <div class="minigames-bg"></div>
       <div class="minigames-container">
         <div class="minigames-header">
-          <button class="btn-back" id="btn-back-minigames">↶</button>
+          <button class="btn-back" id="btn-back-minigames"><img src="assets/icons/back.png" alt="back" class="game-icon"></button>
           <h2>Minigames</h2>
           <span class="coin-display">🪙 <span id="mg-coins">0</span></span>
         </div>
@@ -431,14 +436,29 @@
       <div class="shop-bg"></div>
       <div class="shop-container">
         <div class="shop-header">
-          <button class="btn-back" id="btn-back-shop">↶</button>
-          <h2>Seed Shop</h2>
-          <span class="coin-display">🪙 <span id="shop-coins">0</span></span>
-
-          <span class="loom-display"> <img src="assets/shop/loom.png" class="loom-icon-sm" alt="Loom"> <span id="shop-looms">0</span></span>
+          <button class="btn-back" id="btn-back-shop"><img src="assets/icons/back.png" alt="back" class="game-icon"></button>
+          <!-- <div class="wrapper">
+            <span class="coin-display">
+              <img src="assets/icons/gold.png" alt="Gold" class="loom-icon-sm">
+              <span id="shop-coins">0</span></span>
+              
+              <span class="loom-display"> <img src="assets/shop/loom.png" class="loom-icon-sm" alt="Loom"> <span id="shop-looms">0</span></span>
+            </div> -->
+            <div class="wm-right-bar">
+            <div class="pvz2-currency-pill">
+              <span class="pvz2-currency-icon">
+                <img src="assets/icons/gold.png" alt="gold" class="loom-icon-sm">
+              </span>
+              <span class="pvz2-currency-val" id="wm-coins">0</span>
+            </div>
+            <div class="pvz2-currency-pill">
+              <img src="assets/shop/loom.png" class="loom-icon-sm" alt="Loom" style="width:15px;height:15px;object-fit:contain;">
+              <span class="pvz2-currency-val" id="wm-looms">0</span>
+            </div>
+          </div>
         </div>
+
         <div class="shop-grid" id="shop-grid">
-          <!-- Shop items injected -->
         </div>
       </div>
     </div>

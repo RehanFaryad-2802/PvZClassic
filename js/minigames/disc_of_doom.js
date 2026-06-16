@@ -167,7 +167,7 @@ const DiscOfDoom = (() => {
       <div class="dod-container" id="dod-container">
 
         <div class="dod-header">
-          <button class="btn-back" id="dod-back">↶</button>
+          <button class="btn-back" id="dod-back"><img src="assets/icons/back.png" alt="back" class="game-icon"></button>
           <h2>💿 DISC OF DOOM</h2>
           <div class="dod-stats">
             <div class="dod-stat"><span class="stat-val" id="dod-score">0</span><span class="stat-lbl">SCORE</span></div>
@@ -772,7 +772,7 @@ const DiscOfDoom = (() => {
     const picker = document.createElement("div");
     picker.className = "bh-result";
     picker.innerHTML = `
-      <button class="btn-back" style="align-self:flex-start;margin-bottom:8px" id="dod-pick-back">↶</button>
+      <button class="btn-back" style="align-self:flex-start;margin-bottom:8px" id="dod-pick-back"><img src="assets/icons/back.png" alt="back" class="game-icon"></button>
       <h2 style="font-size:28px">💿 Choose Difficulty</h2>
       ${DIFFICULTIES.map((d,i) => `
         <button class="btn-menu" data-diff="${i}">

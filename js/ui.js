@@ -642,7 +642,7 @@ const UI = (() => {
     if (!document.getElementById("inv-layout")) {
       screen.innerHTML = `
         <div class="inv-header">
-          <button id="btn-back-collection" class="btn-back">↶</button>
+          <button id="btn-back-collection" class="btn-back"><img src="assets/icons/back.png" alt="back" class="game-icon"></button>
           <div class="inv-title">📦 Inventory</div>
           <div class="inv-currency">
             <span>🪙 <span id="inv-coins">${Player.getCoins()}</span></span>
@@ -1841,10 +1841,10 @@ const UI = (() => {
       tabBar.id = "shop-tab-bar";
       tabBar.className = "shop-tab-bar";
       tabBar.innerHTML = `
-        <button class="shop-tab active" data-tab="seeds">🌱 Seeds</button>
-        <button class="shop-tab" data-tab="packets">📦 Packets</button>
-        <button class="shop-tab" data-tab="plants">🛒 Plants</button>
-        <button class="shop-tab" data-tab="event">🎉 Event</button>
+        <button class="shop-tab active" data-tab="seeds">Seeds</button>
+        <button class="shop-tab" data-tab="packets">Packets</button>
+        <button class="shop-tab" data-tab="plants">Plants</button>
+        <button class="shop-tab" data-tab="event">Event</button>
       `;
       container.parentNode.insertBefore(tabBar, container);
 
@@ -1917,13 +1917,10 @@ const UI = (() => {
         "shop-seed-card" + (offer.purchased ? " shop-purchased" : "");
 
       card.innerHTML = `
-        <div class="shop-seed-badge" style="background:${badgeColor}">
-          ${offer.seeds >= 15 ? "⭐ BEST" : offer.seeds >= 10 ? "💜 GREAT" : "🌱 DEAL"}
-        </div>
         <img src="${def.image}" alt="${def.name}" class="shop-seed-img"/>
         <div class="shop-seed-name">${def.name}</div>
         <div class="shop-seed-level">Lv.${level}</div>
-        <div class="shop-seed-amount">+${offer.seeds} 🌱 Seeds</div>
+        <div class="shop-seed-amount">+${offer.seeds} Seeds</div>
         <div class="shop-seed-timer ${isExpiringSoon ? "expiring-soon" : ""}"
              data-refresh="${data.nextRefresh}">
           🔄 ${formatTimeLeft(timeLeft)}
@@ -1985,7 +1982,7 @@ const UI = (() => {
       const qty = owned ? owned.quantity : 0;
 
       const card = document.createElement("div");
-      card.className = "shop-packet-card";
+      card.className = "shop-packet-card flex";
       card.innerHTML = `
         <div class="shop-packet-rarity">${def.rarity.toUpperCase()}</div>
         <div class="shop-packet-emoji">${getPacketEmoji(def.id)}</div>
@@ -1998,7 +1995,7 @@ const UI = (() => {
         <button class="shop-buy-btn shop-loom-btn">
         <img src="assets/shop/loom.png" class="loom-icon-sm"/> ${def.loomCost}
         </button>
-        ${qty > 0 ? `<div class="shop-packet-owned">In inventory: ×${qty}</div>` : ""}
+        ${qty > 0 ? `<div class="shop-packet-owned">×${qty}</div>` : ""}
       `;
 
       card.querySelector(".shop-loom-btn").addEventListener("click", () => {

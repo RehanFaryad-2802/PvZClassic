@@ -85,7 +85,7 @@
   .btn-primary  { font-size: 18px; padding: 10px 24px; }
   .btn-secondary{ font-size: 16px; padding: 9px 20px; }
   .btn-menu     { font-size: 20px; padding: 12px 18px; }
-  .btn-back     { font-size: 12px; padding: 6px 12px; }
+  /* .btn-back     { font-size: 12px; padding: 6px 12px; } */
   .coin-display { font-size: 13px; padding: 4px 10px; }
 
   /* Logo */
@@ -424,8 +424,7 @@
   .inv-currency { font-size: 12px; gap: 8px; }
 
   /* Sidebar gets narrower */
-  .inv-left { width: 160px; min-width: 160px; padding: 8px; }
-  .inv-right { }
+  .inv-left { width: 160px; min-width: 160px; padding: 6px 6px 12px 6px; }
   .inv-layout { height: calc(100% - 46px); }
 
   .inv-grid {
@@ -470,7 +469,7 @@
 @media (max-height: 370px) and (orientation: landscape) {
   .inv-header { padding: 5px 10px; }
   .inv-left { width: 140px; min-width: 140px; }
-  .inv-grid { grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); gap: 4px; padding: 6px; }
+  .inv-grid { grid-template-columns: repeat(6, 1fr); gap: 4px; padding: 6px; }
 }
 
 
@@ -515,7 +514,7 @@
    12. SHOP
 ───────────────────────────────────────────────────── */
 @media (max-width: 900px) and (orientation: landscape) {
-  .shop-container { padding: 8px 12px; gap: 10px; }
+  .shop-container { padding: 8px 12px; }
   .shop-header h2 { font-size: 20px; }
 
   .shop-tab-bar { padding: 5px 10px; gap: 3px; }
@@ -527,10 +526,8 @@
   }
   .shop-seed-card  { padding: 10px 8px; border-radius: 10px; }
   .shop-seed-img   { width: 54px; height: 54px; margin: 6px 0 3px; }
-  .shop-seed-name  { font-size: 11px; }
-  .shop-seed-level { font-size: 9px; }
-  .shop-seed-amount{ font-size: 12px; }
-  .shop-buy-btn    { font-size: 11px; padding: 6px; }
+  .shop-seed-name , .shop-seed-level, .shop-seed-amount, .shop-buy-btn{ font-size: 8px; }
+  .shop-buy-btn    { padding: 6px; }
   .shop-refresh-timer { font-size: 11px; padding: 7px; }
   .shop-loom-balance  { font-size: 14px; padding: 9px 12px; margin-bottom: 10px; }
 
@@ -538,14 +535,14 @@
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 12px;
   }
-  .shop-packet-card { padding: 12px 8px; border-radius: 12px; }
+  .shop-packet-card { padding: 6px 6px 20px 6px; border-radius: 12px; }
   .shop-packet-emoji{ font-size: 32px; }
   .shop-packet-name { font-size: 12px; }
   .shop-packet-desc { font-size: 9px; }
 }
 
 @media (max-height: 370px) and (orientation: landscape) {
-  .shop-container { padding: 5px 10px; gap: 6px; }
+  .shop-container { padding: 5px 10px; }
   .shop-seeds-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 7px; }
   .shop-seed-img   { width: 42px; height: 42px; margin: 4px 0 2px; }
   .shop-loom-balance { font-size: 12px; padding: 6px; margin-bottom: 6px; }
