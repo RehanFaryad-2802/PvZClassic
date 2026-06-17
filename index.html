@@ -82,6 +82,7 @@
     </style>
     <link rel="stylesheet" href="css/main.css" />
     <link rel="stylesheet" href="css/game.css" />
+    <link rel="stylesheet" href="css/battle_layout.css" />
     <link rel="stylesheet" href="css/plantsanimation/emberdoze.css">
     <link rel="stylesheet" href="css/minigames.css" />
   </head>
@@ -296,21 +297,16 @@
        SCREEN: BATTLE
   ══════════════════════════════════════════ -->
     <div id="screen-battle" class="screen">
-      <!-- HUD -->
+
+      <!-- ── Slim Top HUD ── -->
       <div class="battle-hud">
         <div class="hud-left">
           <div class="sun-display">☀️ <span id="hud-sun">50</span></div>
-          <div class="hud-level-info">
-            <span id="hud-world">W1</span>-<span id="hud-level">L1</span>
-          </div>
+          <div class="hud-level-info"><span id="hud-world">W1</span>-<span id="hud-level">L1</span></div>
         </div>
         <div class="hud-center">
-          <div class="wave-display">
-            Wave <span id="hud-wave">1</span>/<span id="hud-wave-total">3</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" id="wave-progress"></div>
-          </div>
+          <div class="wave-display">Wave <span id="hud-wave">1</span>/<span id="hud-wave-total">3</span></div>
+          <div class="progress-bar"><div class="progress-fill" id="wave-progress"></div></div>
         </div>
         <div class="hud-right">
           <span class="coin-display">🪙 <span id="hud-coins">0</span></span>
@@ -318,24 +314,28 @@
         </div>
       </div>
 
-      <!-- Plant tray -->
-      <div class="plant-tray" id="plant-tray">
-        <!-- Plant cards injected by ui.js -->
-      </div>
+      <!-- ── Main battle body: tray left + arena right ── -->
+      <div class="battle-body">
 
-      <!-- Game canvas area -->
-      <div class="battle-arena">
-        <div class="arena-bg" id="arena-bg"></div>
-        <div class="grid-container" id="grid-container">
-          <!-- 5 rows × 9 cols injected by grid.js -->
+        <!-- Vertical plant tray (left column) -->
+        <div class="plant-tray" id="plant-tray">
+          <!-- Plant cards injected by ui.js -->
         </div>
-        <div class="demons-layer" id="demons-layer"></div>
-        <div class="projectiles-layer" id="projectiles-layer"></div>
-        <div class="effects-layer" id="effects-layer"></div>
-      </div>
 
-      <!-- Lawnmowers (last defense) -->
-      <div class="lawnmowers-layer" id="lawnmowers-layer"></div>
+        <!-- Arena + lawnmowers wrapper -->
+        <div class="battle-arena-wrap">
+          <div class="battle-arena">
+            <div class="arena-bg" id="arena-bg"></div>
+            <div class="grid-container" id="grid-container"></div>
+            <div class="demons-layer" id="demons-layer"></div>
+            <div class="projectiles-layer" id="projectiles-layer"></div>
+            <div class="effects-layer" id="effects-layer"></div>
+          </div>
+          <!-- Lawnmowers overlay on left of arena -->
+          <div class="lawnmowers-layer" id="lawnmowers-layer"></div>
+        </div>
+
+      </div>
 
       <!-- Demon Preview overlay (shown before battle) -->
       <div id="demon-preview-overlay" class="overlay hidden">
@@ -526,6 +526,7 @@
     <script src="js/demons.js"></script>
     <script src="js/plant_registry.js"></script>
     <script src="plants/sunflower.js"></script>
+    <script src="plants/cosmbloom.js"></script>
     <script src="plants/peashooter.js"></script>
     <script src="plants/icepea.js"></script>
     <script src="plants/bonkchoy.js"></script>
