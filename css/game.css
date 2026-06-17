@@ -22,61 +22,66 @@
 
 /* ─── Battle HUD ─────────────────────────────────── */
 .battle-hud {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 56px;
-  background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 100%);
-  border-bottom: 1px solid rgba(168,85,247,0.3);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 12px;
+  height: 30px;
+  min-height: 30px;
+  max-height: 30px;
+  padding: 0 8px;
+  background: rgba(0,0,0,0.80);
+  border-bottom: 1px solid rgba(168,85,247,0.25);
+  flex-shrink: 0;
+  gap: 6px;
   z-index: 30;
-  gap: 8px;
+  box-sizing: border-box;
+  /* no position:absolute — it's a flex row child now */
 }
-.hud-left  { display: flex; align-items: center; gap: 10px; }
-.hud-right { display: flex; align-items: center; gap: 8px; }
+.hud-left  { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.hud-right { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
 .hud-center {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  justify-content: center;
+  gap: 1px;
   flex: 1;
+  min-width: 0;
 }
 .sun-display {
   background: rgba(251,191,36,0.15);
-  border: 1px solid var(--gold);
-  border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 16px;
+  border: 1px solid rgba(251,191,36,0.5);
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-size: 12px;
   font-weight: 800;
   color: var(--gold);
-  min-width: 72px;
-  text-align: center;
+  white-space: nowrap;
 }
 .hud-level-info {
-  font-family: var(--font-display);
-  font-size: 14px;
-  color: var(--purple-light);
+  font-size: 9px;
+  color: rgba(168,85,247,0.7);
   letter-spacing: 1px;
 }
 .wave-display {
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: 10px;
   letter-spacing: 2px;
   color: var(--white);
+  line-height: 1;
 }
 .progress-bar {
-  width: 120px;
-  height: 5px;
+  width: 100%;
+  max-width: 110px;
+  height: 3px;
   background: rgba(255,255,255,0.1);
-  border-radius: 3px;
+  border-radius: 2px;
   overflow: hidden;
 }
 .progress-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--orange), var(--red));
-  border-radius: 3px;
+  border-radius: 2px;
   width: 0%;
   transition: width 0.5s ease;
 }
@@ -84,68 +89,81 @@
   background: rgba(255,255,255,0.1);
   border: 1px solid rgba(255,255,255,0.2);
   color: var(--white);
-  font-size: 18px;
-  border-radius: 8px;
-  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  padding: 2px 7px;
   cursor: pointer;
   line-height: 1;
+  flex-shrink: 0;
+  height: 22px;
 }
 
-/* ─── Plant Tray ─────────────────────────────────── */
+/* ─── Plant Tray — vertical left strip ──────────── */
 .plant-tray {
-  position: absolute;
-  top: 56px; left: 0; right: 0;
-  height: 80px;
-  background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 100%);
-  border-bottom: 1px solid rgba(34,197,94,0.2);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  overflow-x: auto;
-  z-index: 25;
-}
-.tray-card {
-  flex-shrink: 0;
-  width: 64px;
-  height: 68px;
-  background: linear-gradient(135deg, #1a0040, #0d0020);
-  border: 2px solid var(--purple);
-  border-radius: 10px;
+  width: 60px;
+  min-width: 60px;
+  max-width: 60px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  gap: 3px;
+  padding: 3px 2px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: rgba(0,0,0,0.7);
+  border-right: 1px solid rgba(34,197,94,0.15);
+  flex-shrink: 0;
+  z-index: 25;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+}
+.plant-tray::-webkit-scrollbar { display: none; }
+
+.tray-card {
+  flex-shrink: 0;
+  width: 54px;
+  height: 54px;
+  background: linear-gradient(135deg, #1a0040, #0d0020);
+  border: 1.5px solid var(--purple);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 3px;
   cursor: pointer;
   transition: all 0.15s;
   position: relative;
   overflow: hidden;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
 }
 .tray-card img {
-  width: 44px;
-  height: 44px;
+  width: 34px;
+  height: 34px;
   object-fit: contain;
   pointer-events: none;
+  display: block;
 }
 .tray-card .tray-cost {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 800;
   position: absolute;
   bottom: 0;
-  background: black;
+  background: rgba(0,0,0,0.85);
   width: 100%;
   text-align: center;
   color: var(--gold);
-  line-height: 1;
+  line-height: 1.3;
 }
 .tray-card.selected {
   border-color: var(--green);
-  box-shadow: 0 0 12px rgba(34,197,94,0.6);
-  transform: scale(1.05);
+  box-shadow: 0 0 8px rgba(34,197,94,0.6);
+  transform: scale(1.04);
 }
-.tray-card.cooldown {
-  cursor: not-allowed;
-}
+.tray-card.cooldown { cursor: not-allowed; }
 .tray-card .cooldown-overlay {
   position: absolute;
   inset: 0;
@@ -154,16 +172,17 @@
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 16px;
+  font-size: 13px;
   color: var(--white);
-  border-radius: 8px;
+  border-radius: 7px;
 }
 .tray-card.no-sun { opacity: 0.5; cursor: not-allowed; }
 
 /* ─── Battle Arena ───────────────────────────────── */
 .battle-arena {
   position: absolute;
-  top: 136px; left: 0; right: 0; bottom: 0;
+  height: 90%;
+  inset: 0;
   overflow: hidden;
 }
 .arena-bg {
@@ -175,27 +194,8 @@
 /* ─── Grid Layout ────────────────────────────────── */
 .grid-container {
   position: absolute;
-  left: 72px;
-  top: 0; bottom: 0;
-  right: 50px;
-  display: grid;
-  grid-template-rows: repeat(5, 1fr);
-  z-index: 5;
-}
-.grid-row {
-  display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  position: relative;
-  background: transparent;
-}
-/* ═══════════════════════════════════════════════════
-   GRID LAYOUT
-═══════════════════════════════════════════════════ */
-.grid-container {
-  position: absolute;
-  left: 72px;
-  top: 0; bottom: 0;
-  right: 50px;
+  left: 28px;   /* lawnmower width */
+  top: 0; bottom: 0; right: 0;
   display: grid;
   grid-template-rows: repeat(5, 1fr);
   z-index: 5;
@@ -1085,12 +1085,10 @@
 
 /* ─── Mobile responsive ──────────────────────────── */
 @media (max-width: 480px) {
-  .grid-container { left: 44px; }
-  .lawnmowers-layer { width: 44px; }
-  .lawnmower { font-size: 16px; }
-  .tray-card { width: 0; height: 58px; }
-  .tray-card img { width: 36px; height: 36px; }
-  .wave-banner { font-size: 32px; }
+  .grid-container { left: 24px; }
+  .lawnmowers-layer { width: 24px; }
+  .lawnmower { font-size: 14px; }
+  .wave-banner { font-size: 28px; }
 }
 /* Extra black bg removal for video plants */
 .grid-cell video.plant-entity {

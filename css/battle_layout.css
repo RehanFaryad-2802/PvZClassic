@@ -1,230 +1,28 @@
 /* ══════════════════════════════════════
-   battle_layout.css
-   2-column battle layout for landscape mobile
-   Viewport: ~752×351px
+   battle_layout.css  — PvZClassic
+   Landscape mobile battle screen shell
+   752×351px target viewport
 ══════════════════════════════════════ */
 
-/* ── Screen fills viewport ── */
+/* Screen: full viewport, vertical flex */
 #screen-battle {
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  position: relative;
+  background: #000;
 }
 
-/* ══ SLIM HUD — target ~28px tall ══ */
-.battle-hud {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 28px;
-  min-height: 28px;
-  max-height: 28px;
-  padding: 0 6px;
-  background: rgba(0, 0, 0, 0.75);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  flex-shrink: 0;
-  gap: 4px;
-  z-index: 10;
-  box-sizing: border-box;
-}
-
-.hud-left,
-.hud-right {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  flex-shrink: 0;
-}
-
-.hud-center {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  min-width: 0;
-}
-
-/* Sun display — small pill */
-.sun-display {
-  font-size: 11px;
-  font-weight: 700;
-  color: #fde68a;
-  white-space: nowrap;
-  background: rgba(251, 191, 36, 0.15);
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  border-radius: 10px;
-  padding: 1px 6px;
-  line-height: 1.4;
-}
-
-.hud-level-info {
-  font-size: 9px;
-  color: rgba(255, 255, 255, 0.4);
-  white-space: nowrap;
-}
-
-/* Wave label */
-.wave-display {
-  font-size: 10px;
-  font-weight: 700;
-  color: #fff;
-  font-family: var(--font-display, sans-serif);
-  letter-spacing: 1px;
-  white-space: nowrap;
-  line-height: 1;
-}
-
-/* Progress bar — thin */
-.progress-bar {
-  width: 100%;
-  max-width: 120px;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #22c55e, #86efac);
-  border-radius: 2px;
-  transition: width 0.3s ease;
-}
-
-/* Coin display */
-.coin-display {
-  font-size: 11px;
-  font-weight: 700;
-  color: #fbbf24;
-  white-space: nowrap;
-}
-
-/* Pause button — tiny square */
-.btn-pause {
-  width: 22px;
-  height: 22px;
-  font-size: 11px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 5px;
-  color: #fff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  flex-shrink: 0;
-  line-height: 1;
-}
-
-/* ══ BATTLE BODY: tray | arena ══ */
+/* Battle body: tray | arena-wrap side by side */
 .battle-body {
   display: flex;
   flex: 1;
-  min-height: 0;     /* critical — let flex children shrink */
+  min-height: 0;
   overflow: hidden;
 }
 
-/* ══ VERTICAL PLANT TRAY (left strip) ══ */
-.plant-tray {
-  width: 58px;
-  min-width: 58px;
-  max-width: 58px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 3px 2px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  background: rgba(0, 0, 0, 0.6);
-  border-right: 1px solid rgba(255, 255, 255, 0.07);
-  flex-shrink: 0;
-  z-index: 5;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  box-sizing: border-box;
-}
-.plant-tray::-webkit-scrollbar { display: none; }
-
-/* Tray card — compact vertical */
-.tray-card {
-  width: 52px;
-  min-height: 52px;
-  max-height: 56px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 3px 2px 2px;
-  border-radius: 7px;
-  border: 1.5px solid rgba(168, 85, 247, 0.5);
-  background: rgba(25, 8, 55, 0.8);
-  cursor: pointer;
-  position: relative;
-  flex-shrink: 0;
-  transition: transform 0.1s, border-color 0.15s, box-shadow 0.15s;
-  box-sizing: border-box;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-.tray-card:active {
-  transform: scale(0.93);
-}
-
-/* Plant image inside card */
-.tray-card img {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-  display: block;
-}
-
-/* Cost label */
-.tray-card .tray-cost {
-  font-size: 9px;
-  font-weight: 700;
-  color: #fde68a;
-  margin-top: 1px;
-  display: flex;
-  align-items: center;
-  gap: 1px;
-  line-height: 1;
-}
-
-/* Cooldown fill overlay */
-.tray-card .tray-cooldown-fill {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(0, 0, 0, 0.6);
-  border-radius: 0 0 5px 5px;
-  pointer-events: none;
-  transition: height 0.1s linear;
-}
-
-/* Not-enough-sun dimming */
-.tray-card.cant-afford {
-  opacity: 0.5;
-  border-color: rgba(168, 85, 247, 0.2);
-}
-
-/* Selected state */
-.tray-card.selected {
-  border-color: rgba(255, 220, 80, 0.8) !important;
-  box-shadow: 0 0 8px rgba(255, 200, 0, 0.4);
-  transform: scale(1.04);
-  background: rgba(255, 220, 80, 0.1);
-}
-
-/* ══ ARENA WRAP — fills all remaining space ══ */
+/* Arena wrap fills all remaining width */
 .battle-arena-wrap {
   flex: 1;
   position: relative;
@@ -233,60 +31,23 @@
   overflow: hidden;
 }
 
-/* ══ BATTLE ARENA — absolute fill ══ */
-.battle-arena {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
-
-/* Arena bg stretches full */
-.arena-bg {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-}
-
-/* Grid container fills arena */
-.grid-container {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Grid rows share height equally */
-.grid-row {
-  flex: 1;
-  display: flex;
-  min-height: 0;
-}
-
-/* Grid cells fill their row */
-.grid-cell {
-  flex: 1;
-  position: relative;
-  min-width: 0;
-}
-
-/* Layers sit on top of grid */
-.demons-layer,
-.projectiles-layer,
-.effects-layer {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 3;
-}
-
-/* Lawnmowers overlay on left of arena */
+/* Lawnmowers — left strip inside arena-wrap */
 .lawnmowers-layer {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 0; left: 0;
   width: 28px;
-  height: 100%;
+  height: 90%;
   z-index: 8;
   pointer-events: none;
 }
+
+/* Shovel btn inside tray */
+.shovel-btn {
+  width: 54px;
+  height: 44px;
+  border-radius: 8px;
+  font-size: 18px;
+  gap: 0;
+  flex-shrink: 0;
+}
+.shovel-btn span { font-size: 8px; }

@@ -1625,7 +1625,6 @@ html, body {
   .level-num { font-size: 16px; }
   .tray-card , .shovel-btn{width: auto !important; height: auto !important; border-radius: 5px !important;}
   .plant-tray{ height: auto !important; }
-  .battle-arena, .lawnmowers-layer { top: 118px !important; margin-bottom: 20px;}
   /* Coin display */
   .coin-display { font-size: 13px; padding: 4px 10px; }
 
