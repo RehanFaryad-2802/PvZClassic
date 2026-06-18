@@ -1,0 +1,286 @@
+/* ══════════════════════════════════════════
+   css/plant_picker.css
+   PvZClassic — Combined Plant Picker Modal
+   Bottom-sheet style, mobile-first
+══════════════════════════════════════════ */
+
+/* Backdrop */
+.pp-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  backdrop-filter: blur(2px);
+}
+.pp-overlay.pp-visible {
+  opacity: 1;
+}
+
+/* Sheet */
+.pp-sheet {
+  width: 100%;
+  max-width: 800px;
+  max-height: 88vh;
+  background: linear-gradient(180deg, #0d0020 0%, #050010 100%);
+  border-radius: 18px 18px 0 0;
+  border-top: 1px solid rgba(168, 85, 247, 0.35);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.34, 1.1, 0.64, 1);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.pp-overlay.pp-visible .pp-sheet {
+  transform: translateY(0);
+}
+
+/* Handle */
+.pp-handle {
+  width: 40px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  margin: 10px auto 0;
+  flex-shrink: 0;
+}
+
+/* Header */
+.pp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px 4px;
+  flex-shrink: 0;
+}
+.pp-title {
+  font-family: var(--font-display, sans-serif);
+  font-size: 14px;
+  color: #fff;
+  letter-spacing: 1px;
+}
+.pp-close-btn {
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Section label */
+.pp-section-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  padding: 4px 16px 2px;
+  flex-shrink: 0;
+}
+
+/* Demon preview row */
+.pp-demon-section {
+  flex-shrink: 0;
+}
+.pp-demon-row {
+  display: flex;
+  gap: 6px;
+  padding: 4px 16px 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.pp-demon-row::-webkit-scrollbar { display: none; }
+
+.pp-demon-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  min-width: 48px;
+}
+.pp-demon-chip img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 4px rgba(255, 60, 0, 0.5));
+}
+.pp-demon-chip span {
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.55);
+  text-align: center;
+  white-space: nowrap;
+}
+.pp-no-demons {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.3);
+  padding: 8px 0;
+}
+
+/* Divider */
+.pp-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.07);
+  margin: 2px 0;
+  flex-shrink: 0;
+}
+
+/* Selected strip */
+.pp-selected-strip {
+  display: flex;
+  gap: 4px;
+  padding: 4px 16px 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+.pp-selected-strip::-webkit-scrollbar { display: none; }
+
+.pp-sel-slot {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-sizing: border-box;
+}
+.pp-sel-filled {
+  border: 1.5px solid rgba(34, 197, 94, 0.7);
+  background: rgba(34, 197, 94, 0.1);
+  cursor: pointer;
+}
+.pp-sel-filled img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+.pp-sel-empty {
+  border: 1.5px dashed rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.03);
+}
+.pp-sel-locked {
+  border: 1.5px dashed rgba(251, 191, 36, 0.35);
+  background: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  font-size: 14px;
+  gap: 1px;
+}
+.pp-sel-locked small {
+  font-size: 7px;
+  color: var(--gold, #fbbf24);
+  font-weight: 700;
+}
+.pp-sel-locked:hover {
+  border-color: rgba(251, 191, 36, 0.7);
+  background: rgba(251, 191, 36, 0.08);
+}
+
+/* Plant grid */
+.pp-plant-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
+  gap: 5px;
+  padding: 4px 12px 6px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(168, 85, 247, 0.3) transparent;
+}
+
+.pp-plant-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 5px 3px 4px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(168, 85, 247, 0.3);
+  background: rgba(20, 5, 45, 0.7);
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.12s, background 0.12s;
+  position: relative;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.pp-plant-card:active { transform: scale(0.93); }
+.pp-plant-card.pp-locked {
+  opacity: 0.38;
+  cursor: default;
+  filter: grayscale(0.6);
+}
+.pp-plant-card.pp-selected {
+  border-color: rgba(34, 197, 94, 0.9);
+  background: rgba(34, 197, 94, 0.12);
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.35);
+}
+.pp-plant-card img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  display: block;
+}
+.pp-plant-name {
+  font-size: 8px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+  margin-top: 3px;
+  line-height: 1.2;
+  word-break: break-word;
+}
+.pp-plant-meta {
+  font-size: 8px;
+  color: var(--gold, #fbbf24);
+  margin-top: 1px;
+}
+
+/* Selected checkmark */
+.pp-plant-card.pp-selected::after {
+  content: '✓';
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 9px;
+  font-weight: 900;
+  color: #22c55e;
+}
+
+/* Start button */
+.pp-start-btn {
+  margin: 6px 16px 10px;
+  padding: 12px;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-family: var(--font-display, sans-serif);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 4px 18px rgba(22, 163, 74, 0.5);
+  transition: transform 0.1s, box-shadow 0.1s;
+  user-select: none;
+}
+.pp-start-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.4);
+}

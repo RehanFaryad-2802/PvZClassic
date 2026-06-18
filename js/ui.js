@@ -458,26 +458,16 @@ const UI = (() => {
   let pendingBattleWorld = 1;
   let pendingBattleLevel = 0;
   let selectedPlants = [];
-  const MAX_PICKS = 5;
+  // MAX_PICKS driven by TraySlots — 6 base + unlockable 7 & 8
+  function getMaxPicks() {
+    return typeof TraySlots !== 'undefined' ? TraySlots.getUnlockedCount() : 6;
+  }
 
   function openPlantPicker(worldId, levelIdx) {
     pendingBattleWorld = worldId;
     pendingBattleLevel = levelIdx;
-
-    const tempPlants = Levels.getTempPlants(worldId, levelIdx);
-    const owned = Player.getOwnedPlants();
-    let ownedIds = owned.map((p) => p.id);
-
-    // Safety: if player somehow has no plants, give them starters
-    if (ownedIds.length === 0) {
-      Player.unlockPlantByLevel("sunflower");
-      Player.unlockPlantByLevel("peashooter");
-      ownedIds = ["sunflower", "peashooter"];
-    }
-
-    selectedPlants = [...ownedIds];
-    // Skip boost popup — go straight to battle
-    Core.startBattle(worldId, levelIdx, ownedIds, tempPlants);
+    // Delegate to PlantPicker component
+    PlantPicker.open(worldId, levelIdx);
   }
 
   function buildPickerAvailable(tempPlants = []) {
@@ -515,8 +505,9 @@ const UI = (() => {
       selectedPlants.splice(idx, 1);
       cardEl.classList.remove("selected");
     } else {
-      if (selectedPlants.length >= MAX_PICKS) {
-        showToast(`Max ${MAX_PICKS} plants!`);
+      const max = getMaxPicks();
+      if (selectedPlants.length >= max) {
+        showToast(`Max ${max} plants! Unlock more slots.`);
         return;
       }
       selectedPlants.push(plantId);
@@ -570,16 +561,35 @@ const UI = (() => {
       tray.appendChild(card);
     });
 
-    // Shovel button
-    const shovel = document.createElement("div");
-    shovel.className = "shovel-btn";
-    shovel.id = "shovel-btn";
-    shovel.innerHTML = "🪣";
-    shovel.addEventListener("click", () => {
-      SoundFX.play("plant_remove");
-      Core.toggleShovel();
-    });
-    tray.appendChild(shovel);
+    // Render locked slots 7 & 8 at bottom of tray
+    if (typeof TraySlots !== 'undefined') {
+      TraySlots.renderLockedSlots(tray, plantIds.length);
+    }
+
+    // Shovel — attach to arena-wrap bottom-right (not inside tray)
+    const arenaWrap = document.querySelector(".battle-arena-wrap");
+    let shovel = document.getElementById("shovel-btn");
+    if (!shovel && arenaWrap) {
+      shovel = document.createElement("button");
+      shovel.className = "shovel-btn";
+      shovel.id = "shovel-btn";
+      shovel.innerHTML = `🪣<span>SHOVEL</span>`;
+      arenaWrap.appendChild(shovel);
+    }
+    if (shovel) {
+      // Remove old listeners by cloning
+      const newShovel = shovel.cloneNode(true);
+      shovel.replaceWith(newShovel);
+      newShovel.addEventListener("click", () => {
+        SoundFX.play("plant_remove");
+        Core.toggleShovel();
+      });
+      newShovel.addEventListener("touchend", (e) => {
+        e.preventDefault();
+        SoundFX.play("plant_remove");
+        Core.toggleShovel();
+      }, { passive: false });
+    }
   }
 
   function updateTrayCard(plantId, sunAvailable, onCooldown, cdMs) {

@@ -83,6 +83,7 @@
     <link rel="stylesheet" href="css/main.css" />
     <link rel="stylesheet" href="css/game.css" />
     <link rel="stylesheet" href="css/battle_layout.css" />
+    <link rel="stylesheet" href="css/plant_picker.css" />
     <link rel="stylesheet" href="css/plantsanimation/emberdoze.css">
     <link rel="stylesheet" href="css/minigames.css" />
   </head>
@@ -318,12 +319,13 @@
       <div class="battle-body">
 
         <!-- Battle body: tray left | arena right -->
+      <!-- Battle body: tray left | arena right -->
       <div class="battle-body">
 
-        <!-- Vertical plant tray -->
+        <!-- Vertical plant tray — cards + locked slots injected by ui.js / TraySlots.js -->
         <div class="plant-tray" id="plant-tray"></div>
 
-        <!-- Arena + lawnmowers -->
+        <!-- Arena wrap — grid + shovel btn injected here by buildPlantTray -->
         <div class="battle-arena-wrap">
           <div class="battle-arena">
             <div class="arena-bg" id="arena-bg"></div>
@@ -333,6 +335,7 @@
             <div class="effects-layer" id="effects-layer"></div>
           </div>
           <div class="lawnmowers-layer" id="lawnmowers-layer"></div>
+          <!-- Shovel btn appended here dynamically by buildPlantTray -->
         </div>
 
       </div>
@@ -518,7 +521,7 @@
       .reward-packet-hint { font-size: 10px; color: #7c3aed; text-align: center; margin-top: -8px; margin-bottom: 4px; }
     </style>
 
-    <script src="js/audio.js"></script>
+    <script src="js/audio.js" defer></script>
     <script src="js/player.js"></script>
     <script src="js/seeds.js"></script>
     <script src="js/coins.js"></script>
@@ -543,12 +546,14 @@
     <script src="plants/glacierbud.js"></script>
     <script src="js/minigames/block_hunt.js"></script>
     <script src="js/minigames/bomb_ball.js"></script>
-<script src="js/minigames/tutorial.js"></script>
-<script src="js/minigames/sharp_shooters.js"></script>
-<script src="js/minigames/disc_of_doom.js"></script>
+    <script src="js/minigames/tutorial.js"></script>
+    <script src="js/minigames/sharp_shooters.js"></script>
+    <script src="js/minigames/disc_of_doom.js"></script>
+    <script src="js/comp/TraySlots.js"></script>
+    <script src="js/comp/PlantPicker.js"></script>
     <script src="js/shop.js"></script>
     <script src="js/ui.js"></script>
-<script src="js/core.js"></script>
+    <script src="js/core.js"></script>
     <script>
       // Boot
       window.addEventListener("DOMContentLoaded", () => {
