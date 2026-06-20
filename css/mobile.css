@@ -336,19 +336,7 @@
   .lawnmowers-layer { width: 28px; }
 }
 
-/* Demon preview popup */
-@media (max-width: 900px) and (orientation: landscape) {
-  .demon-preview-box {
-    padding: 14px 16px;
-    gap: 10px;
-    max-width: 360px;
-  }
-  .dp-title    { font-size: 22px; }
-  .dp-subtitle { font-size: 11px; }
-  .dp-demons   { min-height: 70px; gap: 8px; padding: 8px; }
-  .dp-demon-icon img { width: 48px; height: 48px; }
-  .dp-countdown { font-size: 36px; }
-}
+/* Demon preview styles removed for mobile */
 
 
 /* ─────────────────────────────────────────────────────

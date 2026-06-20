@@ -1,286 +1,373 @@
-/* ══════════════════════════════════════════
-   css/plant_picker.css
-   PvZClassic — Combined Plant Picker Modal
-   Bottom-sheet style, mobile-first
-══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   css/plant_picker.css  — PvZClassic
+   Plant Picker + Demon Preview bottom-sheet modal
+   Target: 752×351px landscape, mobile-first
+═══════════════════════════════════════════════ */
 
-/* Backdrop */
+/* ── Backdrop ── */
 .pp-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  z-index: 200;
+  background: rgba(0,0,0,0.65);
+  z-index: 500;
   display: flex;
   align-items: flex-end;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.25s ease;
-  backdrop-filter: blur(2px);
+  transition: opacity 0.22s ease;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
 }
-.pp-overlay.pp-visible {
-  opacity: 1;
-}
+.pp-overlay.pp-visible { opacity: 1; }
 
-/* Sheet */
+/* ── Sheet slides up ── */
 .pp-sheet {
   width: 100%;
   max-width: 800px;
-  max-height: 88vh;
-  background: linear-gradient(180deg, #0d0020 0%, #050010 100%);
-  border-radius: 18px 18px 0 0;
-  border-top: 1px solid rgba(168, 85, 247, 0.35);
+  /* On 752×351 landscape, cap at ~90% height so background shows */
+  max-height: 100vh;
+  background: linear-gradient(170deg, #0e0022 0%, #060012 100%);
+  border-radius: 16px 16px 0 0;
+  border-top: 1px solid rgba(168,85,247,0.4);
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.7);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   transform: translateY(100%);
-  transition: transform 0.3s cubic-bezier(0.34, 1.1, 0.64, 1);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  transition: transform 0.28s cubic-bezier(0.32,1.1,0.64,1);
 }
-.pp-overlay.pp-visible .pp-sheet {
-  transform: translateY(0);
-}
+.pp-overlay.pp-visible .pp-sheet { transform: translateY(0); }
 
-/* Handle */
+/* ── Handle bar ── */
 .pp-handle {
-  width: 40px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.2);
+  width: 36px; height: 4px;
+  background: rgba(255,255,255,0.18);
   border-radius: 2px;
-  margin: 10px auto 0;
+  margin: 8px auto 0;
   flex-shrink: 0;
 }
 
-/* Header */
+/* ── Header ── */
 .pp-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px 4px;
+  padding: 6px 14px 4px;
   flex-shrink: 0;
 }
 .pp-title {
   font-family: var(--font-display, sans-serif);
-  font-size: 14px;
+  font-size: 13px;
   color: #fff;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
+.pp-title strong { color: #c084fc; }
 .pp-close-btn {
-  width: 28px;
-  height: 28px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  width: 26px; height: 26px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.14);
   border-radius: 50%;
-  color: #fff;
-  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  font-size: 11px;
   cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.pp-close-btn:hover { background: rgba(255,255,255,0.14); }
+
+/* ══ MAIN BODY — 2 columns ══ */
+.pp-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── LEFT COL: selected slots ── */
+.pp-left-col {
+  width: 72px;
+  min-width: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 3px;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  background: rgba(0,0,0,0.3);
+  gap: 3px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.pp-left-col::-webkit-scrollbar { display: none; }
+
+.pp-selected-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 100%;
+}
+
+/* Selected slot cards */
+.pp-sel-slot {
+  width: 58px;
+  height: 52px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+.pp-sel-filled {
+  border: 1.5px solid rgba(34,197,94,0.6);
+  background: rgba(34,197,94,0.08);
+  cursor: pointer;
+  transition: border-color 0.12s;
+}
+.pp-sel-filled:hover { border-color: rgba(239,68,68,0.7); }
+.pp-sel-filled img {
+  width: 38px; height: 38px;
+  object-fit: contain;
+}
+.pp-sel-forced {
+  border-color: rgba(168,85,247,0.6) !important;
+  background: rgba(168,85,247,0.08) !important;
+  cursor: default !important;
+}
+.pp-sel-lock {
+  position: absolute;
+  bottom: 2px; right: 3px;
+  font-size: 9px;
+}
+.pp-sel-empty {
+  border: 1.5px dashed rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.02);
+}
+.pp-sel-plus {
+  font-size: 16px;
+  color: rgba(255,255,255,0.1);
+  font-weight: 300;
 }
 
-/* Section label */
+/* Unlock slot buttons */
+.pp-slot-unlocks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 100%;
+  margin-top: 2px;
+}
+.pp-unlock-slot {
+  width: 58px;
+  height: 52px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+.pp-unlock-available {
+  border: 1.5px dashed rgba(251,191,36,0.5);
+  background: rgba(251,191,36,0.05);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.pp-unlock-available:hover {
+  border-color: rgba(251,191,36,0.9);
+  background: rgba(251,191,36,0.12);
+}
+.pp-unlock-blocked {
+  border: 1.5px dashed rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.2);
+  cursor: default;
+  opacity: 0.5;
+}
+.pp-unlock-icon { font-size: 16px; line-height: 1; }
+.pp-unlock-label {
+  font-size: 8px;
+  font-weight: 700;
+  color: #fbbf24;
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* ── RIGHT COL: enemies + plant grid ── */
+.pp-right-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Demon preview */
+.pp-demon-section { flex-shrink: 0; }
 .pp-section-label {
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 700;
   letter-spacing: 1.5px;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255,255,255,0.35);
+  padding: 5px 12px 2px;
   text-transform: uppercase;
-  padding: 4px 16px 2px;
-  flex-shrink: 0;
-}
-
-/* Demon preview row */
-.pp-demon-section {
-  flex-shrink: 0;
 }
 .pp-demon-row {
   display: flex;
   gap: 6px;
-  padding: 4px 16px 6px;
+  padding: 3px 12px 6px;
   overflow-x: auto;
   scrollbar-width: none;
+  align-items: flex-end;
 }
 .pp-demon-row::-webkit-scrollbar { display: none; }
-
 .pp-demon-chip {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
   flex-shrink: 0;
-  min-width: 48px;
 }
 .pp-demon-chip img {
-  width: 36px;
-  height: 36px;
+  width: 38px; height: 38px;
   object-fit: contain;
-  filter: drop-shadow(0 0 4px rgba(255, 60, 0, 0.5));
+  filter: drop-shadow(0 0 5px rgba(255,60,0,0.45));
 }
 .pp-demon-chip span {
-  font-size: 8px;
-  color: rgba(255, 255, 255, 0.55);
+  font-size: 7px;
+  color: rgba(255,255,255,0.5);
   text-align: center;
   white-space: nowrap;
+  max-width: 44px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .pp-no-demons {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.3);
-  padding: 8px 0;
+  font-size: 10px;
+  color: rgba(255,255,255,0.25);
+  padding: 6px 0;
 }
 
 /* Divider */
 .pp-divider {
   height: 1px;
-  background: rgba(255, 255, 255, 0.07);
-  margin: 2px 0;
+  background: rgba(255,255,255,0.06);
+  margin: 0 10px;
   flex-shrink: 0;
 }
 
-/* Selected strip */
-.pp-selected-strip {
-  display: flex;
-  gap: 4px;
-  padding: 4px 16px 6px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  flex-shrink: 0;
-}
-.pp-selected-strip::-webkit-scrollbar { display: none; }
-
-.pp-sel-slot {
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  box-sizing: border-box;
-}
-.pp-sel-filled {
-  border: 1.5px solid rgba(34, 197, 94, 0.7);
-  background: rgba(34, 197, 94, 0.1);
-  cursor: pointer;
-}
-.pp-sel-filled img {
-  width: 36px;
-  height: 36px;
-  object-fit: contain;
-}
-.pp-sel-empty {
-  border: 1.5px dashed rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.03);
-}
-.pp-sel-locked {
-  border: 1.5px dashed rgba(251, 191, 36, 0.35);
-  background: rgba(0, 0, 0, 0.3);
-  cursor: pointer;
-  font-size: 14px;
-  gap: 1px;
-}
-.pp-sel-locked small {
-  font-size: 7px;
-  color: var(--gold, #fbbf24);
-  font-weight: 700;
-}
-.pp-sel-locked:hover {
-  border-color: rgba(251, 191, 36, 0.7);
-  background: rgba(251, 191, 36, 0.08);
-}
-
-/* Plant grid */
+/* ── Plant grid ── */
 .pp-plant-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
-  gap: 5px;
-  padding: 4px 12px 6px;
+  grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
+  gap: 4px;
+  padding: 5px 10px 8px;
   overflow-y: auto;
   flex: 1;
   min-height: 0;
   scrollbar-width: thin;
-  scrollbar-color: rgba(168, 85, 247, 0.3) transparent;
+  scrollbar-color: rgba(168,85,247,0.3) transparent;
+  align-content: start;
 }
 
 .pp-plant-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  padding: 5px 3px 4px;
-  border-radius: 10px;
-  border: 1.5px solid rgba(168, 85, 247, 0.3);
-  background: rgba(20, 5, 45, 0.7);
+  padding: 5px 3px 3px;
+  border-radius: 9px;
+  border: 1.5px solid rgba(168,85,247,0.25);
+  background: rgba(15,5,35,0.8);
   cursor: pointer;
-  transition: transform 0.1s, border-color 0.12s, background 0.12s;
   position: relative;
   box-sizing: border-box;
+  transition: transform 0.1s, border-color 0.12s, background 0.12s;
   user-select: none;
   -webkit-user-select: none;
 }
-.pp-plant-card:active { transform: scale(0.93); }
-.pp-plant-card.pp-locked {
-  opacity: 0.38;
-  cursor: default;
-  filter: grayscale(0.6);
-}
-.pp-plant-card.pp-selected {
-  border-color: rgba(34, 197, 94, 0.9);
-  background: rgba(34, 197, 94, 0.12);
-  box-shadow: 0 0 8px rgba(34, 197, 94, 0.35);
-}
+.pp-plant-card:active { transform: scale(0.92); }
 .pp-plant-card img {
-  width: 40px;
-  height: 40px;
+  width: 38px; height: 38px;
   object-fit: contain;
   display: block;
 }
 .pp-plant-name {
-  font-size: 8px;
+  font-size: 7px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255,255,255,0.8);
   text-align: center;
-  margin-top: 3px;
+  margin-top: 2px;
   line-height: 1.2;
   word-break: break-word;
 }
-.pp-plant-meta {
-  font-size: 8px;
-  color: var(--gold, #fbbf24);
+.pp-plant-cost {
+  font-size: 7px;
+  color: #fbbf24;
   margin-top: 1px;
+  line-height: 1;
 }
 
-/* Selected checkmark */
-.pp-plant-card.pp-selected::after {
-  content: '✓';
+/* Locked (unowned) */
+.pp-card-locked {
+  opacity: 0.32;
+  cursor: default;
+  filter: grayscale(0.5);
+}
+
+/* Selected */
+.pp-card-selected {
+  border-color: rgba(34,197,94,0.85) !important;
+  background: rgba(34,197,94,0.1) !important;
+  box-shadow: 0 0 8px rgba(34,197,94,0.3);
+}
+.pp-check {
   position: absolute;
-  top: 2px;
-  right: 4px;
+  top: 2px; right: 4px;
   font-size: 9px;
   font-weight: 900;
   color: #22c55e;
+  line-height: 1;
 }
 
-/* Start button */
+/* Level-forced plant */
+.pp-card-forced {
+  border-color: rgba(168,85,247,0.7) !important;
+  background: rgba(168,85,247,0.1) !important;
+  cursor: default;
+}
+.pp-forced-badge {
+  position: absolute;
+  top: 2px; right: 3px;
+  font-size: 8px;
+  line-height: 1;
+}
+
+/* ── Start battle button ── */
 .pp-start-btn {
-  margin: 6px 16px 10px;
-  padding: 12px;
+  margin: 5px 12px 10px;
+  padding: 11px;
   background: linear-gradient(135deg, #16a34a, #15803d);
   border: none;
-  border-radius: 12px;
+  border-radius: 11px;
   color: #fff;
   font-family: var(--font-display, sans-serif);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 1.5px;
   cursor: pointer;
   flex-shrink: 0;
-  box-shadow: 0 4px 18px rgba(22, 163, 74, 0.5);
+  box-shadow: 0 4px 16px rgba(22,163,74,0.45);
   transition: transform 0.1s, box-shadow 0.1s;
   user-select: none;
+  -webkit-user-select: none;
 }
 .pp-start-btn:active {
   transform: scale(0.97);
-  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.4);
+  box-shadow: 0 2px 8px rgba(22,163,74,0.35);
 }
