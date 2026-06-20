@@ -579,6 +579,14 @@
               setTimeout(() => ld.remove(), 400);
             }
             UI.init();
+            const params = new URLSearchParams(window.location.search);
+            const qWorld = parseInt(params.get("world"), 10);
+            const qLevel = parseInt(params.get("level"), 10);
+            if (!Number.isNaN(qWorld) && !Number.isNaN(qLevel)) {
+              UI.forceOpenLevel(qWorld, qLevel);
+            } else if (!Number.isNaN(qWorld)) {
+              UI.openLevelSelect(qWorld);
+            }
           }, 300);
         };
 

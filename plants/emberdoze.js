@@ -111,6 +111,12 @@ PlantRegistry.register({
   onTick(row, col, plantData) {
     const pp    = Player.getPlant("emberdoze");
     const level = pp ? pp.level : 1;
+    // Visual state: show unlock badges on the plant entity
+    if (plantData.element) {
+      if (level >= 6) plantData.element.classList.add('ed-has-dot'); else plantData.element.classList.remove('ed-has-dot');
+      if (level >= 11) plantData.element.classList.add('ed-has-thorn'); else plantData.element.classList.remove('ed-has-thorn');
+    }
+
     if (level >= 11) _thornShot(row, col, plantData, level);
     _triggerSpikes(row, col, plantData, level);
   },
@@ -186,6 +192,7 @@ function _launchSpikeWave(row, col, range, damage, hasDot, dotDmg) {
 
   // ── Build the spike block (1 cell wide) ──────────────────────
   const block = document.createElement("div");
+  block.className = "ed-spike-effect";
   block.style.cssText = `
     position: absolute;
     left: ${startRect.left - layerRect.left}px;
@@ -193,7 +200,7 @@ function _launchSpikeWave(row, col, range, damage, hasDot, dotDmg) {
     width: ${cellW}px;
     height: ${blockH}px;
     pointer-events: none;
-    z-index: 25;
+    z-index: 85;
     display: flex;
     align-items: flex-end;
     justify-content: space-around;
@@ -203,20 +210,37 @@ function _launchSpikeWave(row, col, range, damage, hasDot, dotDmg) {
   for (let i = 0; i < toothCount; i++) {
     const tooth = document.createElement("div");
     tooth.className = "ed-spike-tooth";
+    const height = 30 + Math.round(Math.random() * 20) + Math.round(Math.sin((i / Math.max(1, toothCount - 1)) * Math.PI) * 10);
+    const width = 8 + Math.round(Math.random() * 6);
+    tooth.style.width = `${width}px`;
+    tooth.style.setProperty("--target-height", `${height}px`);
     tooth.style.animationDelay = (i * 0.02) + "s";
     block.appendChild(tooth);
   }
 
+  // If this level provides DoT/sticky spikes, mark block for different styling
+  if (hasDot) block.classList.add('ed-spike-dot');
+
   layer.appendChild(block);
 
-  // ── Animate block moving right ────────────────────────────────
+  // ── Animate block moving right after initial spike pop ───────
   const hitDemons = new Set();
-  const startTime = performance.now();
-  let startX      = startRect.left - layerRect.left;
+  const startX = startRect.left - layerRect.left;
+  const animationDelay = 560;
+  const holdAfterEnd = 220;
+  let startTime;
 
   function tick(now) {
-    const elapsed  = now - startTime;
-    const progress = Math.min(elapsed / TRAVEL_MS, 1);
+    if (!startTime) startTime = now;
+    const elapsed = now - startTime;
+
+    if (elapsed < animationDelay) {
+      requestAnimationFrame(tick);
+      return;
+    }
+
+    const moveElapsed = elapsed - animationDelay;
+    const progress = Math.min(moveElapsed / TRAVEL_MS, 1);
     const currentX = startX + progress * totalDist;
 
     // Move block
@@ -246,10 +270,11 @@ function _launchSpikeWave(row, col, range, damage, hasDot, dotDmg) {
     if (progress < 1) {
       requestAnimationFrame(tick);
     } else {
-      // Fade out at end
-      block.style.opacity = "0";
-      block.style.transition = "opacity 0.15s";
-      setTimeout(() => block.remove(), 160);
+      setTimeout(() => {
+        block.style.opacity = "0";
+        block.style.transition = "opacity 0.18s";
+        setTimeout(() => block.remove(), 180);
+      }, holdAfterEnd);
     }
   }
 

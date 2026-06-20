@@ -470,6 +470,23 @@ const UI = (() => {
     PlantPicker.open(worldId, levelIdx);
   }
 
+  function forceOpenLevel(worldId, levelIdx) {
+    const world = Levels.getWorld(worldId);
+    if (!world) return false;
+    if (levelIdx < 0 || levelIdx >= world.levelCount) return false;
+
+    Player.unlockWorld(worldId);
+    for (let i = 0; i < levelIdx; i++) {
+      Player.setLevelStars(worldId, i, 3);
+    }
+
+    pendingBattleWorld = worldId;
+    pendingBattleLevel = levelIdx;
+    selectedWorldId = worldId;
+    PlantPicker.open(worldId, levelIdx);
+    return true;
+  }
+
   function buildPickerAvailable(tempPlants = []) {
     const container = document.getElementById("picker-available");
     container.innerHTML = "";
@@ -561,10 +578,7 @@ const UI = (() => {
       tray.appendChild(card);
     });
 
-    // Render locked slots 7 & 8 at bottom of tray
-    if (typeof TraySlots !== 'undefined') {
-      TraySlots.renderLockedSlots(tray, plantIds.length);
-    }
+    // Locked battle slots are not shown during gameplay
 
     // Shovel — attach to arena-wrap bottom-right (not inside tray)
     const arenaWrap = document.querySelector(".battle-arena-wrap");
@@ -2849,6 +2863,7 @@ const UI = (() => {
     setArenaBg,
     showWaveBanner,
     openLevelSelect,
+    forceOpenLevel,
     get selectedPlants() {
       return selectedPlants;
     },

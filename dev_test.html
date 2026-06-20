@@ -142,6 +142,15 @@
       <button class="btn-cheat" onclick="unlockAllMinigames()">Unlock</button>
     </div>
     <div class="cheat-card">
+      <div class="cheat-title">🌎 Open World / Level</div>
+      <div class="cheat-desc">Open any world and level in the game</div>
+      <div class="input-row">
+        <input class="dev-input" type="number" id="open-world-id" min="1" value="1" placeholder="World"/>
+        <input class="dev-input" type="number" id="open-level-id" min="1" value="1" placeholder="Level"/>
+      </div>
+      <button class="btn-cheat" onclick="openGameLevel()">Open in Game</button>
+    </div>
+    <div class="cheat-card">
       <div class="cheat-title">✅ Complete World 1</div>
       <div class="cheat-desc">Mark all W1 levels as 3-star</div>
       <button class="btn-cheat" onclick="completeWorld(1)">Complete W1</button>
@@ -252,7 +261,8 @@ function buildPlants() {
 
 function toggleOwn(id) {
   const pp   = Player.getPlant(id);
-  const save = JSON.parse(localStorage.getItem('pvz3_save'));
+  const save = getDevSave();
+  if (!save) return toast('Save data not found');
   if (pp && pp.owned) {
     save.plants[id] = { owned:false, level:1, seeds:0 };
   } else {
@@ -261,24 +271,65 @@ function toggleOwn(id) {
     save.plants[id].level = save.plants[id].level || 1;
     save.plants[id].seeds = save.plants[id].seeds || 0;
   }
+  setDevSave(save);
+  toast(`${id} updated!`);
+  buildPlants();
+}
+
+function getDevSave() {
+  const raw = localStorage.getItem('pvz3_save');
+  if (!raw) return null;
+
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (e) {
+    try {
+      const decoded = decodeURIComponent(escape(atob(raw)));
+      parsed = JSON.parse(decoded);
+    } catch (err) {
+      console.warn('Dev test: failed to parse save', err);
+      return null;
+    }
+  }
+
+  if (!parsed || typeof parsed !== 'object') {
+    return null;
+  }
+
+  if (parsed._cs !== undefined) {
+    const { _cs, ...saveData } = parsed;
+    return saveData;
+  }
+
+  return parsed;
+}
+
+function setDevSave(save) {
   localStorage.setItem('pvz3_save', JSON.stringify(save));
-  Player.load(); toast(`${id} updated!`); buildPlants();
+  Player.load();
+  if (typeof Player.save === 'function') {
+    Player.save();
+  }
 }
 
 function addSeedsTo(id, amount) {
-  const save = JSON.parse(localStorage.getItem('pvz3_save'));
+  const save = getDevSave();
+  if (!save) return toast('Save data not found');
   if (!save.plants[id]) save.plants[id] = { owned:true, level:1, seeds:0 };
   save.plants[id].seeds = (save.plants[id].seeds||0) + amount;
-  localStorage.setItem('pvz3_save', JSON.stringify(save));
-  Player.load(); toast(`+${amount} seeds to ${id}`); buildPlants();
+  setDevSave(save);
+  toast(`+${amount} seeds to ${id}`);
+  buildPlants();
 }
 
 function levelUpPlant(id) {
-  const save = JSON.parse(localStorage.getItem('pvz3_save'));
-  if (!save.plants[id]) return;
-  save.plants[id].level = Math.min((save.plants[id].level||1)+1, 15);
-  localStorage.setItem('pvz3_save', JSON.stringify(save));
-  Player.load(); toast(`${id} leveled up!`); buildPlants();
+  const save = getDevSave();
+  if (!save || !save.plants[id]) return toast('Plant not found in save');
+  save.plants[id].level = Math.min((save.plants[id].level||1) + 1, 15);
+  setDevSave(save);
+  toast(`${id} leveled up!`);
+  buildPlants();
 }
 
 // ── Minigames ─────────────────────────────────────
@@ -344,68 +395,89 @@ function closeMg() {
 // ── Cheats ────────────────────────────────────────
 function addCoins() {
   const amount = parseInt(document.getElementById('coin-amount').value)||500;
-  const save = JSON.parse(localStorage.getItem('pvz3_save'));
+  const save = getDevSave();
+  if (!save) return toast('Save data not found');
   save.coins = (save.coins||0) + amount;
-  localStorage.setItem('pvz3_save', JSON.stringify(save));
-  Player.load(); toast(`+${amount} coins added!`);
+  setDevSave(save);
+  toast(`+${amount} coins added!`);
 }
 function addSeeds() {
   const amount = parseInt(document.getElementById('seed-amount').value)||100;
-  const save = JSON.parse(localStorage.getItem('pvz3_save'));
+  const save = getDevSave();
+  if (!save) return toast('Save data not found');
   Object.keys(save.plants).forEach(id => {
     if (save.plants[id].owned) save.plants[id].seeds = (save.plants[id].seeds||0)+amount;
   });
-  localStorage.setItem('pvz3_save', JSON.stringify(save));
-  Player.load(); toast(`+${amount} seeds to all owned plants!`); buildPlants();
+  setDevSave(save);
+  toast(`+${amount} seeds to all owned plants!`);
+  buildPlants();
 }
 function unlockAllPlants() {
-  const save = JSON.parse(localStorage.getItem('pvz3_save'));
+  const save = getDevSave();
+  if (!save) return toast('Save data not found');
   PLANT_DEFS.forEach(def => {
     if (!save.plants[def.id]) save.plants[def.id] = {};
     save.plants[def.id].owned = true;
     save.plants[def.id].level = save.plants[def.id].level||1;
     save.plants[def.id].seeds = save.plants[def.id].seeds||0;
   });
-  localStorage.setItem('pvz3_save', JSON.stringify(save));
-  Player.load(); toast('All plants unlocked!'); buildPlants();
+  setDevSave(save);
+  toast('All plants unlocked!');
+  buildPlants();
 }
 function maxAllPlants() {
-  const save = JSON.parse(localStorage.getItem('pvz3_save'));
+  const save = getDevSave();
+  if (!save) return toast('Save data not found');
   Object.keys(save.plants).forEach(id => { if (save.plants[id].owned) save.plants[id].level=15; });
-  localStorage.setItem('pvz3_save', JSON.stringify(save));
-  Player.load(); toast('All owned plants maxed to Lv.15!'); buildPlants();
+  setDevSave(save);
+  toast('All owned plants maxed to Lv.15!');
+  buildPlants();
 }
 function unlockAllWorlds() {
-  const save = JSON.parse(localStorage.getItem('pvz3_save'));
+  const save = getDevSave();
+  if (!save) return toast('Save data not found');
   for (let i=1;i<=10;i++) { if (save.worldProgress[i]===-1||save.worldProgress[i]===undefined) save.worldProgress[i]=0; }
-  localStorage.setItem('pvz3_save', JSON.stringify(save));
-  Player.load(); toast('All worlds unlocked!');
+  setDevSave(save);
+  toast('All worlds unlocked!');
 }
 function unlockAllMinigames() {
-  const save = JSON.parse(localStorage.getItem('pvz3_save'));
-  if (!save.minigames) save.minigames = {};
-  ['blockhunt','bombball','sharpshooters'].forEach(id => { save.minigames[id]=true; });
-  localStorage.setItem('pvz3_save', JSON.stringify(save));
-  Player.load(); toast('All minigames unlocked!');
+  const save = getDevSave();
+  if (!save) return toast('Save data not found');
+  if (!save.unlockedMinigames) save.unlockedMinigames = [];
+  ['blockhunt','bombball','sharpshooters'].forEach(id => {
+    if (!save.unlockedMinigames.includes(id)) save.unlockedMinigames.push(id);
+  });
+  setDevSave(save);
+  toast('All minigames unlocked!');
 }
 function completeWorld(worldId) {
-  const save  = JSON.parse(localStorage.getItem('pvz3_save'));
+  const save  = getDevSave();
+  if (!save) return toast('Save data not found');
   const world = Levels.getWorld(worldId);
-  if (!world) return;
+  if (!world) return toast(`World ${worldId} not found`);
   if (!save.levelStars[worldId]) save.levelStars[worldId]={};
   for (let i=0;i<world.levelCount;i++) save.levelStars[worldId][i]=3;
   save.worldProgress[worldId]=world.levelCount;
-  localStorage.setItem('pvz3_save', JSON.stringify(save));
-  Player.load(); toast(`World ${worldId} completed with 3 stars!`);
+  setDevSave(save);
+  toast(`World ${worldId} completed with 3 stars!`);
 }
 function resetSave() {
   if (!confirm('Reset ALL save data? This cannot be undone!')) return;
   localStorage.clear(); Player.load(); toast('Save reset!'); buildPlants();
 }
 function viewSave() {
-  const save = JSON.parse(localStorage.getItem('pvz3_save'));
+  const save = getDevSave();
   console.log('PvZ3 Save Data:', save);
   toast('Save data printed to console (F12)');
+}
+
+function openGameLevel() {
+  const worldId = parseInt(document.getElementById('open-world-id').value, 10);
+  const levelNum = parseInt(document.getElementById('open-level-id').value, 10);
+  if (Number.isNaN(worldId) || Number.isNaN(levelNum) || worldId < 1 || levelNum < 1) {
+    return toast('Enter valid world and level numbers');
+  }
+  window.location.href = `index.html?world=${worldId}&level=${levelNum}`;
 }
 
 // ── Tabs ──────────────────────────────────────────

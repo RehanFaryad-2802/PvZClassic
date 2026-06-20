@@ -86,34 +86,40 @@
 
 /* ── LEFT COL: selected slots ── */
 .pp-left-col {
-  width: 72px;
-  min-width: 72px;
+  width: 96px;
+  min-width: 96px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 4px 3px;
+  padding: 8px 4px 6px;
   border-right: 1px solid rgba(255,255,255,0.06);
   background: rgba(0,0,0,0.3);
-  gap: 3px;
+  gap: 5px;
   flex-shrink: 0;
-  overflow-y: auto;
-  scrollbar-width: none;
+  overflow: hidden;
 }
-.pp-left-col::-webkit-scrollbar { display: none; }
 
 .pp-selected-col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
   width: 100%;
+  justify-items: center;
+  align-items: center;
+}
+
+.pp-slot-unlocks {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
 }
 
 /* Selected slot cards */
 .pp-sel-slot {
-  width: 58px;
-  height: 52px;
-  border-radius: 8px;
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -129,8 +135,15 @@
 }
 .pp-sel-filled:hover { border-color: rgba(239,68,68,0.7); }
 .pp-sel-filled img {
-  width: 38px; height: 38px;
+  width: 28px; height: 28px;
   object-fit: contain;
+}
+.pp-sel-empty,
+.pp-unlock-slot {
+  height: 46px;
+}
+.pp-sel-plus {
+  font-size: 14px;
 }
 .pp-sel-forced {
   border-color: rgba(168,85,247,0.6) !important;

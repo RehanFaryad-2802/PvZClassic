@@ -11,9 +11,10 @@ const PlantPicker = (() => {
   let _lockedPlants   = [];
   let _tempPlants     = [];
   let _overlay        = null;
+  let _unlockedSlots  = 6;
 
   function getMaxPicks() {
-    return typeof TraySlots !== 'undefined' ? TraySlots.getUnlockedCount() : 6;
+    return Math.max(6, _unlockedSlots);
   }
 
   // Define level-forced plants here: key = "worldId-levelIdx"
@@ -22,11 +23,12 @@ const PlantPicker = (() => {
   };
 
   function open(worldId, levelIdx) {
-    _worldId      = worldId;
-    _levelIdx     = levelIdx;
-    _tempPlants   = Levels.getTempPlants(worldId, levelIdx);
-    _lockedPlants = LEVEL_LOCKED_PLANTS[`${worldId}-${levelIdx}`] || [];
+    _worldId       = worldId;
+    _levelIdx      = levelIdx;
+    _tempPlants    = Levels.getTempPlants(worldId, levelIdx);
+    _lockedPlants  = LEVEL_LOCKED_PLANTS[`${worldId}-${levelIdx}`] || [];
     _selectedPlants = [..._lockedPlants];
+    _unlockedSlots = 6;
     _buildOverlay();
   }
 
@@ -183,9 +185,7 @@ const PlantPicker = (() => {
 
   function _refreshSelected() {
     const col       = _overlay.querySelector('#pp-selected-col');
-    const countEl   = _overlay.querySelector('#pp-count');
     const unlockCol = _overlay.querySelector('#pp-slot-unlocks');
-    if (countEl) countEl.textContent = _selectedPlants.length;
 
     col.innerHTML = '';
     const max = getMaxPicks();
@@ -221,7 +221,7 @@ const PlantPicker = (() => {
     // Unlock slot buttons (7 & 8)
     unlockCol.innerHTML = '';
     if (typeof TraySlots !== 'undefined') {
-      const unlocked = TraySlots.getUnlockedCount();
+      const unlocked = _unlockedSlots;
       for (let slot = 7; slot <= 8; slot++) {
         if (unlocked >= slot) continue;
         const slotCost     = TraySlots.SLOT_COSTS[slot];
@@ -230,8 +230,8 @@ const PlantPicker = (() => {
         el.className = 'pp-unlock-slot' + (prevUnlocked ? ' pp-unlock-available' : ' pp-unlock-blocked');
         if (prevUnlocked) {
           el.innerHTML = `
-            <span class="pp-unlock-icon">🔓</span>
-            <span class="pp-unlock-label">${slotCost.coins}🪙${slotCost.looms ? `+${slotCost.looms}💜` : ''}</span>
+            <span class="pp-unlock-icon">${slotCost.looms ? `<img src="assets/shop/loom.png" class="loom-icon-sm" alt="Loom">` : '🔓'}</span>
+            <span class="pp-unlock-label">${slotCost.coins}🪙${slotCost.looms ? ` + ${slotCost.looms}` : ''}</span>
           `;
           el.addEventListener('click', () => _promptUnlockSlot(slot, slotCost));
         } else {
@@ -247,29 +247,62 @@ const PlantPicker = (() => {
 
   function _promptUnlockSlot(slot, slotCost) {
     const costs = [{ icon: '🪙', amount: slotCost.coins, label: 'Coins' }];
-    if (slotCost.looms > 0) costs.push({ icon: '💜', amount: slotCost.looms, label: 'Looms', type: 'loom' });
+    if (slotCost.looms > 0) costs.push({ icon: '<img src="assets/shop/loom.png" class="loom-icon-sm" alt="Loom">', amount: slotCost.looms, label: 'Looms', type: 'loom' });
     ConfirmPopup.show({
       icon: '🔓',
       title: `Unlock Slot ${slot}`,
-      body: `Permanently adds 1 extra plant slot to your battle tray.`,
+      body: `Adds one extra plant slot for this level attempt. Battle will start once all slots are filled.`,
       costs,
-      confirmText: 'Unlock!',
+      confirmText: 'Unlock',
       cancelText: 'Cancel',
       type: 'purchase',
       onConfirm: () => {
-        const res = TraySlots.unlockSlot(slot);
-        if (!res.ok) { if (typeof UI !== 'undefined') UI.showToast(res.msg); return; }
-        const max = getMaxPicks();
+        const coinCost = slotCost.coins;
+        const loomCost = slotCost.looms;
+        if (Player.getCoins() < coinCost) {
+          if (typeof UI !== 'undefined') UI.showToast(`Need ${coinCost} 🪙 coins`);
+          return;
+        }
+        if (loomCost > 0 && Player.getLooms() < loomCost) {
+          if (typeof UI !== 'undefined') UI.showToast(`Need ${loomCost} Looms`);
+          return;
+        }
+        Player.spendCoins(coinCost);
+        if (loomCost > 0) Player.spendLooms(loomCost);
+        _unlockedSlots = slot;
         _refreshSelected();
       },
     });
   }
 
   function _startBattle() {
-    if (_selectedPlants.length === 0) {
-      if (typeof UI !== 'undefined') UI.showToast('Select at least 1 plant!');
+    const max = getMaxPicks();
+    if (_selectedPlants.length < max) {
+      if (typeof UI !== 'undefined') UI.showToast(`Fill all ${max} plant slots before starting.`);
       return;
     }
+
+    const hasSunflower = _selectedPlants.includes('sunflower');
+    const sunflowerAvailable = Player.getPlant('sunflower')?.owned || _tempPlants.includes('sunflower');
+    if (!hasSunflower && sunflowerAvailable) {
+      ConfirmPopup.show({
+        icon: '☀️',
+        title: 'No Sunflower Selected',
+        body: 'This level can benefit from sun production. Continue without a Sunflower?',
+        confirmText: 'Proceed',
+        cancelText: 'Choose again',
+        type: 'info',
+        onConfirm: () => {
+          _beginBattle();
+        },
+      });
+      return;
+    }
+
+    _beginBattle();
+  }
+
+  function _beginBattle() {
     close();
     Core.startBattle(_worldId, _levelIdx, _selectedPlants, _tempPlants);
   }
