@@ -82,7 +82,8 @@
     </style>
     <link rel="stylesheet" href="css/main.css" />
     <link rel="stylesheet" href="css/game.css" />
-    <link rel="stylesheet" href="css/battle_layout.css" />
+    <link rel="stylesheet" href="css/level_select_map.css" />
+<link rel="stylesheet" href="css/battle_layout.css" />
     <link rel="stylesheet" href="css/plant_picker.css" />
     <link rel="stylesheet" href="css/plantsanimation/emberdoze.css">
     <link rel="stylesheet" href="css/minigames.css" />
@@ -126,38 +127,83 @@
     </div>
 
     <!-- ══════════════════════════════════════════
-       SCREEN: MAIN MENU
+       SCREEN: MAIN MENU  (PvZ2 style)
   ══════════════════════════════════════════ -->
     <div id="screen-menu" class="screen">
-      <div class="menu-bg"></div>
-      <div class="menu-container">
-        <!-- Top-left: settings icon only -->
-        <button class="menu-corner-btn menu-corner-left" id="btn-settings" title="Settings"><img src="assets/icons/setting.png" alt="icon" class="game-icon"></button>
-        <!-- Top-right: shop icon only -->
-        <button class="menu-corner-btn menu-corner-right" id="btn-shop" title="Seed Shop"><img src="assets/icons/shop.png" class="game-icon"></button>
+      <!-- Full background garden image -->
+      <div class="menu-bg-img"></div>
+      <!-- Soft bottom gradient so buttons pop -->
+      <div class="menu-bg-overlay"></div>
 
-        <div class="menu-center-layout">
-          <!-- Game name label -->
-          <div class="menu-game-title">
-            <span class="logo-pvz">PvZ</span><span class="logo-3">Classic</span>
+      <!-- ── Top Bar ── -->
+      <div class="menu-topbar">
+        <!-- Left: player pill -->
+        <div class="menu-player-pill">
+          <div class="menu-avatar">🌿</div>
+          <span class="menu-playername" id="menu-player-name">Hero</span>
+        </div>
+        <!-- Right: currencies -->
+        <div class="menu-topbar-right">
+          <div class="menu-currency-pill">
+            <img src="assets/icons/gold.png" alt="coins" class="menu-curr-icon">
+            <span id="menu-coins">0</span>
           </div>
-          <!-- Random homepage image -->
-          <img id="menu-hero-img" src="assets/homepage/page1.png" class="menu-hero-img" alt="">
-          <!-- Username read-only display -->
-          <div class="menu-username-display" id="menu-player-name">Hero</div>
-          <!-- Play button -->
-          <button class="btn-menu-play" id="btn-play">▶ PLAY</button>
+          <div class="menu-currency-pill">
+            <img src="assets/shop/loom.png" alt="looms" class="menu-curr-icon">
+            <span id="menu-looms">0</span>
+          </div>
         </div>
-        <div class="menu-deco" style="display: none">
-          <img src="assets/plants/sunflower.png" class="deco-plant p1" alt="" />
-          <img
-            src="assets/plants/peashooter.png"
-            class="deco-plant p2"
-            alt=""
-          />
-          <img src="assets/plants/bonkchoy.png" class="deco-plant p3" alt="" />
-          <img src="assets/plants/icepea.png" class="deco-plant p4" alt="" />
+      </div>
+
+      <!-- ── Center: Logo + Buttons ── -->
+      <div class="menu-center">
+        <!-- PvZClassic logo -->
+        <div class="menu-pvz-logo">
+          <span class="pvz-logo-pvz">PvZ</span><span class="pvz-logo-classic">Classic</span>
+          <div class="pvz-logo-sub">Plants vs Demons</div>
         </div>
+
+        <!-- ADVENTURE button (big, blue) -->
+        <button class="menu-btn-adventure" id="btn-play">
+          <span class="menu-btn-icon">🗺️</span>
+          <span class="menu-btn-label">ADVENTURE</span>
+        </button>
+
+        <!-- PLAY button (orange/brown) -->
+        <button class="menu-btn-play" id="btn-play-quick">
+          <span class="menu-btn-label">▶ PLAY</span>
+        </button>
+
+        <!-- Row: ARENA + ALMANAC -->
+        <div class="menu-btn-row">
+          <button class="menu-btn-secondary" id="btn-menu-minigames">
+            <span>🏆</span> ARENA
+          </button>
+          <button class="menu-btn-secondary" id="btn-menu-collection">
+            <span>📖</span> ALMANAC
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Bottom Bar ── -->
+      <div class="menu-bottombar">
+        <button class="menu-bottom-btn" id="btn-shop">
+          <span class="menu-bottom-icon">🛒</span>
+          <span class="menu-bottom-label">STORE</span>
+        </button>
+        <button class="menu-bottom-btn" id="btn-menu-collection2">
+          <span class="menu-bottom-icon">🌿</span>
+          <span class="menu-bottom-label">PLANTS</span>
+        </button>
+        <div class="menu-bottom-spacer"></div>
+        <button class="menu-bottom-btn" id="btn-settings">
+          <span class="menu-bottom-icon"><img src="assets/icons/setting.png" class="menu-bottom-icon-img" alt=""></span>
+          <span class="menu-bottom-label">SETTINGS</span>
+        </button>
+        <button class="menu-bottom-btn" id="btn-menu-worldmap">
+          <span class="menu-bottom-icon">🌍</span>
+          <span class="menu-bottom-label">WORLDS</span>
+        </button>
       </div>
     </div>
 
@@ -537,6 +583,7 @@
     <script src="js/comp/ConfirmPopup.js"></script>
     <script src="js/comp/TraySlots.js"></script>
     <script src="js/comp/PlantPicker.js"></script>
+<script src="js/comp/LevelSelectMap.js"></script>
     <script src="js/shop.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/core.js"></script>

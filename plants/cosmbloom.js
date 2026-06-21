@@ -63,16 +63,16 @@ PlantRegistry.register({
   hitCount: 1,
   hp: 320,
   fireRate: 3000,
-  description: `Channels <b style="color:#2dd4bf">cosmic soul energy</b> into ghost orbs that haunt demons with spectral damage.
+  description: `Channels <b style="color:#2dd4bf">cosmic soul energy</b> into a dark rift that pushes demons back to the row start and tears one into a random lane.
 <div style="margin-top:8px;display:flex;flex-direction:column;gap:5px">
   <div style="background:rgba(45,212,191,0.08);border-left:3px solid rgba(45,212,191,0.5);border-radius:4px;padding:5px 8px;font-size:10px;color:var(--white)">
-    👻 <b style="color:#5eead4">Lv 1–4:</b> Lobs a floating <b style="color:#5eead4">Soul Orb</b> at the nearest demon. On impact, leaves a spectral wisp that ticks damage for 1s.
+    👻 <b style="color:#5eead4">Lv 1–4:</b> Every shot sends demons in the row back to the nearest spawn edge while firing a spectral soul orb.
   </div>
   <div style="background:rgba(167,139,250,0.08);border-left:3px solid rgba(167,139,250,0.5);border-radius:4px;padding:5px 8px;font-size:10px;color:var(--white)">
-    🌀 <b style="color:#c4b5fd">Lv 5–9:</b> Every ${COSMBLOOM_CFG.HAUNT_EVERY}rd orb becomes a <b style="color:#c4b5fd">Haunting Orb</b> — splits into 3 homing wisps on impact. Each wisp applies a <b style="color:#c4b5fd">Ghost Mark</b> (+20% damage taken for 4s).
+    🌀 <b style="color:#c4b5fd">Lv 5–9:</b> Every 3–4 shots also rips a random demon into another row, disrupting enemy paths.
   </div>
   <div style="background:rgba(45,212,191,0.06);border-left:3px solid rgba(45,212,191,0.7);border-radius:4px;padding:5px 8px;font-size:10px;color:var(--white)">
-    🌸 <b style="color:#2dd4bf">Lv 10–15:</b> Every ${COSMBLOOM_CFG.VOID_EVERY}th shot triggers <b style="color:#2dd4bf">Void Bloom</b> — erupts a dark cosmic flower on ALL demons in lane. Applies <b style="color:#2dd4bf">Soul Drain</b> (3% current HP/s for 5s).
+    🌌 <b style="color:#2dd4bf">Lv 10–15:</b> Adds a <b style="color:#2dd4bf">Void Shard Barrage</b> — dark cosmic shards streak from the plant and strike multiple demons.
   </div>
 </div>`,
 
@@ -108,45 +108,19 @@ PlantRegistry.register({
   // ── onPlace ──────────────────────────────────────────────────
   onPlace(row, col, plantData) {
     const stats = this.getStats(plantData.level);
-    plantData.maxHp    = stats.hp;
-    plantData.hp       = stats.hp;
+    plantData.maxHp     = stats.hp;
+    plantData.hp        = stats.hp;
     plantData.shotCount = 0;
-    plantData.casting  = false;
+    plantData.casting   = false;
+    plantData.nextRowTeleport = 3 + Math.floor(Math.random() * 2);
 
     const cell = Grid.getCellEl(row, col);
     if (cell) {
-      // Glowing blob spots on cap
-      for (let i = 0; i < 4; i++) {
-        const blob = document.createElement("div");
-        blob.className = `cb-blob cb-blob-${i}`;
-        cell.appendChild(blob);
-      }
+      // Cosmic core ring and aura
+      const core = document.createElement("div");
+      core.className = "cb-core-ring";
+      cell.appendChild(core);
 
-      // Ghost smoke wisps rising from cap
-      for (let i = 0; i < 3; i++) {
-        const smoke = document.createElement("div");
-        smoke.className = `cb-smoke cb-smoke-${i}`;
-        cell.appendChild(smoke);
-      }
-
-      // Eyes (sleepy/smug)
-      const eyes = document.createElement("div");
-      eyes.className = "cb-eyes";
-      const eyeL = document.createElement("div"); eyeL.className = "cb-eye cb-eye-l";
-      const eyeR = document.createElement("div"); eyeR.className = "cb-eye cb-eye-r";
-      eyes.appendChild(eyeL); eyes.appendChild(eyeR);
-      cell.appendChild(eyes);
-
-      // Orb holders (left and right hands)
-      const orbL = document.createElement("div");
-      orbL.className = "cb-orb-glow cb-orb-l";
-      cell.appendChild(orbL);
-
-      const orbR = document.createElement("div");
-      orbR.className = "cb-orb-glow cb-orb-r";
-      cell.appendChild(orbR);
-
-      // Ground aura
       const aura = document.createElement("div");
       aura.className = "cb-aura";
       cell.appendChild(aura);
@@ -183,6 +157,16 @@ PlantRegistry.register({
     if (!target) return;
 
     plantData.shotCount = (plantData.shotCount || 0) + 1;
+    if (!plantData.nextRowTeleport) {
+      plantData.nextRowTeleport = 3 + Math.floor(Math.random() * 2);
+    }
+
+    const isRandomRowTeleport = plantData.level >= 5 &&
+      plantData.shotCount >= plantData.nextRowTeleport;
+    if (isRandomRowTeleport) {
+      plantData.nextRowTeleport += 3 + Math.floor(Math.random() * 2);
+    }
+    const doShardBarrage = plantData.level >= 10 && isRandomRowTeleport;
 
     const tier       = this._getTier(plantData.level);
     const isHaunt    = (tier === "haunt" || tier === "void") &&
@@ -214,11 +198,11 @@ PlantRegistry.register({
     // ── Fire after windup ──
     setTimeout(() => {
       if (isVoid) {
-        fireVoidBloom(row, col, active, cellRect, gridRect, stats);
+        fireVoidBloom(row, col, active, cellRect, gridRect, stats, doShardBarrage, isRandomRowTeleport);
       } else if (isHaunt) {
-        fireHauntOrb(row, col, target, active, cellRect, stats);
+        fireHauntOrb(row, col, target, active, cellRect, gridRect, stats, doShardBarrage, isRandomRowTeleport);
       } else {
-        fireSoulOrb(row, col, target, cellRect, stats);
+        fireSoulOrb(row, col, target, active, cellRect, gridRect, stats, doShardBarrage, isRandomRowTeleport);
       }
     }, 180);
   },
@@ -228,7 +212,7 @@ PlantRegistry.register({
     const cell = Grid.getCellEl(row, col);
     if (cell) {
       cell.querySelectorAll(
-        ".cb-blob,.cb-smoke,.cb-eyes,.cb-orb-glow,.cb-aura"
+        ".cb-core-ring,.cb-aura"
       ).forEach(el => el.remove());
     }
   },
@@ -252,7 +236,7 @@ PlantRegistry.register({
 // ══════════════════════════════════════════════════════════════
 //  TIER 1 — SOUL ORB (floating ghost orb, short DoT wisp)
 // ══════════════════════════════════════════════════════════════
-function fireSoulOrb(row, col, target, cellRect, stats) {
+function fireSoulOrb(row, col, target, active, cellRect, gridRect, stats, doShardBarrage, randomTeleport) {
   const layer  = document.getElementById("projectiles-layer");
   const cellEl = Grid.getCellEl(row, col);
   if (!layer || !cellEl) return;
@@ -292,6 +276,9 @@ function fireSoulOrb(row, col, target, cellRect, stats) {
         showCbImpact(endX + 8, endY + 8, "basic", layerRect);
         // Leave soul wisp DoT
         applySoulWisp(target, stats.dotDmg, COSMBLOOM_CFG.DOT_DURATION_MS, COSMBLOOM_CFG.DOT_TICK_MS);
+        sendRowDemonsToStart(row, active, gridRect, layerRect);
+        if (randomTeleport) teleportOneDemonToRandomRow(row, active, gridRect, layerRect);
+        if (doShardBarrage) fireVoidShardBarrage(row, col, active, cellRect, layerRect, stats);
       }
     }
   }
@@ -301,7 +288,7 @@ function fireSoulOrb(row, col, target, cellRect, stats) {
 // ══════════════════════════════════════════════════════════════
 //  TIER 2 — HAUNTING ORB (splits into 3 homing wisps + ghost mark)
 // ══════════════════════════════════════════════════════════════
-function fireHauntOrb(row, col, target, active, cellRect, stats) {
+function fireHauntOrb(row, col, target, active, cellRect, gridRect, stats, doShardBarrage, randomTeleport) {
   const layer  = document.getElementById("projectiles-layer");
   const cellEl = Grid.getCellEl(row, col);
   if (!layer || !cellEl) return;
@@ -340,6 +327,9 @@ function fireHauntOrb(row, col, target, active, cellRect, stats) {
         showCbImpact(endX + 10, endY + 10, "haunt", layerRect);
         // Spawn 3 homing wisps targeting closest 3 demons in lane
         spawnHomingWisps(row, col, active, endX + 10, endY + 10, layerRect, stats);
+        sendRowDemonsToStart(row, active, gridRect, layerRect);
+        if (randomTeleport) teleportOneDemonToRandomRow(row, active, gridRect, layerRect);
+        if (doShardBarrage) fireVoidShardBarrage(row, col, active, cellRect, layerRect, stats);
       }
     }
   }
@@ -417,7 +407,7 @@ function spawnHomingWisps(row, col, active, originX, originY, layerRect, stats) 
 // ══════════════════════════════════════════════════════════════
 //  TIER 3 — VOID BLOOM (erupts on all demons, soul drain)
 // ══════════════════════════════════════════════════════════════
-function fireVoidBloom(row, col, active, cellRect, gridRect, stats) {
+function fireVoidBloom(row, col, active, cellRect, gridRect, stats, doShardBarrage, randomTeleport) {
   const layer  = document.getElementById("projectiles-layer");
   const cellEl = Grid.getCellEl(row, col);
   if (!layer || !cellEl) return;
@@ -463,6 +453,10 @@ function fireVoidBloom(row, col, active, cellRect, gridRect, stats) {
       showVoidBloomFlower(dcx, dcy, layerRect);
     }, i * COSMBLOOM_CFG.VOID_DELAY_MS);
   });
+
+  sendRowDemonsToStart(row, active, gridRect, layerRect);
+  if (randomTeleport) teleportOneDemonToRandomRow(row, active, gridRect, layerRect);
+  if (doShardBarrage) fireVoidShardBarrage(row, col, active, cellRect, layerRect, stats);
 
   // "VOID BLOOM!" text
   showVoidText(cellRect, layerRect);
@@ -626,4 +620,118 @@ function showVoidText(cellRect, layerRect) {
   `;
   effectsEl.appendChild(txt);
   setTimeout(() => txt.remove(), 1100);
+}
+
+function sendRowDemonsToStart(row, active, gridRect, layerRect) {
+  if (!gridRect || !layerRect) return;
+  const startX = gridRect.right - layerRect.left - 8;
+
+  active.forEach((d) => {
+    if (d.dead || d.row !== row) return;
+    d.x = startX;
+    d.el.style.left = d.x + "px";
+    d.targeting = null;
+    d.biteTimer = 0;
+
+    const rowEl = document.querySelector(`.grid-row[data-row="${row}"]`);
+    if (rowEl) {
+      const rowRect = rowEl.getBoundingClientRect();
+      const liveY = rowRect.top - layerRect.top + (rowRect.height - d.height) / 2;
+      d.y = liveY;
+      d.el.style.top = liveY + "px";
+    }
+    showTeleportPulse(d, layerRect);
+  });
+}
+
+function teleportOneDemonToRandomRow(row, active, gridRect, layerRect) {
+  const candidates = active.filter((d) => !d.dead && d.row === row);
+  if (candidates.length === 0 || !gridRect || !layerRect) return;
+  const availableRows = Array.from({ length: Grid.getRows() }, (_, i) => i).filter((r) => r !== row);
+  if (availableRows.length === 0) return;
+
+  const demon = candidates[Math.floor(Math.random() * candidates.length)];
+  const newRow = availableRows[Math.floor(Math.random() * availableRows.length)];
+  demon.row = newRow;
+  demon.targeting = null;
+  demon.biteTimer = 0;
+
+  const rowEl = document.querySelector(`.grid-row[data-row="${newRow}"]`);
+  if (rowEl) {
+    const rowRect = rowEl.getBoundingClientRect();
+    const liveY = rowRect.top - layerRect.top + (rowRect.height - demon.height) / 2;
+    demon.y = liveY;
+    demon.el.style.top = liveY + "px";
+  }
+  showTeleportPulse(demon, layerRect, true);
+}
+
+function fireVoidShardBarrage(row, col, active, cellRect, layerRect, stats) {
+  const layer = document.getElementById("projectiles-layer");
+  const cellEl = Grid.getCellEl(row, col);
+  if (!layer || !cellEl) return;
+
+  const targets = active
+    .filter((d) => !d.dead && d.row === row)
+    .sort((a, b) => {
+      const ar = a.el.getBoundingClientRect();
+      const br = b.el.getBoundingClientRect();
+      return ar.left - br.left;
+    })
+    .slice(0, 5);
+
+  if (targets.length === 0) return;
+
+  const originX = cellRect.right - layerRect.left - 10;
+  const originY = cellRect.top - layerRect.top + cellRect.height * 0.5 - 10;
+
+  targets.forEach((target, index) => {
+    setTimeout(() => {
+      if (target.dead) return;
+      const shard = document.createElement("div");
+      shard.className = "cb-shard";
+      shard.style.cssText = `position:absolute;left:${originX}px;top:${originY}px;pointer-events:none;z-index:15;`;
+      layer.appendChild(shard);
+
+      const dRect = target.el.getBoundingClientRect();
+      const endX = dRect.left - layerRect.left + dRect.width * 0.5 - 7;
+      const endY = dRect.top - layerRect.top + dRect.height * 0.5 - 7;
+      const startT = performance.now();
+      const DURATION = 320;
+
+      function animShard(now) {
+        const t = Math.min((now - startT) / DURATION, 1);
+        const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+        const x = originX + (endX - originX) * ease;
+        const y = originY + (endY - originY) * ease;
+        shard.style.left = x + "px";
+        shard.style.top = y + "px";
+        if (t < 1) {
+          requestAnimationFrame(animShard);
+        } else {
+          shard.remove();
+          if (!target.dead) {
+            _ghostDamage(target, Math.round(stats.damage * 0.75), "soul");
+            showCbImpact(endX + 7, endY + 7, "void", layerRect);
+          }
+        }
+      }
+      requestAnimationFrame(animShard);
+    }, index * 80);
+  });
+}
+
+function showTeleportPulse(d, layerRect, brighter = false) {
+  const effectsEl = document.getElementById("effects-layer");
+  if (!effectsEl || !d.el) return;
+  const eRect = effectsEl.getBoundingClientRect();
+  const dRect = d.el.getBoundingClientRect();
+  const ex = dRect.left - eRect.left + (dRect.width - 32) / 2;
+  const ey = dRect.top - eRect.top + (dRect.height - 32) / 2;
+
+  const pulse = document.createElement("div");
+  pulse.className = brighter ? "cb-teleport-arc cb-teleport-arc-bright" : "cb-teleport-arc";
+  pulse.style.cssText = `left:${ex}px;top:${ey}px;width:34px;height:34px;`;
+  effectsEl.appendChild(pulse);
+  setTimeout(() => pulse.remove(), 520);
 }

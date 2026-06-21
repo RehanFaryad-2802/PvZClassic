@@ -279,70 +279,284 @@ html, body {
 /* ═══════════════════════════════════════════════════
    MAIN MENU
 ═══════════════════════════════════════════════════ */
-.menu-bg {
+/* ══════════════════════════════════════════════
+   MENU SCREEN — PvZ2 Style
+══════════════════════════════════════════════ */
+.menu-bg-img {
+  position: absolute;
+  inset: 0;
+  background: url('../assets/homepage/home.jpeg') center center / cover no-repeat;
+  /* fallback color while image loads */
+  background-color: #5a9e2f;
+  z-index: 0;
+}
+.menu-bg-overlay {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(106,0,200,0.3) 0%, transparent 60%),
-    radial-gradient(ellipse at 10% 90%, rgba(34,197,94,0.12) 0%, transparent 50%),
-    linear-gradient(180deg, #0a0010 0%, #06000e 100%);
+    linear-gradient(to bottom,
+      rgba(0,0,0,0.25) 0%,
+      transparent 30%,
+      transparent 55%,
+      rgba(0,0,0,0.45) 100%);
+  z-index: 1;
 }
-.menu-container {
-  position: relative;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: 24px;
-  gap: 24px;
-}
-.menu-header {
+
+/* ── Top Bar ────────────────────────────────── */
+.menu-topbar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 8px 12px;
+  z-index: 10;
 }
-.player-info-bar {
+.menu-player-pill {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0,0,0,0.55);
+  border: 2px solid rgba(255,200,50,0.6);
+  border-radius: 20px;
+  padding: 4px 10px 4px 4px;
+}
+.menu-avatar {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  border: 1px solid #4ade80;
+}
+.menu-playername {
+  font-family: var(--font-display);
+  font-size: 12px;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  max-width: 80px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.menu-topbar-right {
+  display: flex;
+  align-items: center;
   gap: 6px;
 }
-#menu-player-name {
+.menu-currency-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0,0,0,0.6);
+  border: 2px solid rgba(255,180,0,0.5);
+  border-radius: 16px;
+  padding: 3px 10px 3px 5px;
   font-family: var(--font-display);
-  font-size: 20px;
-  color: var(--orange-light);
-  letter-spacing: 1px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fde68a;
+  min-width: 52px;
 }
-.menu-buttons {
+.menu-curr-icon {
+  width: 16px; height: 16px;
+  object-fit: contain;
+}
+
+/* ── Center area: logo + buttons ────────────── */
+.menu-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -54%);
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  flex: 1;
+  align-items: center;
+  gap: 7px;
+  z-index: 10;
+  width: 90%;
+  max-width: 340px;
+}
+
+/* ── PvZClassic logo ─────────────────────────── */
+.menu-pvz-logo {
+  text-align: center;
+  line-height: 1;
+  margin-bottom: 6px;
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,0.7));
+}
+.pvz-logo-pvz {
+  font-family: var(--font-display);
+  font-size: 38px;
+  font-weight: 900;
+  color: #22c55e;
+  text-shadow:
+    -2px -2px 0 #14532d,
+     2px -2px 0 #14532d,
+    -2px  2px 0 #14532d,
+     2px  2px 0 #14532d,
+     0 4px 0 #0a2e18,
+     0 0 20px rgba(34,197,94,0.6);
+  letter-spacing: 1px;
+}
+.pvz-logo-classic {
+  font-family: var(--font-display);
+  font-size: 38px;
+  font-weight: 900;
+  color: #fbbf24;
+  text-shadow:
+    -2px -2px 0 #78350f,
+     2px -2px 0 #78350f,
+    -2px  2px 0 #78350f,
+     2px  2px 0 #78350f,
+     0 4px 0 #451a03,
+     0 0 20px rgba(251,191,36,0.5);
+}
+.pvz-logo-sub {
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: #a7f3d0;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  margin-top: 2px;
+}
+
+/* ── ADVENTURE button ───────────────────────── */
+.menu-btn-adventure {
+  display: flex;
+  align-items: center;
   justify-content: center;
-  max-width: 400px;
-  margin: 0 auto;
+  gap: 8px;
   width: 100%;
+  max-width: 260px;
+  padding: 10px 20px;
+  background: linear-gradient(180deg, #3bbfff 0%, #1a90e8 40%, #1270c0 100%);
+  border: 3px solid #7de0ff;
+  border-bottom-color: #0a5090;
+  border-radius: 12px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  box-shadow:
+    0 5px 0 #0a4a80,
+    0 6px 12px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
 }
-.menu-deco {
+.menu-btn-adventure:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #0a4a80, 0 3px 6px rgba(0,0,0,0.4);
+}
+.menu-btn-icon { font-size: 20px; }
+
+/* ── PLAY button (orange) ────────────────────── */
+.menu-btn-play {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 260px;
+  padding: 9px 20px;
+  background: linear-gradient(180deg, #f97316 0%, #c2510a 60%, #9a3c06 100%);
+  border: 3px solid #fbbf24;
+  border-bottom-color: #7c2d12;
+  border-radius: 12px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  box-shadow:
+    0 5px 0 #7c2d12,
+    0 6px 12px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.menu-btn-play:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #7c2d12, 0 3px 6px rgba(0,0,0,0.4);
+}
+
+/* ── Row: ARENA + ALMANAC ───────────────────── */
+.menu-btn-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  max-width: 260px;
+}
+.menu-btn-secondary {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px 10px;
+  background: linear-gradient(180deg, #a16207 0%, #78350f 100%);
+  border: 2px solid #fbbf24;
+  border-bottom-color: #451a03;
+  border-radius: 10px;
+  color: #fde68a;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  box-shadow: 0 3px 0 #451a03, 0 4px 8px rgba(0,0,0,0.4);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.menu-btn-secondary:active { transform: translateY(2px); }
+
+/* ── Bottom icon bar ─────────────────────────── */
+.menu-bottombar {
   position: absolute;
-  bottom: 0; right: 0;
-  width: 260px;
-  height: 200px;
-  pointer-events: none;
+  bottom: 0; left: 0; right: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 10px 6px;
+  z-index: 10;
+  gap: 4px;
 }
-.deco-plant {
-  position: absolute;
-  width: 70px;
-  filter: drop-shadow(0 0 12px rgba(34,197,94,0.5));
-  animation: plantBob 3s ease-in-out infinite;
+.menu-bottom-spacer { flex: 1; }
+.menu-bottom-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  background: rgba(0,0,0,0.65);
+  border: 2px solid rgba(255,200,50,0.5);
+  border-radius: 12px;
+  padding: 6px 10px 4px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 8px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.15s;
+  min-width: 44px;
 }
-.deco-plant.p1 { bottom: 20px; right: 20px; animation-delay: 0s; }
-.deco-plant.p2 { bottom: 30px; right: 90px; animation-delay: 0.5s; width: 60px; }
-.deco-plant.p3 { bottom: 10px; right: 160px; animation-delay: 1s; width: 55px; }
-.deco-plant.p4 { bottom: 40px; right: 220px; animation-delay: 1.5s; width: 50px; }
-@keyframes plantBob {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-8px); }
+.menu-bottom-btn:active { transform: scale(0.92); background: rgba(0,0,0,0.85); }
+.menu-bottom-icon { font-size: 18px; line-height: 1; }
+.menu-bottom-icon-img { width: 18px; height: 18px; object-fit: contain; }
+.menu-bottom-label {
+  font-size: 8px;
+  color: #fde68a;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
+
+/* keep old deco/bg classes harmless */
+.menu-bg { display: none; }
+.menu-container { display: none; }
+.menu-deco { display: none; }
+.deco-plant { display: none; }
 
 /* ═══════════════════════════════════════════════════
    WORLD MAP

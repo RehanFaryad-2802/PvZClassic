@@ -246,215 +246,23 @@ const UI = (() => {
     showScreen("screen-levelselect");
   }
 
-  function buildLevelGrid(worldId) {
-    const world = Levels.getWorld(worldId);
-    const container = document.getElementById("levels-grid");
-    container.innerHTML = "";
-    container.className = `levels-grid world-theme-${worldId}`;
-
-    // Set bg image
-    const bg = document.querySelector(".levelselect-bg");
-    if (bg) {
-      bg.className = `levelselect-bg world-${worldId}`;
-      const hasBg = {
-        1: true,
-        2: false,
-        3: false,
-        4: false,
-        5: false,
-        6: false,
-        7: false,
-        8: false,
-        9: false,
-        10: false,
-      };
-      const imgPath = hasBg[worldId]
-        ? `assets/worlds/world${worldId}/bg.jpg`
-        : `assets/worlds/world${worldId}/world${worldId}.jpg`;
-      // fallback color if image missing
-      bg.style.backgroundColor = "#0a0010";
-      bg.style.backgroundImage = `url('${imgPath}')`;
-      bg.style.backgroundSize = "cover";
-      bg.style.backgroundPosition = "center bottom";
-      bg.style.backgroundRepeat = "no-repeat";
-    }
-
-    let currentLevelIdx = -1;
-    for (let i = 0; i < world.levelCount; i++) {
-      if (
-        (Player.isLevelUnlocked(worldId, i) || (worldId === 1 && i === 0)) &&
-        Player.getLevelStars(worldId, i) === 0
-      ) {
-        currentLevelIdx = i;
-        break;
-      }
-    }
-    // Safety: if still -1 (all levels done), point to last level
-    if (currentLevelIdx === -1) currentLevelIdx = world.levelCount - 1;
-
-    const zigzag = [0, -55, -90, -55, 0, 55, 90, 55];
-    const ORB_SIZE = 64;
-    const H_STEP = 100;
-    const baseline = 160;
-
-    container.style.position = "relative";
-    container.style.height = "320px";
-    container.style.display = "block";
-    container.style.overflowX = "auto";
-    container.style.overflowY = "hidden";
-    container.style.scrollbarWidth = "none";
-    container.style.cursor = "grab";
-    const wmBg = document.querySelector(".worldmap-bg");
-    container.addEventListener("scroll", () => {
-      if (wmBg) {
-        const pct =
-          container.scrollLeft /
-          (container.scrollWidth - container.clientWidth);
-        wmBg.style.backgroundPosition = `${pct * 100}% center`;
-      }
-    });
-
-    const totalWidth = world.levelCount * H_STEP + 120;
-    const canvas = document.createElement("div");
-    canvas.style.cssText = `position:relative;width:${totalWidth}px;height:320px;`;
-    container.appendChild(canvas);
-
-    // SVG connector lines
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.style.cssText =
-      "position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:1;pointer-events:none;";
-    canvas.appendChild(svg);
-
-    for (let i = 1; i < world.levelCount; i++) {
-      const prevY = baseline + zigzag[(i - 1) % zigzag.length];
-      const currY = baseline + zigzag[i % zigzag.length];
-      const prevX = 50 + (i - 1) * H_STEP + ORB_SIZE / 2;
-      const currX = 50 + i * H_STEP + ORB_SIZE / 2;
-      const prevDone = Player.getLevelStars(worldId, i - 1) > 0;
-      const currDone = Player.getLevelStars(worldId, i) > 0;
-      const isCurr = i === currentLevelIdx;
-
-      const color =
-        prevDone && currDone
-          ? "#22c55e"
-          : prevDone && isCurr
-            ? "#3b82f6"
-            : "rgba(255,255,255,0.15)";
-
-      const mx = (prevX + currX) / 2;
-      const path = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "path",
-      );
-      path.setAttribute(
-        "d",
-        `M${prevX},${prevY} C${mx},${prevY} ${mx},${currY} ${currX},${currY}`,
-      );
-      path.setAttribute("stroke", color);
-      path.setAttribute("stroke-width", "6");
-      path.setAttribute("fill", "none");
-      path.setAttribute("stroke-linecap", "round");
-      if (!prevDone && !isCurr) path.setAttribute("stroke-dasharray", "8 6");
-      svg.appendChild(path);
-    }
-
-    // Orb nodes
-    for (let i = 0; i < world.levelCount; i++) {
-      const unlocked = Player.isLevelUnlocked(worldId, i);
-      const stars = Player.getLevelStars(worldId, i);
-      const isElite = (i + 1) % 5 === 0;
-      const isCurrent = i === currentLevelIdx;
-      const isDone = stars > 0;
-
-      const x = 50 + i * H_STEP;
-      const y = baseline + zigzag[i % zigzag.length] - ORB_SIZE / 2;
-
-      const plantReward = Levels.PLANT_UNLOCKS.find(
-        (u) => u.worldId === worldId && u.levelIdx === i,
-      );
-      const mgReward = Levels.MINIGAME_UNLOCKS.find(
-        (u) => u.worldId === worldId && u.levelIdx === i,
-      );
-      const rewardBadge = plantReward
-        ? `<div class="level-reward-badge">🌿 Plant</div>`
-        : mgReward
-          ? `<div class="level-reward-badge">🎮 Game</div>`
-          : "";
-
-      const starsHtml = isDone
-        ? `<div class="level-stars-row">${"⭐".repeat(stars)}${"☆".repeat(3 - stars)}</div>`
-        : isCurrent
-          ? `<div class="level-arrow">▼</div>`
-          : "";
-
-      const btn = document.createElement("div");
-      btn.className =
-        "level-btn" +
-        (isDone ? " completed" : "") +
-        (isCurrent ? " current" : "") +
-        (!unlocked && !isCurrent ? " locked" : "") +
-        (isElite ? " elite" : "");
-      btn.style.cssText = `position:absolute;left:${x}px;top:${y}px;z-index:2;`;
-      btn.innerHTML = `
-        ${rewardBadge}
-        <div class="level-orb">
-          <span class="level-num">${unlocked || isCurrent ? (isElite ? "🔥" : i + 1) : "🔒"}</span>
-        </div>
-        ${starsHtml}
-      `;
-
-      const isAlwaysOpenOrb = (worldId === 1 && i === 0);
-      if (unlocked || isCurrent || isAlwaysOpenOrb)
-        btn.addEventListener("click", () => openPlantPicker(worldId, i));
-      canvas.appendChild(btn);
-    }
-
-    // Auto scroll to current
-    setTimeout(() => {
-      if (currentLevelIdx >= 0) {
-        container.scrollTo({
-          left: Math.max(0, currentLevelIdx * H_STEP - 200),
-          behavior: "smooth",
-        });
-      }
-    }, 300);
-
-    // Drag to scroll
-    let isDragging = false,
-      dragStartX = 0,
-      scrollStartX = 0;
-    container.addEventListener("mousedown", (e) => {
-      isDragging = true;
-      dragStartX = e.clientX;
-      scrollStartX = container.scrollLeft;
-      container.style.cursor = "grabbing";
-    });
-    window.addEventListener("mousemove", (e) => {
-      if (!isDragging) return;
-      container.scrollLeft = scrollStartX - (e.clientX - dragStartX);
-    });
-    window.addEventListener("mouseup", () => {
-      isDragging = false;
-      container.style.cursor = "grab";
-    });
-    container.addEventListener(
-      "touchstart",
-      (e) => {
-        dragStartX = e.touches[0].clientX;
-        scrollStartX = container.scrollLeft;
-      },
-      { passive: true },
-    );
-    container.addEventListener(
-      "touchmove",
-      (e) => {
-        container.scrollLeft =
-          scrollStartX - (e.touches[0].clientX - dragStartX);
-      },
-      { passive: true },
-    );
+function buildLevelGrid(worldId) {
+  // Set background image
+  const bg = document.querySelector('.levelselect-bg');
+  if (bg) {
+    const imgPath = `assets/worlds/world${worldId}/bg.jpg`;
+    bg.style.cssText = `
+      position:absolute;inset:0;
+      background-color:#1a2e0a;
+      background-image:url('${imgPath}');
+      background-size:cover;
+      background-position:center;
+    `;
   }
-
+  // Delegate to component
+  LevelSelectMap.init('levels-grid', (wId, lIdx) => openPlantPicker(wId, lIdx));
+  LevelSelectMap.render(worldId);
+}
   let pendingBattleWorld = 1;
   let pendingBattleLevel = 0;
   let selectedPlants = [];
@@ -2324,8 +2132,14 @@ const UI = (() => {
       .addEventListener("click", () => showScreen("screen-worldmap"));
 
     // Settings open/back
-    document
-      .getElementById("btn-settings")
+    // New menu bottom bar buttons
+document.getElementById('btn-menu-minigames')?.addEventListener('click', () => UI.showScreen('screen-minigames'));
+document.getElementById('btn-menu-collection')?.addEventListener('click', () => UI.showScreen('screen-collection'));
+document.getElementById('btn-menu-collection2')?.addEventListener('click', () => UI.showScreen('screen-collection'));
+document.getElementById('btn-menu-worldmap')?.addEventListener('click', () => UI.showScreen('screen-worldmap'));
+document.getElementById('btn-play-quick')?.addEventListener('click', () => UI.showScreen('screen-worldmap'));
+
+document.getElementById('btn-settings')
       .addEventListener("click", () => showScreen("screen-settings"));
     document
       .getElementById("btn-back-settings")

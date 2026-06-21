@@ -1,0 +1,274 @@
+/* ══════════════════════════════════════════════════
+   css/level_select_map.css  — PvZClassic
+   Floating island winding-path level select
+══════════════════════════════════════════════════ */
+
+/* ── Outer container replaces .levels-grid ───────── */
+.lsm-container {
+  position: absolute;
+  inset: 0;
+  top: 44px;           /* below the header */
+  overflow: hidden;
+}
+
+/* ── Horizontal scroll wrapper ───────────────────── */
+.lsm-scroll {
+  width: 100%;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  cursor: grab;
+  -webkit-overflow-scrolling: touch;
+}
+.lsm-scroll::-webkit-scrollbar { display: none; }
+.lsm-scroll:active { cursor: grabbing; }
+
+/* ── Canvas: the wide logical drawing area ────────── */
+.lsm-canvas {
+  position: relative;
+  /* width + height set inline by JS */
+  /* Scale height to fill screen */
+  height: 100%;
+  /* Keep the canvas proportional — we scale via transform */
+  transform-origin: top left;
+}
+
+/* ── Island background ────────────────────────────── */
+.lsm-island-bg {
+  position: absolute;
+  inset: 0;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center center;
+  pointer-events: none;
+}
+
+/* ── SVG path layer ───────────────────────────────── */
+.lsm-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ══════════════════════════════════════════════════
+   LEVEL NODE  (.lsm-node)
+   Centred on its path point via transform
+══════════════════════════════════════════════════ */
+.lsm-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  z-index: 3;
+  cursor: pointer;
+  /* prevent accidental text selection while dragging */
+  user-select: none;
+  -webkit-user-select: none;
+}
+.lsm-node.lsm-locked {
+  cursor: default;
+  opacity: 0.55;
+}
+
+/* ── Stone slab ────────────────────────────────────── */
+.lsm-slab {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  /* Stone texture via gradient */
+  background: radial-gradient(circle at 35% 30%,
+    #e8d5a3 0%,
+    #c9b07a 40%,
+    #a8905a 70%,
+    #8a7040 100%);
+  border: 3px solid #6b5a30;
+  box-shadow:
+    0 4px 0 #4a3c1a,
+    0 6px 12px rgba(0,0,0,0.55),
+    inset 0 1px 0 rgba(255,255,255,0.35),
+    inset 0 -2px 4px rgba(0,0,0,0.3);
+
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.lsm-node:not(.lsm-locked):active .lsm-slab {
+  transform: translateY(3px);
+  box-shadow:
+    0 1px 0 #4a3c1a,
+    0 3px 6px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+/* Completed slab — mossy green */
+.lsm-node.lsm-done .lsm-slab {
+  background: radial-gradient(circle at 35% 30%,
+    #a8d87a 0%,
+    #78b84a 40%,
+    #558a2e 70%,
+    #3a6018 100%);
+  border-color: #2d4e10;
+  box-shadow:
+    0 4px 0 #1e3608,
+    0 6px 12px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.3),
+    0 0 12px rgba(120,184,74,0.5);
+}
+
+/* Current slab — glowing blue */
+.lsm-node.lsm-current .lsm-slab {
+  background: radial-gradient(circle at 35% 30%,
+    #7dd3fc 0%,
+    #3b9fe8 40%,
+    #1a70c0 70%,
+    #0a4a90 100%);
+  border-color: #7de0ff;
+  box-shadow:
+    0 4px 0 #0a3a70,
+    0 6px 12px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.4),
+    0 0 18px rgba(59,159,232,0.7),
+    0 0 32px rgba(59,159,232,0.3);
+  animation: lsm-pulse 1.8s ease-in-out infinite;
+}
+
+/* Elite slab — golden */
+.lsm-node.lsm-elite .lsm-slab {
+  background: radial-gradient(circle at 35% 30%,
+    #fde68a 0%,
+    #f59e0b 40%,
+    #d97706 70%,
+    #b45309 100%);
+  border-color: #fbbf24;
+  box-shadow:
+    0 4px 0 #92400e,
+    0 6px 12px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.4),
+    0 0 14px rgba(251,191,36,0.5);
+}
+
+/* Locked slab — dark grey */
+.lsm-node.lsm-locked .lsm-slab {
+  background: radial-gradient(circle at 35% 30%,
+    #6b7280 0%,
+    #4b5563 40%,
+    #374151 70%,
+    #1f2937 100%);
+  border-color: #374151;
+  box-shadow:
+    0 3px 0 #111827,
+    0 5px 10px rgba(0,0,0,0.6);
+}
+
+@keyframes lsm-pulse {
+  0%, 100% { box-shadow:
+    0 4px 0 #0a3a70,
+    0 6px 12px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.4),
+    0 0 18px rgba(59,159,232,0.7),
+    0 0 32px rgba(59,159,232,0.3); }
+  50% { box-shadow:
+    0 4px 0 #0a3a70,
+    0 6px 12px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.4),
+    0 0 28px rgba(59,159,232,1),
+    0 0 50px rgba(59,159,232,0.6); }
+}
+
+/* ── Number label ─────────────────────────────────── */
+.lsm-num {
+  font-family: var(--font-display, sans-serif);
+  font-size: 16px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow:
+    -1px -1px 0 rgba(0,0,0,0.6),
+     1px -1px 0 rgba(0,0,0,0.6),
+    -1px  1px 0 rgba(0,0,0,0.6),
+     1px  1px 0 rgba(0,0,0,0.6),
+     0 2px 4px rgba(0,0,0,0.8);
+  line-height: 1;
+  pointer-events: none;
+}
+.lsm-node.lsm-done .lsm-num { color: #f0fff0; }
+
+/* ── Stars row ────────────────────────────────────── */
+.lsm-stars {
+  font-size: 10px;
+  letter-spacing: 0px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8));
+}
+
+/* ── Current arrow ────────────────────────────────── */
+.lsm-arrow {
+  font-size: 11px;
+  color: #7dd3fc;
+  animation: lsm-bounce 1s ease-in-out infinite;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.8));
+}
+@keyframes lsm-bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(3px); }
+}
+
+/* ── Reward badge ─────────────────────────────────── */
+.lsm-badge {
+  font-size: 11px;
+  background: rgba(0,0,0,0.7);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  padding: 1px 4px;
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════════════════════
+   LEVEL SELECT SCREEN HEADER
+══════════════════════════════════════════════════ */
+.levelselect-container {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.levelselect-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  height: 44px;
+  flex-shrink: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  z-index: 10;
+}
+.levelselect-header h2 {
+  font-family: var(--font-display, sans-serif);
+  font-size: 16px;
+  color: #fff;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+.levelselect-header .coin-display {
+  font-size: 12px;
+  color: #fde68a;
+  font-weight: 700;
+}
