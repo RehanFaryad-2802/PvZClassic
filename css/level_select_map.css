@@ -1,47 +1,64 @@
 /* ══════════════════════════════════════════════════
    css/level_select_map.css  — PvZClassic
-   Floating island winding-path level select
+   Floating island level select — scales to screen height,
+   scrolls horizontally. Works on mobile & desktop.
 ══════════════════════════════════════════════════ */
 
-/* ── Outer container replaces .levels-grid ───────── */
+/* ── Screen container ─────────────────────────────── */
 .lsm-container {
   position: absolute;
   inset: 0;
-  top: 44px;           /* below the header */
   overflow: hidden;
+}
+
+/* ── Sky background (fixed, fills screen) ─────────── */
+.lsm-sky {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #87ceeb 0%, #c9e8f5 60%, #e8f4fd 100%);
+  z-index: 0;
 }
 
 /* ── Horizontal scroll wrapper ───────────────────── */
 .lsm-scroll {
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
   cursor: grab;
   -webkit-overflow-scrolling: touch;
+  /* vertically centre the island */
+  display: flex;
+  align-items: center;
+  z-index: 1;
 }
 .lsm-scroll::-webkit-scrollbar { display: none; }
 .lsm-scroll:active { cursor: grabbing; }
 
-/* ── Canvas: the wide logical drawing area ────────── */
-.lsm-canvas {
+/* ── Island wrapper ───────────────────────────────── */
+/* Height fills the scroll container (minus small vertical padding).
+   Width = height × aspect ratio — this is the key to keeping nodes
+   at the correct % positions regardless of screen size.            */
+.lsm-island {
   position: relative;
-  /* width + height set inline by JS */
-  /* Scale height to fill screen */
+  flex-shrink: 0;
   height: 100%;
-  /* Keep the canvas proportional — we scale via transform */
-  transform-origin: top left;
+  aspect-ratio: 2.4 / 1;
+  min-height: 260px;
+  max-height: 600px;
 }
 
-/* ── Island background ────────────────────────────── */
-.lsm-island-bg {
+/* ── Island image ─────────────────────────────────── */
+.lsm-island-img {
   position: absolute;
   inset: 0;
-  background-size: contain;
+  background-size: 100% 100%;   /* stretch to fill island div exactly */
   background-repeat: no-repeat;
-  background-position: center center;
-  pointer-events: none;
+  background-position: center;
+  border-radius: 8px;
+  /* Soft shadow so island floats above sky */
+  filter: drop-shadow(0 12px 32px rgba(0,0,0,0.35));
 }
 
 /* ── SVG path layer ───────────────────────────────── */
@@ -51,170 +68,140 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 1;
+  z-index: 2;
+  /* stroke-width in viewBox units (0-100), so 1.2 = 1.2% of width */
 }
 
 /* ══════════════════════════════════════════════════
-   LEVEL NODE  (.lsm-node)
-   Centred on its path point via transform
+   LEVEL NODE
 ══════════════════════════════════════════════════ */
 .lsm-node {
   position: absolute;
+  /* Centre the node on its % coordinate */
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
-  z-index: 3;
+  gap: 2px;
+  z-index: 5;
   cursor: pointer;
-  /* prevent accidental text selection while dragging */
   user-select: none;
   -webkit-user-select: none;
 }
 .lsm-node.lsm-locked {
   cursor: default;
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
-/* ── Stone slab ────────────────────────────────────── */
+/* ── Slab circle ──────────────────────────────────── */
 .lsm-slab {
-  width: 46px;
-  height: 46px;
+  width: var(--slab-w, 28px);
+  height: 28px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-
-  /* Stone texture via gradient */
-  background: radial-gradient(circle at 35% 30%,
-    #e8d5a3 0%,
-    #c9b07a 40%,
-    #a8905a 70%,
-    #8a7040 100%);
-  border: 3px solid #6b5a30;
+  /* Unlocked: natural warm grey stone matching island slabs */
+  background: radial-gradient(circle at 38% 28%,
+    #d4cfc8 0%, #b0a99e 40%, #8c8278 72%, #6e6058 100%);
+  border: 2px solid #5a5048;
   box-shadow:
-    0 4px 0 #4a3c1a,
-    0 6px 12px rgba(0,0,0,0.55),
-    inset 0 1px 0 rgba(255,255,255,0.35),
-    inset 0 -2px 4px rgba(0,0,0,0.3);
-
-  transition: transform 0.15s, box-shadow 0.15s;
+    0 3px 0 #3e3830,
+    0 5px 10px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.25);
+  transition: transform 0.12s, box-shadow 0.12s;
 }
 .lsm-node:not(.lsm-locked):active .lsm-slab {
-  transform: translateY(3px);
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #3e3830, 0 2px 5px rgba(0,0,0,0.45);
+}
+
+/* Completed — slightly mossy stone (subtle green tint, still natural) */
+.lsm-node.lsm-done .lsm-slab {
+  background: radial-gradient(circle at 38% 28%,
+    #c8d4be 0%, #9eb890 40%, #708c62 70%, #4e6644 100%);
+  border-color: #4a6040;
   box-shadow:
-    0 1px 0 #4a3c1a,
-    0 3px 6px rgba(0,0,0,0.5),
+    0 3px 0 #3a4e30,
+    0 5px 10px rgba(0,0,0,0.45),
     inset 0 1px 0 rgba(255,255,255,0.2);
 }
 
-/* Completed slab — mossy green */
-.lsm-node.lsm-done .lsm-slab {
-  background: radial-gradient(circle at 35% 30%,
-    #a8d87a 0%,
-    #78b84a 40%,
-    #558a2e 70%,
-    #3a6018 100%);
-  border-color: #2d4e10;
-  box-shadow:
-    0 4px 0 #1e3608,
-    0 6px 12px rgba(0,0,0,0.5),
-    inset 0 1px 0 rgba(255,255,255,0.3),
-    0 0 12px rgba(120,184,74,0.5);
-}
-
-/* Current slab — glowing blue */
+/* Current — warm cream/highlight stone, glowing edge only */
 .lsm-node.lsm-current .lsm-slab {
-  background: radial-gradient(circle at 35% 30%,
-    #7dd3fc 0%,
-    #3b9fe8 40%,
-    #1a70c0 70%,
-    #0a4a90 100%);
-  border-color: #7de0ff;
+  background: radial-gradient(circle at 38% 28%,
+    #ede8d8 0%, #c8bfa0 40%, #a09070 70%, #7a6c50 100%);
+  border-color: #d4b860;
   box-shadow:
-    0 4px 0 #0a3a70,
-    0 6px 12px rgba(0,0,0,0.5),
-    inset 0 1px 0 rgba(255,255,255,0.4),
-    0 0 18px rgba(59,159,232,0.7),
-    0 0 32px rgba(59,159,232,0.3);
-  animation: lsm-pulse 1.8s ease-in-out infinite;
+    0 3px 0 #5a4820,
+    0 5px 10px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.35),
+    0 0 14px rgba(212,184,96,0.7),
+    0 0 24px rgba(212,184,96,0.3);
+  animation: lsm-glow 1.8s ease-in-out infinite;
 }
 
-/* Elite slab — golden */
-.lsm-node.lsm-elite .lsm-slab {
-  background: radial-gradient(circle at 35% 30%,
-    #fde68a 0%,
-    #f59e0b 40%,
-    #d97706 70%,
-    #b45309 100%);
-  border-color: #fbbf24;
+/* Elite — darker, rougher stone with amber edge */
+.lsm-node.lsm-elite:not(.lsm-done):not(.lsm-current) .lsm-slab {
+  background: radial-gradient(circle at 38% 28%,
+    #b8a888 0%, #8a7860 40%, #665848 70%, #4a3e30 100%);
+  border-color: #c8a850;
   box-shadow:
-    0 4px 0 #92400e,
-    0 6px 12px rgba(0,0,0,0.5),
-    inset 0 1px 0 rgba(255,255,255,0.4),
-    0 0 14px rgba(251,191,36,0.5);
+    0 3px 0 #2e2418,
+    0 5px 10px rgba(0,0,0,0.55),
+    inset 0 1px 0 rgba(255,255,255,0.2),
+    0 0 8px rgba(200,168,80,0.4);
 }
 
-/* Locked slab — dark grey */
+/* Locked — dark weathered stone, faded */
 .lsm-node.lsm-locked .lsm-slab {
-  background: radial-gradient(circle at 35% 30%,
-    #6b7280 0%,
-    #4b5563 40%,
-    #374151 70%,
-    #1f2937 100%);
-  border-color: #374151;
-  box-shadow:
-    0 3px 0 #111827,
-    0 5px 10px rgba(0,0,0,0.6);
+  background: radial-gradient(circle at 38% 28%,
+    #8a8880 0%, #6a6860 50%, #4a4840 100%);
+  border-color: #3a3830;
+  box-shadow: 0 2px 0 #202018, 0 4px 8px rgba(0,0,0,0.6);
 }
 
-@keyframes lsm-pulse {
+@keyframes lsm-glow {
   0%, 100% { box-shadow:
-    0 4px 0 #0a3a70,
-    0 6px 12px rgba(0,0,0,0.5),
-    inset 0 1px 0 rgba(255,255,255,0.4),
-    0 0 18px rgba(59,159,232,0.7),
-    0 0 32px rgba(59,159,232,0.3); }
+    0 3px 0 #5a4820, 0 5px 10px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.35),
+    0 0 14px rgba(212,184,96,0.7), 0 0 24px rgba(212,184,96,0.3); }
   50% { box-shadow:
-    0 4px 0 #0a3a70,
-    0 6px 12px rgba(0,0,0,0.5),
-    inset 0 1px 0 rgba(255,255,255,0.4),
-    0 0 28px rgba(59,159,232,1),
-    0 0 50px rgba(59,159,232,0.6); }
+    0 3px 0 #5a4820, 0 5px 10px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.35),
+    0 0 22px rgba(212,184,96,1), 0 0 40px rgba(212,184,96,0.55); }
 }
 
 /* ── Number label ─────────────────────────────────── */
 .lsm-num {
   font-family: var(--font-display, sans-serif);
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 900;
   color: #fff;
   text-shadow:
-    -1px -1px 0 rgba(0,0,0,0.6),
-     1px -1px 0 rgba(0,0,0,0.6),
-    -1px  1px 0 rgba(0,0,0,0.6),
-     1px  1px 0 rgba(0,0,0,0.6),
-     0 2px 4px rgba(0,0,0,0.8);
-  line-height: 1;
+    -1px -1px 0 rgba(0,0,0,0.7),
+     1px -1px 0 rgba(0,0,0,0.7),
+    -1px  1px 0 rgba(0,0,0,0.7),
+     1px  1px 0 rgba(0,0,0,0.7),
+     0 2px 4px rgba(0,0,0,0.9);
   pointer-events: none;
-}
-.lsm-node.lsm-done .lsm-num { color: #f0fff0; }
-
-/* ── Stars row ────────────────────────────────────── */
-.lsm-stars {
-  font-size: 10px;
-  letter-spacing: 0px;
   line-height: 1;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8));
+}
+
+/* ── Stars ────────────────────────────────────────── */
+.lsm-stars {
+  font-size: 5px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.9));
+  letter-spacing: -1px;
 }
 
 /* ── Current arrow ────────────────────────────────── */
 .lsm-arrow {
-  font-size: 11px;
-  color: #7dd3fc;
+  font-size: 10px;
+  color: #d4b860;
   animation: lsm-bounce 1s ease-in-out infinite;
-  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.8));
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.9));
 }
 @keyframes lsm-bounce {
   0%, 100% { transform: translateY(0); }
@@ -223,13 +210,13 @@
 
 /* ── Reward badge ─────────────────────────────────── */
 .lsm-badge {
-  font-size: 11px;
-  background: rgba(0,0,0,0.7);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 6px;
-  padding: 1px 4px;
+  font-size: 9px;
+  background: rgba(0,0,0,0.75);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 5px;
+  padding: 1px 3px;
   position: absolute;
-  top: -18px;
+  top: -16px;
   left: 50%;
   transform: translateX(-50%);
   white-space: nowrap;
@@ -237,7 +224,7 @@
 }
 
 /* ══════════════════════════════════════════════════
-   LEVEL SELECT SCREEN HEADER
+   LEVEL SELECT HEADER
 ══════════════════════════════════════════════════ */
 .levelselect-container {
   position: relative;
@@ -245,7 +232,6 @@
   display: flex;
   flex-direction: column;
 }
-
 .levelselect-header {
   display: flex;
   align-items: center;
@@ -253,10 +239,10 @@
   padding: 6px 12px;
   height: 44px;
   flex-shrink: 0;
-  background: rgba(0,0,0,0.55);
-  backdrop-filter: blur(6px);
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  z-index: 10;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  z-index: 20;
 }
 .levelselect-header h2 {
   font-family: var(--font-display, sans-serif);
@@ -265,10 +251,6 @@
   margin: 0;
   flex: 1;
   text-align: center;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-}
-.levelselect-header .coin-display {
-  font-size: 12px;
-  color: #fde68a;
-  font-weight: 700;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.8);
 }
