@@ -1202,58 +1202,72 @@ html, body {
 .shop-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(160deg, #060015, #0c0028);
+  background: url('../assets/homepage/home.jpeg') center center / cover no-repeat;
+  background-color: #4a8a20;
+}
+.shop-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    rgba(0,0,0,0.2) 0%,
+    rgba(0,0,0,0.1) 40%,
+    rgba(0,0,0,0.35) 100%);
+  pointer-events: none;
 }
 .shop-container {
   position: relative;
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 0 20px;
+  padding: 0;
+  z-index: 1;
 }
 .shop-grid {
   display: grid;
-  /* grid-template-columns: repeat(12, 1fr); */
   gap: 14px;
   overflow-y: auto;
-  flex: 0 0 1;
+  flex: 1;
   padding-bottom: 20px;
 }
 .shop-item {
-  background: linear-gradient(135deg, #1a0040, #0d0025);
-  border: 2px solid var(--purple);
-  border-radius: 14px;
-  padding: 16px 12px;
+  background: linear-gradient(180deg, rgba(90,55,15,0.88) 0%, rgba(55,30,6,0.93) 100%);
+  border: 2px solid #8b6530;
+  border-bottom: 3px solid #5a3808;
+  border-radius: 12px;
+  padding: 14px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
   transition: all 0.15s;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,200,80,0.1);
 }
-.shop-item:hover { border-color: var(--gold); }
-.shop-item img {
-  width: 64px;
-  height: 64px;
-  object-fit: contain;
+.shop-item:hover {
+  border-color: #c8941a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 rgba(0,0,0,0.4), 0 0 14px rgba(200,148,26,0.35);
 }
+.shop-item img { width: 64px; height: 64px; object-fit: contain; }
 .shop-item .si-name {
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 15px;
   text-align: center;
+  color: #fef3c7;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
 }
-.shop-item .si-seeds {
-  font-size: 12px;
-  color: var(--green);
-}
+.shop-item .si-seeds { font-size: 12px; color: #86efac; font-weight: 700; }
 .shop-item .si-price {
-  background: rgba(251,191,36,0.15);
-  border: 1px solid var(--gold);
+  background: linear-gradient(180deg, #78400a 0%, #5a2e06 100%);
+  border: 2px solid #c8941a;
+  border-bottom-color: #3e2405;
   border-radius: 20px;
   padding: 4px 14px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 800;
-  color: var(--gold);
+  color: #fde68a;
+  box-shadow: 0 2px 0 #2a1608;
 }
 
 /* ═══════════════════════════════════════════════════
