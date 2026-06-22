@@ -86,7 +86,6 @@
 <link rel="stylesheet" href="css/battle_layout.css" />
     <link rel="stylesheet" href="css/plant_picker.css" />
     <link rel="stylesheet" href="css/plantsanimation/emberdoze.css">
-    <link rel="stylesheet" href="css/minigames.css" />
   </head>
   <body>
     <!-- ══════════════════════════════════════════
@@ -174,11 +173,8 @@
           <span class="menu-btn-label">▶ PLAY</span>
         </button>
 
-        <!-- Row: ARENA + ALMANAC -->
+        <!-- Row: ALMANAC -->
         <div class="menu-btn-row">
-          <button class="menu-btn-secondary" id="btn-menu-minigames">
-            <span>🏆</span> ARENA
-          </button>
           <button class="menu-btn-secondary" id="btn-menu-collection">
             <span>📖</span> ALMANAC
           </button>
@@ -275,7 +271,6 @@
           <!-- Left icon toolbar (PvZ2 style) -->
           <div class="wm-icon-toolbar">
             <button class="wm-icon-btn" id="btn-back-worldmap" title="Back"><img src="assets/icons/back.png" alt="back" class="game-icon"></button>
-            <button class="wm-icon-btn" id="btn-wm-minigames" title="Minigames"><img src="assets/icons/minigames.png" class="game-icon"></button>
             <button class="wm-icon-btn" id="btn-wm-inventory" title="Inventory"><img src="assets/icons/inventory.png" class="game-icon"></button>
           </div>
           <!-- Right: currencies + shop -->
@@ -437,36 +432,6 @@
     </div>
 
     <!-- ══════════════════════════════════════════
-       SCREEN: MINIGAMES HUB
-  ══════════════════════════════════════════ -->
-    <div id="screen-minigames" class="screen">
-      <div class="minigames-bg"></div>
-      <div class="minigames-container">
-        <div class="minigames-header">
-          <button class="btn-back" id="btn-back-minigames"><img src="assets/icons/back.png" alt="back" class="game-icon"></button>
-          <h2>Minigames</h2>
-          <span class="coin-display">🪙 <span id="mg-coins">0</span></span>
-        </div>
-        <div class="minigames-grid" id="minigames-grid">
-          <!-- Minigame cards injected -->
-        </div>
-      </div>
-    </div>
-
-    <div id="screen-blockhunt" class="screen">
-      <!-- Injected by minigames/block_hunt.js -->
-    </div>
-
-    <div id="screen-bombball" class="screen">
-      <!-- Injected by minigames/bomb_ball.js -->
-    </div>
-
-    <div id="screen-sharpshooters" class="screen" style="cursor: crosshair;">
-      <!-- Injected by minigames/sharp_shooters.js -->
-    </div>
-    <div class="screen" id="screen-discofdoom"></div>
-
-    <!-- ══════════════════════════════════════════
        SCREEN: SEED SHOP
   ══════════════════════════════════════════ -->
     <div id="screen-shop" class="screen">
@@ -575,11 +540,6 @@
     <script src="plants/mushpuff.js"></script>
     <script src="plants/lavaburst.js"></script>
     <script src="plants/glacierbud.js"></script>
-    <script src="js/minigames/block_hunt.js"></script>
-    <script src="js/minigames/bomb_ball.js"></script>
-    <script src="js/minigames/tutorial.js"></script>
-    <script src="js/minigames/sharp_shooters.js"></script>
-    <script src="js/minigames/disc_of_doom.js"></script>
     <script src="js/comp/ConfirmPopup.js"></script>
     <script src="js/comp/TraySlots.js"></script>
     <script src="js/comp/PlantPicker.js"></script>
@@ -673,7 +633,6 @@
       });
 
       // World map toolbar shortcuts
-      document.getElementById("btn-wm-minigames")?.addEventListener("click", () => UI.showScreen("screen-minigames"));
       document.getElementById("btn-wm-inventory")?.addEventListener("click", () => UI.showScreen("screen-collection"));
 
       // Service worker for offline/APK

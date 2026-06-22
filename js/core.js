@@ -426,7 +426,6 @@ Grid.init(arenaEl, worldId);
 
       // Unlock plants/minigames earned by this level
       const unlockedPlants = Levels.checkPlantUnlocks(currentWorld, currentLevel);
-      const unlockedMinigames = Levels.checkMinigameUnlocks(currentWorld, currentLevel);
 
       // Check if this level gives a seed packet
       const hasPacket = !!Levels.checkPacketReward(currentWorld, currentLevel);
@@ -453,7 +452,6 @@ Grid.init(arenaEl, worldId);
         coinReward,
         seedReward,
         unlockedPlants,
-        unlockedMinigames,
         packetReward,
       );
     } else {

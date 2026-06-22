@@ -56,7 +56,6 @@ const Player = (() => {
       rootboom: { owned: false, level: 1, seeds: 0 },
       cosmbloom: { owned: false, level: 1, seeds: 0 },
     },
-    unlockedMinigames: [],
     totalLevelsBeaten: 0,
   };
 
@@ -290,18 +289,6 @@ const Player = (() => {
     return true;
   }
 
-  function unlockMinigame(id) {
-    if (!data.unlockedMinigames) data.unlockedMinigames = [];
-    if (!data.unlockedMinigames.includes(id)) {
-      data.unlockedMinigames.push(id);
-      save();
-    }
-  }
-
-  function isMinigameUnlocked(id) {
-    if (!data.unlockedMinigames) return false;
-    return data.unlockedMinigames.includes(id);
-  }
 
   function levelUpPlant(plantId) {
     const p = data.plants[plantId];
@@ -426,15 +413,6 @@ const Player = (() => {
       data.plants[id].seeds = 999999;
     });
 
-    // Ensure minigames are unlocked (all known ones)
-    // MINIGAME_UNLOCKS is defined in Levels; use it if available.
-    const allMgs =
-      typeof Levels !== "undefined" && Array.isArray(Levels.MINIGAME_UNLOCKS)
-        ? Levels.MINIGAME_UNLOCKS.map((x) => x.minigameId)
-        : [];
-    data.unlockedMinigames = Array.from(new Set(allMgs));
-
-    // Beat all levels
     if (typeof Levels !== "undefined" && Levels.getAllWorlds) {
       const allWorlds = Levels.getAllWorlds();
       allWorlds.forEach((w) => {
@@ -501,8 +479,6 @@ const Player = (() => {
     reset,
     enableAllContent,
     unlockPlantByLevel,
-    unlockMinigame,
-    isMinigameUnlocked,
   };
 })();
 

@@ -199,9 +199,7 @@ const LevelSelectMap = (() => {
     else              label = String(i + 1);
 
     const plantRew = Levels.PLANT_UNLOCKS.find(u => u.worldId === worldId && u.levelIdx === i);
-    const mgRew    = Levels.MINIGAME_UNLOCKS.find(u => u.worldId === worldId && u.levelIdx === i);
-    const badge    = plantRew ? '<div class="lsm-badge">🌿</div>'
-                   : mgRew   ? '<div class="lsm-badge">🎮</div>' : '';
+    const badge    = plantRew ? '<div class="lsm-badge">🌿</div>' : '';
 
     return `${badge}<div class="lsm-slab"><span class="lsm-num">${label}</span></div>${starsRow}`;
   }

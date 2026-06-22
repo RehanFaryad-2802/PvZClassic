@@ -324,14 +324,6 @@ const Levels = (() => {
     { worldId: 1, levelIdx: 0,plantId: "cosmbloom" },
   ];
 
-  // ── Minigame Unlock Table ──────────────────────
-  const MINIGAME_UNLOCKS = [
-    { worldId: 1, levelIdx: 3, minigameId: "blockhunt" }, // W1 Level 4
-    { worldId: 1, levelIdx: 3, minigameId: "bombball" }, // W1 Level 4
-    { worldId: 1, levelIdx: 0, minigameId: "sharpshoot" }, // W1 Level 4
-    { worldId: 1, levelIdx: 0, minigameId: "discofdoom" }, // W1 Level 1
-  ];
-
   const LEVEL_TEMP_PLANTS = {
     "1-0": ["peashooter"],
     "1-1": ["sunflower"],
@@ -653,19 +645,6 @@ const Levels = (() => {
     return unlocked.length > 0 ? unlocked : null;
   }
 
-  function checkMinigameUnlocks(worldId, levelIdx) {
-    const unlocked = [];
-    for (const mg of MINIGAME_UNLOCKS) {
-      if (mg.worldId === worldId && mg.levelIdx === levelIdx) {
-        const alreadyOwned = Player.hasMinigame && Player.hasMinigame(mg.minigameId);
-        if (!alreadyOwned) {
-          Player.unlockMinigame(mg.minigameId);
-          unlocked.push(mg.minigameId);
-        }
-      }
-    }
-    return unlocked;
-  }
   function getTempPlants(worldId, levelIdx) {
     return LEVEL_TEMP_PLANTS[`${worldId}-${levelIdx}`] || [];
   }
@@ -719,13 +698,11 @@ const Levels = (() => {
     getDemonStats,
     checkWorldUnlocks,
     checkPlantUnlocks,
-    checkMinigameUnlocks,
     getTempPlants,
     checkPacketReward,
     generatePacketContents,
     getWorldPlants,
     DEMON_STATS,
     PLANT_UNLOCKS,
-    MINIGAME_UNLOCKS,
   };
 })();

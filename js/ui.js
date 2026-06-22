@@ -30,9 +30,6 @@ const UI = (() => {
       case "screen-collection":
         buildCollection();
         break;
-      case "screen-minigames":
-        buildMinigames();
-        break;
       case "screen-shop":
         buildShop();
         break;
@@ -46,7 +43,7 @@ const UI = (() => {
     const looms = Player.getLooms();
     document
       .querySelectorAll(
-        "#menu-coins, #wm-coins, #ls-coins, #hud-coins, #mg-coins, #shop-coins",
+        "#menu-coins, #wm-coins, #ls-coins, #hud-coins, #shop-coins",
       )
       .forEach((el) => {
         if (el) el.textContent = coins;
@@ -1510,152 +1507,6 @@ function buildLevelGrid(worldId) {
       .join("");
   }
 
-  // ── Minigames Hub ──────────────────────────────
-  const MINIGAMES = [
-    {
-      id: "blockhunt",
-      name: "Block Hunt",
-      icon: "🎯",
-      image: "assets/minigames/blockhunt.png",
-      desc: "Find the matching block before time runs out!",
-      reward: "Seeds",
-    },
-    {
-      id: "bombball",
-      name: "Bomb Ball",
-      icon: "💣",
-      image: "assets/minigames/bomball.png",
-      desc: "Catch falling bombs, dodge the poison!",
-      reward: "Seeds",
-    },
-    {
-      id: "sharpshooters",
-      name: "Sharp Shooters",
-      icon: "🎯",
-      image: "assets/minigames/shartshooter.png",
-      desc: "Shoot demons with your peashooters, but watch out for the reloading time!",
-      reward: "Seeds",
-    },
-    {
-      id: "discofdoom",
-      name: "Disc of Doom",
-      icon: "💿",
-      image: null,
-      desc: "Deflect spinning discs into demons before they reach you!",
-      reward: "Seeds & Coins",
-    },
-    {
-      id: "fleefacility",
-      name: "Flee Facility",
-      icon: "🏃",
-      image: null,
-      desc: "Coming soon!",
-      reward: "Coins",
-    },
-    {
-      id: "gladiator",
-      name: "Gladiator Grounds",
-      icon: "⚔️",
-      image: null,
-      desc: "Coming soon!",
-      reward: "Seeds & Coins",
-    },
-    {
-      id: "lasertag",
-      name: "Laser Tag",
-      icon: "🔫",
-      image: null,
-      desc: "Coming soon!",
-      reward: "Seeds",
-    },
-    {
-      id: "minutewin",
-      name: "Minute 2 Win",
-      icon: "⏱️",
-      image: null,
-      desc: "Coming soon!",
-      reward: "Coins",
-    },
-  ];
-
- function buildMinigames() {
-    const container = document.getElementById("minigames-grid");
-    container.innerHTML = "";
-    MINIGAMES.forEach((mg) => {
-      const isUnlocked = Player.isMinigameUnlocked(mg.id);
-      const hasTut = typeof MiniTutorial !== "undefined" && MiniTutorial.hasTutorial(mg.id);
-      const card = document.createElement("div");
-      card.className = "mg-card" + (isUnlocked ? "" : " locked");
-      card.innerHTML = `
-        <div class="mg-thumb">
-          ${mg.image
-            ? `<img src="${mg.image}" alt="${mg.name}" />`
-            : `<div class="mg-thumb-placeholder">${mg.icon}</div>`}
-          ${!isUnlocked ? `<div class="mg-lock-overlay">🔒</div>` : ""}
-          ${isUnlocked  ? `<div class="mg-play-btn">▶</div>`       : ""}
-        </div>
-        <div class="mg-info">
-          <div class="mg-name">${mg.name}</div>
-          <div class="mg-desc">${mg.desc}</div>
-          <div class="mg-reward">🎁 ${mg.reward}</div>
-          ${isUnlocked && hasTut
-            ? `<button class="mg-tut-btn" data-mgid="${mg.id}">📖 Tutorial</button>`
-            : ""}
-        </div>
-      `;
-      if (isUnlocked) {
-        // Play button / card click — but NOT if the tutorial button was clicked
-        card.addEventListener("click", (e) => {
-          if (e.target.closest(".mg-tut-btn")) return;
-          launchMinigame(mg.id);
-        });
-        // Tutorial button
-        const tutBtn = card.querySelector(".mg-tut-btn");
-        if (tutBtn) {
-          tutBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            showMinigameTutorial(mg.id);
-          });
-        }
-      }
-      container.appendChild(card);
-    });
-  }
-
-  // Show tutorial overlay on top of minigames screen (without launching the game)
-  function showMinigameTutorial(mgId) {
-    const scr = document.getElementById("screen-minigames");
-    if (!scr || typeof MiniTutorial === "undefined") return;
-    MiniTutorial.show(scr, mgId, () => {
-      // After tutorial closes, just stay on minigames screen
-    });
-  }
-
-  function launchMinigame(id) {
-    // Auto-show tutorial on first play
-    function afterTutorial(screenId, launchFn) {
-      showScreen(screenId);
-      if (typeof MiniTutorial !== "undefined" && MiniTutorial.shouldAutoShow(id)) {
-        const scr = document.getElementById(screenId);
-        MiniTutorial.show(scr, id, launchFn);
-      } else {
-        launchFn();
-      }
-    }
-
-    if (id === "blockhunt") {
-      afterTutorial("screen-blockhunt", () => BlockHunt.startGame());
-    } else if (id === "bombball") {
-      afterTutorial("screen-bombball", () => BombBall.startGame());
-    } else if (id === "sharpshooters") {
-      afterTutorial("screen-sharpshooters", () => SharpShooters.startGame());
-    } else if (id === "discofdoom") {
-      afterTutorial("screen-discofdoom", () => DiscOfDoom.startGame());
-    } else {
-      showToast("Coming soon! 🚧");
-    }
-  }
-
   // ── Shop ─────────────────────────────────────────
   let shopTab = "seeds";
 
@@ -1875,7 +1726,6 @@ function buildLevelGrid(worldId) {
     coinReward,
     seedReward,
     unlockedPlants = null,
-    unlockedMinigames = null,
     packetReward = null,
   ) {
     // ── Save progress when won ──
@@ -1896,12 +1746,8 @@ function buildLevelGrid(worldId) {
         Player.addSeeds(seedReward.plantId, seedReward.amount);
       }
 
-      // Check for plant/minigame unlocks triggered by this level
       if (!unlockedPlants) {
         unlockedPlants = Levels.checkPlantUnlocks(pendingBattleWorld, pendingBattleLevel);
-      }
-      if (!unlockedMinigames) {
-        unlockedMinigames = Levels.checkMinigameUnlocks(pendingBattleWorld, pendingBattleLevel);
       }
     }
     // ── Clean up any leftover sun coins / floating effects ──
@@ -1954,16 +1800,6 @@ function buildLevelGrid(worldId) {
           `;
         });
       }
-      if (unlockedMinigames && unlockedMinigames.length > 0) {
-        unlockedMinigames.forEach((mgId) => {
-          rewardsEl.innerHTML += `
-            <div class="reward-row" style="border:2px solid var(--orange);background:rgba(255,106,0,0.1)">
-              <span>🎮 Minigame Unlocked!</span>
-              <span style="color:var(--orange);font-weight:900">${mgId}</span>
-            </div>
-          `;
-        });
-      }
     }
 
     showScreen("screen-result");
@@ -2002,9 +1838,6 @@ function buildLevelGrid(worldId) {
   // ── Global click sound + spark effect ─────────
   const SPARK_EXCLUDED = new Set([
     "screen-battle",
-    "screen-blockhunt",
-    "screen-bombball",
-    "screen-sharpshooters",
   ]);
 
   const SPARK_COLORS = ["#ffd450", "#ff6a00", "#fff", "#a78bfa", "#34d399"];
@@ -2101,12 +1934,10 @@ function buildLevelGrid(worldId) {
       .getElementById("btn-play")
       .addEventListener("click", () => showScreen("screen-worldmap"));
     document.getElementById("btn-collection")?.addEventListener("click", () => showScreen("screen-collection"));
-    document.getElementById("btn-minigames")?.addEventListener("click", () => showScreen("screen-minigames"));
     document.getElementById("btn-shop")?.addEventListener("click", () => showScreen("screen-shop"));
 
     // World map back + toolbar
     document.getElementById("btn-back-worldmap")?.addEventListener("click", () => showScreen("screen-menu"));
-    document.getElementById("btn-wm-minigames")?.addEventListener("click", () => showScreen("screen-minigames"));
     document.getElementById("btn-wm-inventory")?.addEventListener("click", () => showScreen("screen-collection"));
     document.getElementById("btn-wm-shop")?.addEventListener("click", () => showScreen("screen-shop"));
     // Level select back
@@ -2124,8 +1955,6 @@ function buildLevelGrid(worldId) {
     document
       .getElementById("btn-back-collection")
       .addEventListener("click", () => showScreen("screen-menu"));
-    // Minigames back
-    document.getElementById("btn-back-minigames")?.addEventListener("click", () => showScreen("screen-worldmap"));
     // Shop back
     document
       .getElementById("btn-back-shop")
@@ -2133,8 +1962,7 @@ function buildLevelGrid(worldId) {
 
     // Settings open/back
     // New menu bottom bar buttons
-document.getElementById('btn-menu-minigames')?.addEventListener('click', () => UI.showScreen('screen-minigames'));
-document.getElementById('btn-menu-collection')?.addEventListener('click', () => UI.showScreen('screen-collection'));
+    document.getElementById('btn-menu-collection')?.addEventListener('click', () => UI.showScreen('screen-collection'));
 document.getElementById('btn-menu-collection2')?.addEventListener('click', () => UI.showScreen('screen-collection'));
 document.getElementById('btn-menu-worldmap')?.addEventListener('click', () => UI.showScreen('screen-worldmap'));
 document.getElementById('btn-play-quick')?.addEventListener('click', () => UI.showScreen('screen-worldmap'));
@@ -2211,10 +2039,7 @@ document.getElementById('btn-settings')
 
   function init() {
     initButtons();
-    BlockHunt.init();
-    BombBall.init();
-    SharpShooters.init();
-    // SharpShooters inits on launch, not on page load
+    // Minigames removed; no init required
 
     // Check if player already has a name → skip name screen
     if (Player.hasName()) {
