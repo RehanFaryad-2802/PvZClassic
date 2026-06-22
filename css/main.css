@@ -564,24 +564,22 @@ html, body {
 .worldmap-bg {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 50% 40%, #001830 0%, #000810 40%, #000308 100%);
+  background:
+    url('../assets/homepage/home.jpeg') center center / cover no-repeat;
   overflow: hidden;
   pointer-events: none;
 }
-/* Stars overlay */
+/* Soft warm overlay so cards pop */
 .worldmap-bg::before {
   content: '';
   position: absolute;
   inset: 0;
-  background-image:
-    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.6) 0%, transparent 100%),
-    radial-gradient(1px 1px at 60% 10%, rgba(255,255,255,0.4) 0%, transparent 100%),
-    radial-gradient(1px 1px at 80% 50%, rgba(255,255,255,0.5) 0%, transparent 100%),
-    radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,0.4) 0%, transparent 100%),
-    radial-gradient(1px 1px at 90% 20%, rgba(255,255,255,0.6) 0%, transparent 100%),
-    radial-gradient(1px 1px at 50% 90%, rgba(255,255,255,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 70% 60%, rgba(255,255,255,0.5) 0%, transparent 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(0,0,0,0.15) 0%,
+    rgba(0,0,0,0.05) 40%,
+    rgba(0,0,0,0.35) 100%
+  );
   pointer-events: none;
   z-index: 0;
 }
@@ -603,7 +601,13 @@ html, body {
   font-family: var(--font-display);
   font-size: 24px;
   letter-spacing: 3px;
-  color: var(--purple-light);
+  color: #fff;
+  text-shadow:
+    -2px -2px 0 #3a5a10,
+     2px -2px 0 #3a5a10,
+    -2px  2px 0 #3a5a10,
+     2px  2px 0 #3a5a10,
+     0 3px 8px rgba(0,0,0,0.6);
 }
 .levelselect-header, .collection-header,
 .minigames-header, .shop-header, .picker-header {
@@ -642,124 +646,152 @@ html, body {
 }
 .worlds-grid::-webkit-scrollbar { display: none; }
 
-/* Floating island card */
+/* ── World card — PvZ wooden frame style ── */
 .world-card {
   flex-shrink: 0;
   scroll-snap-align: center;
-  width: 340px;
+  width: 220px;
   display: flex;
   flex-direction: column;
   align-items: center;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
-  position: relative;
-  animation: islandFloat 4s ease-in-out infinite;
   outline: none;
   border: none;
   background: none;
+  animation: islandFloat 4s ease-in-out infinite;
+  transition: transform 0.25s cubic-bezier(0.175,0.885,0.32,1.275);
 }
 .world-card:nth-child(2) { animation-delay: 0.5s; }
 .world-card:nth-child(3) { animation-delay: 1s; }
 .world-card:nth-child(4) { animation-delay: 1.5s; }
 
-.world-card:hover { transform: translateY(-18px) scale(1.05) !important; }
-/* Unlocked world subtle glow on image */
-.world-card.unlocked .world-img-wrap img {
-  filter: drop-shadow(0 16px 24px rgba(0,0,0,0.7))
-          drop-shadow(0 0 24px rgba(168,85,247,0.4));
+/* Wooden frame wrapper */
+.world-frame {
+  position: relative;
+  width: 100%;
+  border-radius: 12px;
+  /* Outer wooden border */
+  background: linear-gradient(180deg, #8b5e1a 0%, #6b4010 50%, #8b5e1a 100%);
+  padding: 5px;
+  box-shadow:
+    0 0 0 2px #c8941a,
+    0 0 0 4px #5a3008,
+    0 8px 24px rgba(0,0,0,0.55),
+    inset 0 1px 0 rgba(255,220,80,0.3);
 }
 
-/* Island image — no crop, natural shape */
+/* Unlocked frame gets green leaf glow */
+.world-card.unlocked .world-frame {
+  box-shadow:
+    0 0 0 2px #c8941a,
+    0 0 0 4px #5a3008,
+    0 8px 24px rgba(0,0,0,0.5),
+    0 0 20px rgba(80,180,30,0.4),
+    inset 0 1px 0 rgba(255,220,80,0.3);
+}
+
+/* Locked frame — darker, greyed wood */
+.world-card.locked .world-frame {
+  background: linear-gradient(180deg, #4a3a20 0%, #342810 50%, #4a3a20 100%);
+  box-shadow:
+    0 0 0 2px #6a5828,
+    0 0 0 4px #2a1e08,
+    0 6px 16px rgba(0,0,0,0.6);
+}
+
+/* Inner cream mat — like picture frame */
+.world-frame-inner {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid rgba(255,220,80,0.25);
+}
+
+/* Image */
 .world-img-wrap {
-  width: 100% ;
-  height: 400px;
+  width: 100%;
+  height: 180px;
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
 }
 .world-img-wrap img {
   width: 100%;
   height: 100%;
-  object-fit: fill;
-  filter: drop-shadow(0 16px 24px rgba(0,0,0,0.7))
-          drop-shadow(0 0 20px rgba(168,85,247,0.3));
-  transition: transform 0.4s ease, filter 0.4s ease;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.35s ease;
 }
-.world-card:hover .world-img-wrap img {
-  transform: scale(1.01);
-  /* filter: drop-shadow(0 20px 30px rgba(0,0,0,0.8))
-          drop-shadow(0 0 30px rgba(168,85,247,0.5)); */
-}
-/* Lock overlay — moves with image on hover */
+
+/* Lock overlay */
 .world-lock-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.55);
+  background: rgba(0,0,0,0.6);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 52px;
-  border-radius: 8px;
-  transition: transform 0.4s ease;
+  font-size: 40px;
   pointer-events: none;
 }
-.world-card:hover .world-lock-overlay {
-  transform: scale(1.06);
-}
 
-/* Shadow under island */
-.world-shadow {
-  width: 160px;
-  height: 20px;
-  background: radial-gradient(ellipse, rgba(0,0,0,0.5) 0%, transparent 70%);
-  margin-top: -8px;
-  transition: all 0.3s;
-}
-.world-card:hover .world-shadow { width: 120px; opacity: 0.3; }
-
-/* Info below island */
-.world-info {
+/* Nameplate — brown banner below image */
+.world-frame-nameplate {
+  background: linear-gradient(180deg, #7a4e10 0%, #5c3808 100%);
+  border-top: 2px solid rgba(255,200,60,0.4);
+  padding: 8px 10px 10px;
   text-align: center;
-  margin-top: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
+  border-radius: 0 0 6px 6px;
 }
-.world-card .world-name {
+.world-name {
   font-family: var(--font-display);
-  font-size: 20px;
-  letter-spacing: 2px;
-  color: var(--white);
-  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  color: #fef3c7;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8), 0 0 8px rgba(255,200,60,0.3);
 }
-.world-card .world-sub {
+.world-sub {
+  font-size: 10px;
+  color: #d4c080;
+  letter-spacing: 0.5px;
+}
+.world-difficulty {
   font-size: 11px;
-  color: var(--gray);
   letter-spacing: 1px;
 }
-.world-card .world-progress {
-  font-size: 12px;
-  color: var(--gold);
-  background: rgba(251,191,36,0.1);
-  border: 1px solid rgba(251,191,36,0.3);
-  border-radius: 10px;
-  padding: 2px 10px;
+.world-progress {
+  font-size: 11px;
+  color: #fde68a;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(212,180,60,0.4);
+  border-radius: 8px;
+  padding: 2px 8px;
+  margin-top: 2px;
 }
-.world-card .world-difficulty {
-  font-size: 14px;
-  letter-spacing: 2px;
-}
+.world-progress.locked-prog { color: #a09060; }
 
-/* Selected world glow */
-.world-card.unlocked .world-img-wrap {
-  box-shadow:
-    0 0 0 6px rgba(168,85,247,0.4),
-    0 20px 40px rgba(0,0,0,0.6),
-    0 0 40px rgba(168,85,247,0.4);
+/* Leaf corner decorations */
+.world-frame-leaves {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
+.wfl {
+  position: absolute;
+  font-size: 18px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.5));
+}
+.wfl-tl { top: -8px;  left: -6px;  transform: rotate(-30deg); }
+.wfl-tr { top: -8px;  right: -6px; transform: rotate(30deg) scaleX(-1); }
+.wfl-bl { bottom: -8px; left: -6px;  transform: rotate(30deg); }
+.wfl-br { bottom: -8px; right: -6px; transform: rotate(-30deg) scaleX(-1); }
+
+/* Remove old shadow div */
+.world-shadow { display: none; }
+.world-info   { display: none; }
 
 /* ═══════════════════════════════════════════════════
    LEVEL SELECT

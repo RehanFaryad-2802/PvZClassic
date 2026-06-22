@@ -143,20 +143,29 @@ const UI = (() => {
       card.className = "world-card" + (unlocked ? " unlocked" : " locked");
 
       card.innerHTML = `
-        <div class="world-img-wrap">
-          <img src="${worldImages[world.id]}" alt="${world.name}" />
-          ${!unlocked ? '<div class="world-lock-overlay">🔒</div>' : ""}
-        </div>
-        <div class="world-shadow"></div>
-        <div class="world-info">
-          <div class="world-name">${world.name}</div>
-          <div class="world-sub">${world.sub}</div>
-          <div class="world-difficulty">${worldDifficulty[world.id]}</div>
-          ${
-            unlocked
-              ? `<div class="world-progress">📋 ${prog}/${world.levelCount}</div>`
-              : `<div class="world-progress" style="color:var(--gray)">🔒 Locked</div>`
-          }
+        <div class="world-frame">
+          <div class="world-frame-inner">
+            <div class="world-img-wrap">
+              <img src="${worldImages[world.id]}" alt="${world.name}" />
+              ${!unlocked ? '<div class="world-lock-overlay">🔒</div>' : ""}
+            </div>
+          </div>
+          <div class="world-frame-nameplate">
+            <div class="world-name">${world.name}</div>
+            <div class="world-sub">${world.sub}</div>
+            <div class="world-difficulty">${worldDifficulty[world.id]}</div>
+            ${
+              unlocked
+                ? `<div class="world-progress">📋 ${prog}/${world.levelCount}</div>`
+                : `<div class="world-progress locked-prog">🔒 Locked</div>`
+            }
+          </div>
+          <div class="world-frame-leaves">
+            <span class="wfl wfl-tl">🍃</span>
+            <span class="wfl wfl-tr">🍃</span>
+            <span class="wfl wfl-bl">🌿</span>
+            <span class="wfl wfl-br">🌿</span>
+          </div>
         </div>
       `;
 
