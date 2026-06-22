@@ -3,7 +3,7 @@
    Usage:
      ConfirmPopup.show({
        title: 'Unlock Slot 7',
-       body: 'Cost: 500 🪙 coins',
+       body: 'Cost: 500 <img src="assets/icons/gold.png" alt="gold"> coins',
        confirmText: 'Unlock',
        cancelText: 'Cancel',
        type: 'purchase',        // 'purchase' | 'danger' | 'info'

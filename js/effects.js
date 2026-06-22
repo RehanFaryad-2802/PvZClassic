@@ -17,7 +17,8 @@ const Effects = (() => {
     if (!layer) return;
     const el = document.createElement("div");
     el.className = `effect-hit ${type}`;
-    el.textContent = text;
+    // allow passing small HTML (e.g. coin icon img)
+    el.innerHTML = text;
     el.style.left = x + "px";
     el.style.top = y + "px";
     layer.appendChild(el);

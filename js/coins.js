@@ -41,7 +41,7 @@ const Coins = (() => {
   function spawnCoinToken(parentEl, x, y, amount) {
     const el = document.createElement("div");
     el.className = "coin-token";
-    el.textContent = "🪙";
+    el.innerHTML = '<img src="assets/icons/gold.png" alt="gold" class="icon-gold-inline">';
     el.style.left = x + "px";
     el.style.top = y + "px";
     el.title = `+${amount}`;
@@ -50,7 +50,7 @@ const Coins = (() => {
       Player.addCoins(amount);
       UI.updateCoinDisplays();
       el.remove();
-      UI.showFloatingText(`+${amount}🪙`, x, y, "coin");
+      UI.showFloatingText(`+${amount}<img src="assets/icons/gold.png" alt="gold" class="icon-gold-inline">`, x, y, "coin");
     }
     el.addEventListener("click", collectCoin, { once: true });
     el.addEventListener("pointerenter", collectCoin, { once: true });

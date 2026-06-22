@@ -13,7 +13,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
+  padding: 5px 10px;
   background: linear-gradient(180deg, #5a3808 0%, #3e2405 100%);
   border-bottom: 3px solid #c8941a;
   box-shadow:
@@ -24,7 +24,7 @@
 
 .inv-title {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 14px;
   color: #fef3c7;
   text-shadow:
     -1px -1px 0 #3a5a10,
@@ -60,8 +60,8 @@
 
 /* Left panel — wooden sidebar */
 .inv-left {
-  width: 200px;
-  min-width: 200px;
+  width: 160px;
+  min-width: 160px;
   background: linear-gradient(180deg,
     rgba(62,36,5,0.92) 0%,
     rgba(44,24,4,0.95) 100%);
@@ -85,21 +85,21 @@
 /* Tabs — wooden pill tabs */
 .inv-tabs {
   display: flex;
-  gap: 5px;
-  padding: 8px 10px;
+  gap: 4px;
+  padding: 5px 8px;
   background: linear-gradient(180deg, rgba(62,36,5,0.9) 0%, rgba(44,24,4,0.9) 100%);
   border-bottom: 2px solid #8b5e1a;
 }
 
 .inv-tab {
-  padding: 5px 13px;
+  padding: 3px 10px;
   border-radius: 20px;
   border: 2px solid rgba(139,94,26,0.6);
   background: rgba(0,0,0,0.3);
   color: #c4a96a;
-  font-size: 11px;
+  font-size: 10px;
   font-family: var(--font-display);
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -119,9 +119,9 @@
 .inv-grid {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
-  gap: 8px;
-  padding: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+  gap: 6px;
+  padding: 8px;
   overflow-y: auto;
   align-content: start;
 }
@@ -129,12 +129,12 @@
 /* Item card — wooden frame style */
 .inv-item-card {
   background: linear-gradient(180deg,
-    rgba(90,55,15,0.75) 0%,
-    rgba(60,35,8,0.85) 100%);
+    rgba(90,55,15,0.88) 0%,
+    rgba(55,30,6,0.93) 100%);
   border: 2px solid #8b6530;
   border-bottom-color: #5a3808;
   border-radius: 10px;
-  padding: 8px 4px 6px;
+  padding: 5px 3px 4px;
   text-align: center;
   cursor: pointer;
   transition: all 0.18s;
@@ -162,9 +162,9 @@
   filter: grayscale(0.4);
 }
 
-.inv-item-card img { width: 52px; height: 52px; object-fit: contain; }
+.inv-item-card img { width: 44px; height: 44px; object-fit: contain; }
 .inv-item-name {
-  font-size: 9px;
+  font-size: 8px;
   color: #fde68a;
   margin-top: 4px;
   line-height: 1.2;
@@ -199,14 +199,14 @@
 }
 .inv-detail-name {
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: 12px;
   color: #fef3c7;
   text-align: center;
   text-shadow: 0 1px 4px rgba(0,0,0,0.8);
 }
 .inv-detail-img-wrap { position: relative; text-align: center; }
 .inv-detail-img {
-  width: 76px; height: 76px;
+  width: 60px; height: 60px;
   object-fit: contain;
   filter: drop-shadow(0 0 10px rgba(100,200,60,0.5));
 }
@@ -236,7 +236,7 @@
 
 /* Action buttons */
 .inv-action-btn {
-  width: 100%; padding: 9px; border-radius: 10px;
+  width: 100%; padding: 6px; border-radius: 8px;
   background: linear-gradient(180deg, #7a4e10 0%, #5c3808 100%);
   border: 2px solid #c8941a;
   border-bottom-color: #3e2405;
@@ -246,12 +246,9 @@
   text-shadow: 0 1px 3px rgba(0,0,0,0.6);
   letter-spacing: 0.5px;
 }
-.inv-action-btn:hover {
-  filter: brightness(1.15);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 0 #2a1608, 0 0 10px rgba(200,148,26,0.4);
-}
+.inv-action-btn:hover { filter: brightness(1.15); transform: translateY(-1px); box-shadow: 0 4px 0 #2a1608, 0 0 10px rgba(200,148,26,0.4); }
 .inv-action-btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #2a1608; }
+.inv-action-btn { font-size: 11px; }
 
 .inv-levelup-btn {
   background: linear-gradient(180deg, #22863a 0%, #166028 100%);
@@ -315,8 +312,8 @@
 /* Tab bar — wooden header bar */
 .shop-tab-bar {
   display: flex;
-  gap: 5px;
-  padding: 8px 12px;
+  gap: 4px;
+  padding: 5px 10px;
   background: linear-gradient(180deg, #5a3808 0%, #3e2405 100%);
   border-bottom: 3px solid #c8941a;
   box-shadow: 0 3px 8px rgba(0,0,0,0.4);
@@ -329,7 +326,7 @@
 .shop-tab-bar::-webkit-scrollbar { display: none; }
 
 .shop-tab {
-  padding: 6px 14px;
+  padding: 4px 11px;
   border-radius: 20px;
   border: 2px solid rgba(139,94,26,0.6);
   background: rgba(0,0,0,0.3);
@@ -394,16 +391,15 @@
   border: 2px solid #8b6530;
   border-bottom: 3px solid #5a3808;
   border-radius: 12px;
-  padding: 12px 10px;
+  padding: 8px 8px;
   text-align: center;
   position: relative;
   transition: all 0.2s;
   box-shadow: 0 4px 0 rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,200,80,0.1);
-  /* Force equal height across all cards */
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 210px;
+  min-height: 180px;
 }
 .shop-seed-card:hover {
   border-color: #c8941a;
@@ -416,13 +412,13 @@
 }
 
 .shop-seed-img {
-  width: 68px; height: 68px;
+  width: 52px; height: 52px;
   object-fit: contain;
-  margin: 6px 0 4px;
+  margin: 4px 0 2px;
   flex-shrink: 0;
 }
 .shop-seed-name {
-  font-size: 12px; font-weight: 700;
+  font-size: 11px; font-weight: 700;
   color: #fef3c7;
   text-shadow: 0 1px 3px rgba(0,0,0,0.8);
   flex-shrink: 0;
@@ -433,10 +429,10 @@
   flex-shrink: 0;
 }
 .shop-seed-amount {
-  font-size: 13px;
+  font-size: 11px;
   color: #86efac;
   font-weight: 700;
-  margin: 4px 0;
+  margin: 2px 0;
   flex-shrink: 0;
   text-shadow: 0 0 6px rgba(34,197,94,0.4);
 }
@@ -446,7 +442,7 @@
 
 .shop-buy-btn {
   width: 100%;
-  padding: 8px;
+  padding: 5px;
   background: linear-gradient(180deg, #78400a 0%, #5a2e06 100%);
   border: 2px solid #c8941a;
   border-bottom-color: #3e2405;
@@ -509,7 +505,7 @@
   border: 2px solid #8b6530;
   border-bottom: 3px solid #5a3808;
   border-radius: 14px;
-  padding: 14px 10px;
+  padding: 8px 8px;
   text-align: center;
   transition: all 0.2s;
   box-shadow: 0 4px 0 rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,200,80,0.1);
@@ -517,7 +513,7 @@
   flex-direction: column;
   align-items: center;
   position: relative;
-  min-height: 240px;
+  min-height: 200px;
 }
 .shop-packet-card:hover {
   border-color: #c8941a;
@@ -534,9 +530,9 @@
   color: #fde68a;
   text-shadow: 0 1px 3px rgba(0,0,0,0.7);
 }
-.shop-packet-emoji { font-size: 38px; margin: 6px 0; }
+.shop-packet-emoji { font-size: 30px; margin: 4px 0; }
 .shop-packet-name {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 900;
   color: #fef3c7;
   text-shadow: 0 1px 3px rgba(0,0,0,0.8);

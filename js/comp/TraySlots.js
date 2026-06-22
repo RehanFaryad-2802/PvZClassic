@@ -41,7 +41,7 @@ const TraySlots = (() => {
 
     // Check coins
     if (Player.getCoins() < cost.coins) {
-      return { ok: false, msg: `Need ${cost.coins} 🪙 coins` };
+      return { ok: false, msg: `Need ${cost.coins} <img src="assets/icons/gold.png" alt="gold" class="icon-gold"> coins` };
     }
     // Check looms
     if (cost.looms > 0 && Player.getLooms() < cost.looms) {
@@ -86,9 +86,9 @@ const TraySlots = (() => {
         el.style.opacity = '0.4';
         el.style.cursor  = 'default';
       } else {
-        const costLine = cost.looms > 0
-          ? `${cost.coins}🪙\n+${cost.looms} Looms`
-          : `${cost.coins}🪙`;
+          const costLine = cost.looms > 0
+            ? `${cost.coins}<img src="assets/icons/gold.png" alt="gold" class="icon-gold">\n+${cost.looms} Looms`
+            : `${cost.coins}<img src="assets/icons/gold.png" alt="gold" class="icon-gold">`;
         el.innerHTML = `
           <span class="lock-icon">🔓</span>
           <span class="lock-cost">${costLine}</span>

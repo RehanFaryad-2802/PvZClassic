@@ -249,7 +249,7 @@ const Shop = (() => {
     if (!offer || offer.purchased)
       return { ok: false, msg: "Already purchased" };
     if (!Player.spendCoins(offer.coinCost)) {
-      return { ok: false, msg: "Not enough coins 🪙" };
+      return { ok: false, msg: "Not enough <img src=\"assets/icons/gold.png\" alt=\"gold\" class=\"icon-gold\">" };
     }
     Player.addSeeds(offer.plantId, offer.seeds);
     markOfferPurchased(idx);

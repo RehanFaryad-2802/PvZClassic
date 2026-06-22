@@ -231,7 +231,7 @@ const PlantPicker = (() => {
         if (prevUnlocked) {
           el.innerHTML = `
             <span class="pp-unlock-icon">${slotCost.looms ? `<img src="assets/shop/loom.png" class="loom-icon-sm" alt="Loom">` : '🔓'}</span>
-            <span class="pp-unlock-label">${slotCost.coins}🪙${slotCost.looms ? ` + ${slotCost.looms}` : ''}</span>
+            <span class="pp-unlock-label">${slotCost.coins}<img src="assets/icons/gold.png" alt="gold" class="icon-gold">${slotCost.looms ? ` + ${slotCost.looms}` : ''}</span>
           `;
           el.addEventListener('click', () => _promptUnlockSlot(slot, slotCost));
         } else {
@@ -246,7 +246,7 @@ const PlantPicker = (() => {
   }
 
   function _promptUnlockSlot(slot, slotCost) {
-    const costs = [{ icon: '🪙', amount: slotCost.coins, label: 'Coins' }];
+    const costs = [{ icon: '<img src="assets/icons/gold.png" alt="gold" class="icon-gold">', amount: slotCost.coins, label: 'Coins' }];
     if (slotCost.looms > 0) costs.push({ icon: '<img src="assets/shop/loom.png" class="loom-icon-sm" alt="Loom">', amount: slotCost.looms, label: 'Looms', type: 'loom' });
     ConfirmPopup.show({
       icon: '🔓',
@@ -259,8 +259,8 @@ const PlantPicker = (() => {
       onConfirm: () => {
         const coinCost = slotCost.coins;
         const loomCost = slotCost.looms;
-        if (Player.getCoins() < coinCost) {
-          if (typeof UI !== 'undefined') UI.showToast(`Need ${coinCost} 🪙 coins`);
+          if (Player.getCoins() < coinCost) {
+          if (typeof UI !== 'undefined') UI.showToast(`Need ${coinCost} <img src="assets/icons/gold.png" alt="gold" class="icon-gold"> coins`);
           return;
         }
         if (loomCost > 0 && Player.getLooms() < loomCost) {

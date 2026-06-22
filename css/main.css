@@ -27,7 +27,8 @@
   --white:        #f0e6ff;
   --gray:         #9ca3af;
   --cell-size:    72px;
-  --font-display: 'Bangers', cursive;
+  --font-display: 'Fredoka', sans-serif;
+  --font-body: 'Fredoka', sans-serif, 'Bangers', cursive;
   --font-body:    'Nunito', sans-serif;
   --shadow-glow:  0 0 20px rgba(168,85,247,0.6);
   --shadow-card:  0 4px 24px rgba(0,0,0,0.6);
@@ -38,6 +39,7 @@
 
 html, body {
   width: 100%; height: 100%;
+  font-family: 'Fredoka', sans-serif;
   overflow: hidden;
   background: var(--bg-dark);
   color: var(--white);
@@ -709,7 +711,7 @@ html, body {
 /* Image */
 .world-img-wrap {
   width: 100%;
-  height: 180px;
+  height: 150px;
   position: relative;
   overflow: hidden;
 }
@@ -734,10 +736,9 @@ html, body {
 }
 
 /* Nameplate — brown banner below image */
-.world-frame-nameplate {
-  background: linear-gradient(180deg, #7a4e10 0%, #5c3808 100%);
-  border-top: 2px solid rgba(255,200,60,0.4);
-  padding: 8px 10px 10px;
+.world-name {
+  font-family: var(--font-display);
+  font-size: 13px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -745,15 +746,8 @@ html, body {
   gap: 3px;
   border-radius: 0 0 6px 6px;
 }
-.world-name {
-  font-family: var(--font-display);
-  font-size: 13px;
-  letter-spacing: 1.5px;
-  color: #fef3c7;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.8), 0 0 8px rgba(255,200,60,0.3);
-}
 .world-sub {
-  font-size: 10px;
+  font-size: 9px;
   color: #d4c080;
   letter-spacing: 0.5px;
 }
@@ -762,7 +756,7 @@ html, body {
   letter-spacing: 1px;
 }
 .world-progress {
-  font-size: 11px;
+  font-size: 10px;
   color: #fde68a;
   background: rgba(0,0,0,0.35);
   border: 1px solid rgba(212,180,60,0.4);
@@ -2183,3 +2177,13 @@ html, body {
   border: 2px solid rgba(255,255,255,0.15);
   box-shadow: 0 0 24px rgba(100,200,100,0.25), 0 4px 16px rgba(0,0,0,0.5);
 }
+
+/* Coin icon helpers */
+.icon-gold,
+.icon-gold-inline {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  vertical-align: middle;
+}
+.icon-gold-inline { width: 20px; height: 20px; }

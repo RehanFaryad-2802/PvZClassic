@@ -1,6 +1,9 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
     <meta charset="UTF-8" />
     <meta
       name="viewport"
@@ -303,7 +306,7 @@
         <div class="levelselect-header">
           <button class="btn-back" id="btn-back-levelselect"><img src="assets/icons/back.png" alt="back" class="game-icon"></button>
           <h2 id="levelselect-world-name">World 1</h2>
-          <span class="coin-display">🪙 <span id="ls-coins">0</span></span>
+          <span class="coin-display"><img src="assets/icons/gold.png" alt="gold" class="icon-gold"> <span id="ls-coins">0</span></span>
         </div>
         
         <div class="levels-grid" id="levels-grid">
@@ -351,7 +354,7 @@
           <div class="progress-bar"><div class="progress-fill" id="wave-progress"></div></div>
         </div>
         <div class="hud-right">
-          <span class="coin-display">🪙 <span id="hud-coins">0</span></span>
+          <span class="coin-display"><img src="assets/icons/gold.png" alt="gold" class="icon-gold"> <span id="hud-coins">0</span></span>
           <button class="btn-pause" id="btn-pause">⏸</button>
         </div>
       </div>
@@ -582,7 +585,6 @@
             const ld = document.getElementById("screen-loading");
             if (ld) {
               ld.style.transition = "opacity 0.4s ease";
-              ld.style.opacity = "0";
               setTimeout(() => ld.remove(), 400);
             }
             UI.init();

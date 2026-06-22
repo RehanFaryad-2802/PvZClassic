@@ -483,7 +483,7 @@ function buildLevelGrid(worldId) {
           <button id="btn-back-collection" class="btn-back"><img src="assets/icons/back.png" alt="back" class="game-icon"></button>
           <div class="inv-title">📦 Inventory</div>
           <div class="inv-currency">
-            <span>🪙 <span id="inv-coins">${Player.getCoins()}</span></span>
+            <span><img src="assets/icons/gold.png" alt="gold" class="icon-gold"> <span id="inv-coins">${Player.getCoins()}</span></span>
             <span class="loom-display">
               <img src="assets/shop/loom.png" class="loom-icon-sm"/>
               <span id="inv-looms">${Player.getLooms()}</span>
@@ -498,7 +498,7 @@ function buildLevelGrid(worldId) {
             <div class="inv-tabs" id="inv-tabs">
               <button class="inv-tab active" data-tab="plants">🌿 Plants</button>
               <button class="inv-tab" data-tab="packets">📦 Items</button>
-              <button class="inv-tab" data-tab="coins">🪙 Coins</button>
+              <button class="inv-tab" data-tab="coins"><img src="assets/icons/gold.png" alt="gold" class="icon-gold"> Coins</button>
             </div>
             <div class="inv-grid" id="inv-grid"></div>
           </div>
@@ -628,7 +628,7 @@ function buildLevelGrid(worldId) {
       const coinCard = document.createElement("div");
       coinCard.className = "inv-item-card inv-packet-card";
       coinCard.innerHTML = `
-        <div style="font-size:36px;line-height:1">🪙</div>
+        <div style="font-size:36px;line-height:1"><img src="assets/icons/gold.png" alt="gold" class="icon-gold"></div>
         <div class="inv-item-name">Coins</div>
         <div class="inv-packet-qty" style="color:#fbbf24">${Player.getCoins()}</div>
       `;
@@ -636,9 +636,9 @@ function buildLevelGrid(worldId) {
         const left = document.getElementById("inv-left");
         if (!left) return;
         left.innerHTML = `
-          <div class="inv-detail" style="text-align:center">
-            <div class="inv-detail-name">🪙 Coins</div>
-            <div style="font-size:56px;margin:12px 0">🪙</div>
+            <div class="inv-detail" style="text-align:center">
+            <div class="inv-detail-name"><img src="assets/icons/gold.png" alt="gold" class="icon-gold"> Coins</div>
+            <div style="font-size:56px;margin:12px 0"><img src="assets/icons/gold.png" alt="gold" class="icon-gold"></div>
             <div class="inv-currency-amount" style="font-size:40px;font-weight:900;color:#fbbf24">${Player.getCoins()}</div>
             <div style="margin-top:12px;font-size:11px;color:#6b7280;line-height:1.7">
               The main currency of PvZ Classic.<br>
@@ -915,14 +915,14 @@ function buildLevelGrid(worldId) {
                   ? `<button class="inv-action-btn inv-levelup-btn" id="inv-lvlup-btn" data-id="${id}">
                     ⬆️ Level Up<br><small>${
                       level >= 14
-                        ? `🪙 ${nextCost.coins} + 🌀 ${nextCost.seedCoins}`
-                        : `🪙 ${nextCost} coins`
+                        ? `<img src="assets/icons/gold.png" alt="gold" class="icon-gold"> ${nextCost.coins} + 🌀 ${nextCost.seedCoins}`
+                        : `<img src="assets/icons/gold.png" alt="gold" class="icon-gold"> ${nextCost} coins`
                     }</small>
                    </button>`
                   : `<div class="inv-need-seeds">${
                       level >= 14
-                        ? `Need 🪙 ${(nextCost?.coins || 0) - Player.getCoins()} more coins`
-                        : `Need 🪙 ${(nextCost || 0) - Player.getCoins()} more coins`
+                        ? `Need <img src="assets/icons/gold.png" alt="gold" class="icon-gold"> ${(nextCost?.coins || 0) - Player.getCoins()} more coins`
+                        : `Need <img src="assets/icons/gold.png" alt="gold" class="icon-gold"> ${(nextCost || 0) - Player.getCoins()} more coins`
                     }</div>`
             }
           </div>
@@ -1619,8 +1619,7 @@ function buildLevelGrid(worldId) {
         </div>
         <button class="shop-buy-btn ${offer.purchased ? "shop-bought-btn" : ""}"
           ${offer.purchased ? "disabled" : ""}>
-          ${offer.purchased ? "✓ Purchased" : `🪙 ${offer.coinCost}`}
-        </button>
+          ${offer.purchased ? "✓ Purchased" : `<img src="assets/icons/gold.png" alt="gold" class="icon-gold"> ${offer.coinCost}`}</button>
       `;
 
       if (!offer.purchased) {
@@ -1782,7 +1781,7 @@ function buildLevelGrid(worldId) {
 
     rewardsEl.innerHTML = "";
     if (won) {
-      rewardsEl.innerHTML += `<div class="reward-row"><span>Coins Earned</span><span>🪙 ${coinReward}</span></div>`;
+      rewardsEl.innerHTML += `<div class="reward-row"><span>Coins Earned</span><span><img src="assets/icons/gold.png" alt="gold" class="icon-gold"> ${coinReward}</span></div>`;
       if (packetReward) {
         rewardsEl.innerHTML += `
           <div class="reward-row reward-packet">
@@ -1818,7 +1817,8 @@ function buildLevelGrid(worldId) {
   let toastTimer = null;
   function showToast(msg) {
     const el = document.getElementById("toast");
-    el.textContent = msg;
+    // allow small HTML (icons) in toasts
+    el.innerHTML = msg;
     el.classList.remove("hidden");
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => el.classList.add("hidden"), 2500);
@@ -1971,10 +1971,10 @@ function buildLevelGrid(worldId) {
 
     // Settings open/back
     // New menu bottom bar buttons
-    document.getElementById('btn-menu-collection')?.addEventListener('click', () => UI.showScreen('screen-collection'));
-document.getElementById('btn-menu-collection2')?.addEventListener('click', () => UI.showScreen('screen-collection'));
-document.getElementById('btn-menu-worldmap')?.addEventListener('click', () => UI.showScreen('screen-worldmap'));
-document.getElementById('btn-play-quick')?.addEventListener('click', () => UI.showScreen('screen-worldmap'));
+    document.getElementById('btn-menu-collection')?.addEventListener('click', () => showScreen('screen-collection'));
+    document.getElementById('btn-menu-collection2')?.addEventListener('click', () => showScreen('screen-collection'));
+    document.getElementById('btn-menu-worldmap')?.addEventListener('click', () => showScreen('screen-worldmap'));
+    document.getElementById('btn-play-quick')?.addEventListener('click', () => showScreen('screen-worldmap'));
 
 document.getElementById('btn-settings')
       .addEventListener("click", () => showScreen("screen-settings"));
