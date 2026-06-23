@@ -580,7 +580,7 @@ function buildLevelGrid(worldId) {
         left.innerHTML = `
             <div class="inv-detail" style="text-align:center">
             <div class="inv-detail-name"><img src="assets/icons/gold.png" alt="gold" class="icon-gold"> Coins</div>
-            <div style="font-size:56px;margin:12px 0"><img src="assets/icons/gold.png" alt="gold" class="icon-gold"></div>
+            <div style="font-size:56px;"><img src="assets/icons/gold.png" alt="gold" class="icon-gold" style="width:64px;height:64px;object-fit:contain;margin:12px auto;display:block;filter:drop-shadow(0 0 16px #fbbf24)"></div>
             <div class="inv-currency-amount" style="font-size:40px;font-weight:900;color:#fbbf24">${Player.getCoins()}</div>
             <div style="margin-top:12px;font-size:11px;color:#6b7280;line-height:1.7">
               The main currency of PvZ Classic.<br>

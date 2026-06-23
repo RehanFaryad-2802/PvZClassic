@@ -37,6 +37,7 @@
 /* ─── Reset & Base ───────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+
 html, body {
   width: 100%; height: 100%;
   font-family: 'Fredoka', sans-serif;
@@ -51,6 +52,9 @@ html, body {
 /* img{
   mix-blend-mode: multiply;
 } */
+ .pvz2-currency-icon img{
+  width: 100%;
+ }
 .game-icon{
   width: 24px;
   height: 24px;

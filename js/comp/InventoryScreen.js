@@ -134,6 +134,8 @@ const InventoryScreen = (() => {
 
         <div class="inv-detail-desc">${def.description || ''}</div>
 
+        
+        ${statsHTML ? `<div class="inv-stats-block">${statsHTML}</div>` : ''}
         <div class="inv-seeds-block">
           <div class="inv-seeds-row">
             <span>🌱 Seeds</span>
@@ -148,8 +150,6 @@ const InventoryScreen = (() => {
             </div>
           </div>
         </div>
-
-        ${statsHTML ? `<div class="inv-stats-block">${statsHTML}</div>` : ''}
 
         <div class="inv-actions">${actionHTML}</div>
       </div>

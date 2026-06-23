@@ -91,12 +91,26 @@
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
-  background: linear-gradient(180deg,
-    rgba(50,28,4,0.94) 0%,
-    rgba(36,18,2,0.97) 100%);
-  border-right: 2px solid #8b5e1a;
-  box-shadow: 2px 0 8px rgba(0,0,0,0.4);
   scrollbar-width: none;
+  /* Wooden plank — same grain system as wc-card */
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px, transparent 4px,
+      rgba(0,0,0,0.025) 4px, rgba(0,0,0,0.025) 5px
+    ),
+    linear-gradient(160deg,
+      #b07838 0%,
+      #8c5820 30%,
+      #7a4a14 60%,
+      #8c5820 100%);
+  border-right: 3px solid #c8941a;
+  border-top-right-radius: 0;
+  box-shadow:
+    3px 0 0 #4a2808,
+    4px 0 12px rgba(0,0,0,0.5),
+    inset -2px 0 6px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,210,100,0.12);
 }
 .inv-panel::-webkit-scrollbar { display: none; }
 
@@ -125,8 +139,8 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: rgba(0,0,0,0.22);
-  backdrop-filter: blur(4px);
+  background: rgba(0,0,0,0.15);
+  backdrop-filter: blur(3px);
 }
 
 /* ══════════════════════════════════════════════════
@@ -134,17 +148,58 @@
 ══════════════════════════════════════════════════ */
 .inv-tabs {
   display: flex;
-  gap: 4px;
-  padding: 4px 8px;
-  background: linear-gradient(180deg, rgba(58,32,4,0.92) 0%, rgba(40,20,2,0.95) 100%);
-  border-bottom: 2px solid #7a4e10;
+  gap: 5px;
+  padding: 5px 15px 9px;
   flex-shrink: 0;
+  /* Wooden plank strip — lighter top edge, dark bottom edge */
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px, transparent 3px,
+      rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px
+    ),
+    linear-gradient(180deg,
+      #c8914a 0%,
+      #a06828 40%,
+      #8a5218 100%);
+  border-top:    2px solid #daa050;
+  border-bottom: 3px solid #4a2808;
+  box-shadow:
+    0 4px 0 #3a1e08,
+    0 5px 10px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,210,100,0.2);
+  position: relative;
+  z-index: 2;
 }
+
+/* Nail pins on tab bar — decorative left & right */
+.inv-tabs::before,
+.inv-tabs::after {
+  content: '';
+  position: absolute;
+  top: 50%; transform: translateY(-50%);
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e8d090, #b8922a 60%, #6a4800);
+  border: 1px solid #4a3000;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,235,150,0.4);
+}
+.inv-tabs::before { left: 6px; }
+.inv-tabs::after  { right: 6px; }
+
 .inv-tab {
-  padding: 3px 10px;
+  padding: 3px 11px;
   border-radius: 20px;
-  border: 1px solid rgba(139,94,26,0.55);
-  background: rgba(0,0,0,0.28);
+  /* Recessed unselected tab — slightly darker carved look */
+  background:
+    linear-gradient(180deg,
+      rgba(60,30,5,0.7) 0%,
+      rgba(40,18,2,0.8) 100%);
+  border: 2px solid rgba(90,48,8,0.8);
+  border-bottom: 2px solid rgba(30,12,2,0.6);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(0,0,0,0.2);
   color: #c4a96a;
   font-family: var(--font-display);
   font-size: 10px;
@@ -152,13 +207,24 @@
   cursor: pointer;
   transition: all 0.18s;
   white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
+.inv-tab:hover:not(.active) {
+  background: linear-gradient(180deg, rgba(80,42,8,0.8) 0%, rgba(58,28,4,0.9) 100%);
+  color: #e0c080;
 }
 .inv-tab.active {
-  background: linear-gradient(180deg, #78400a 0%, #5a2e06 100%);
+  /* Raised active tab — pops out like a wooden button */
+  background: linear-gradient(180deg, #daa050 0%, #b07838 40%, #8c5820 100%);
   color: #fef3c7;
-  border-color: #c8941a;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,220,80,0.2);
-  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  border: 2px solid #c8941a;
+  border-bottom-color: #5a3008;
+  box-shadow:
+    0 3px 0 #3a1e08,
+    0 4px 8px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,220,100,0.3);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+  /* transform: translateY(-1px); */
 }
 
 /* ══════════════════════════════════════════════════
@@ -362,7 +428,6 @@
   flex-direction: column;
   gap: 6px;
   padding: 8px 7px;
-  height: 100%;
 }
 
 /* Plant header: image + name side by side */
