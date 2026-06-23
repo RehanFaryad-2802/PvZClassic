@@ -1,0 +1,253 @@
+/* ══════════════════════════════════════════════════
+   css/wooden_card.css  — PvZClassic
+   WoodenCard component styles.
+   Mobile-first, 752×351px landscape target.
+   All sizes use relative units so cards scale
+   correctly in both inventory grid and shop grid.
+══════════════════════════════════════════════════ */
+
+/* ── Card shell ───────────────────────────────────
+   Portrait plank: narrower than tall, like a real
+   wooden notice-board tile nailed to a board.     */
+.wc-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Wood body gradient — light top grain, dark sides */
+  background:
+    /* noise grain overlay */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E"),
+    /* horizontal grain stripes */
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px,
+      transparent 3px,
+      rgba(0,0,0,0.03) 3px,
+      rgba(0,0,0,0.03) 4px
+    ),
+    /* base wood colour */
+    linear-gradient(
+      160deg,
+      #c8914a 0%,
+      #a86e2e 25%,
+      #8c5820 55%,
+      #7a4a14 75%,
+      #8c5820 100%
+    );
+  border-radius: 6px 6px 4px 4px;
+  /* Bevelled wooden edge */
+  border-top:    2px solid #e0ac60;
+  border-left:   2px solid #c8914a;
+  border-right:  2px solid #6a3c10;
+  border-bottom: 3px solid #4a2808;
+  box-shadow:
+    0 4px 0 #3a1e08,          /* thick bottom shadow = depth */
+    0 6px 12px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,220,100,0.2),  /* top shine */
+    inset 0 -1px 0 rgba(0,0,0,0.3);       /* bottom inner shadow */
+  cursor: pointer;
+  transition: transform 0.14s, box-shadow 0.14s;
+  overflow: visible;          /* pin sticks out above */
+  padding-top: 8px;           /* room for pin */
+  /* no fixed width — let grid control it */
+}
+
+/* Hover lift */
+.wc-card:not(.wc-locked):hover {
+  transform: translateY(-4px) rotate(0.5deg);
+  box-shadow:
+    0 8px 0 #3a1e08,
+    0 10px 20px rgba(0,0,0,0.55),
+    0 0 16px rgba(200,145,74,0.4),
+    inset 0 1px 0 rgba(255,220,100,0.25);
+}
+
+/* Press */
+.wc-card:not(.wc-locked):active {
+  transform: translateY(2px);
+  box-shadow:
+    0 2px 0 #3a1e08,
+    0 3px 6px rgba(0,0,0,0.5);
+}
+
+/* Selected — gold rim glow */
+.wc-card.wc-selected {
+  border-top-color:   #fbbf24;
+  border-left-color:  #f59e0b;
+  border-right-color: #d97706;
+  box-shadow:
+    0 4px 0 #3a1e08,
+    0 6px 12px rgba(0,0,0,0.5),
+    0 0 18px rgba(251,191,36,0.7),
+    inset 0 1px 0 rgba(255,220,100,0.3);
+}
+
+/* Locked — darker, desaturated wood */
+.wc-card.wc-locked {
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px, transparent 3px,
+      rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px
+    ),
+    linear-gradient(160deg, #7a6040 0%, #5c4428 50%, #4a3418 100%);
+  border-top-color:    #8a7050;
+  border-left-color:   #6a5030;
+  border-right-color:  #3a2810;
+  border-bottom-color: #2a1808;
+  box-shadow: 0 3px 0 #1a1008, 0 5px 10px rgba(0,0,0,0.6);
+  cursor: default;
+}
+
+/* ── Nail pin ─────────────────────────────────────
+   Small circle at top-centre, sits above card.   */
+.wc-pin {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e8d090, #b8922a 60%, #6a4800);
+  border: 1px solid #4a3000;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.6),
+    inset 0 1px 0 rgba(255,235,150,0.5);
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+/* ── Image recess ─────────────────────────────────
+   Carved-out darker area where plant image sits. */
+.wc-recess {
+  width: calc(100% - 8px);
+  /* Square recess */
+  aspect-ratio: 1 / 1;
+  background:
+    linear-gradient(135deg,
+      rgba(0,0,0,0.35) 0%,
+      rgba(0,0,0,0.15) 50%,
+      rgba(0,0,0,0.25) 100%);
+  border-radius: 4px;
+  border: 1px solid rgba(0,0,0,0.4);
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,0.5),  /* carved depth */
+    inset 0 -1px 2px rgba(255,200,100,0.08);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.wc-img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+  display: block;
+  /* slight drop shadow to lift plant off the wood */
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+  transition: transform 0.15s;
+}
+.wc-card:not(.wc-locked):hover .wc-img {
+  transform: scale(1.1);
+}
+
+/* Lock icon centred over recess */
+.wc-lock-icon {
+  position: absolute;
+  font-size: 16px;
+  bottom: 2px;
+  right: 3px;
+  opacity: 0.85;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8));
+}
+
+/* Badge — top-right of recess (seed count, rarity, etc.) */
+.wc-badge {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  background: linear-gradient(135deg, #78400a, #5a2e06);
+  border: 1px solid #c8941a;
+  border-radius: 6px;
+  padding: 1px 4px;
+  font-size: 8px;
+  font-family: var(--font-display, sans-serif);
+  font-weight: 700;
+  color: #fde68a;
+  line-height: 1.3;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+  white-space: nowrap;
+  z-index: 2;
+}
+
+/* ── Nameplate strip ──────────────────────────────
+   Darker wood band at bottom, like a label nailed on. */
+.wc-plate {
+  width: 100%;
+  background: linear-gradient(180deg, #5a3408 0%, #3e2005 100%);
+  border-top: 1px solid rgba(255,180,60,0.25);
+  border-radius: 0 0 3px 3px;
+  padding: 3px 4px 4px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.wc-name {
+  font-family: var(--font-display, sans-serif);
+  font-size: 8px;
+  font-weight: 600;
+  color: #fef3c7;
+  line-height: 1.2;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wc-sub {
+  font-family: var(--font-display, sans-serif);
+  font-size: 7px;
+  color: #86efac;
+  font-weight: 600;
+  text-shadow: 0 0 4px rgba(34,197,94,0.4);
+  line-height: 1.2;
+}
+.wc-sub.wc-sub-locked { color: #a08060; }
+
+/* ── Seed progress bar inside nameplate ─────────── */
+.wc-bar-wrap {
+  height: 3px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 2px;
+  margin-top: 3px;
+  overflow: hidden;
+}
+.wc-bar {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.4s ease-out;
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE GRID SIZING
+   The grid controls width; card height follows
+   the aspect-ratio of the recess + plate.
+══════════════════════════════════════════════════ */
+
+/* Inventory grid — tight mobile grid */
+.inv-grid {
+  grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
+  gap: 10px;
+  padding: 10px;
+}
+
+/* Shop grid — slightly larger cards */
+.shop-seeds-grid {
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 10px;
+}

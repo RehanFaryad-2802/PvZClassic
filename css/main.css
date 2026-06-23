@@ -2157,6 +2157,7 @@ html, body {
 /* ── World map right bar ────────────────────── */
 .wm-right-bar {
   display: flex;
+  width: 160px;
   align-items: center;
   gap: 6px;
   margin-left: auto;

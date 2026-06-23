@@ -472,56 +472,19 @@ function buildLevelGrid(worldId) {
     buildInventory();
   }
 
-  function buildInventory() {
-    const screen = document.getElementById("screen-collection");
+ function buildInventory() {
+    const screen = document.getElementById('screen-collection');
     if (!screen) return;
 
-    // Build inventory layout if not already done
-    if (!document.getElementById("inv-layout")) {
-      screen.innerHTML = `
-        <div class="inv-header">
-          <button id="btn-back-collection" class="btn-back"><img src="assets/icons/back.png" alt="back" class="game-icon"></button>
-          <div class="inv-title">📦 Inventory</div>
-          <div class="inv-currency">
-            <span><img src="assets/icons/gold.png" alt="gold" class="icon-gold"> <span id="inv-coins">${Player.getCoins()}</span></span>
-            <span class="loom-display">
-              <img src="assets/shop/loom.png" class="loom-icon-sm"/>
-              <span id="inv-looms">${Player.getLooms()}</span>
-            </span>
-          </div>
-        </div>
-        <div class="inv-layout" id="inv-layout">
-          <div class="inv-left" id="inv-left">
-            <div class="inv-detail-empty">Select an item</div>
-          </div>
-          <div class="inv-right" id="inv-right">
-            <div class="inv-tabs" id="inv-tabs">
-              <button class="inv-tab active" data-tab="plants">🌿 Plants</button>
-              <button class="inv-tab" data-tab="packets">📦 Items</button>
-              <button class="inv-tab" data-tab="coins"><img src="assets/icons/gold.png" alt="gold" class="icon-gold"> Coins</button>
-            </div>
-            <div class="inv-grid" id="inv-grid"></div>
-          </div>
-        </div>
-      `;
-
-      // Re-wire back button
-      document
-        .getElementById("btn-back-collection")
-        .addEventListener("click", () => showScreen("screen-worldmap"));
-
-      // Tab switching
-      document.getElementById("inv-tabs").addEventListener("click", (e) => {
-        const tab = e.target.dataset.tab;
-        if (!tab) return;
-        document
-          .querySelectorAll(".inv-tab")
-          .forEach((t) => t.classList.toggle("active", t.dataset.tab === tab));
-        buildInventoryGrid(tab);
-      });
+    if (!document.getElementById('inv-layout')) {
+      InventoryScreen.buildShell(
+        screen,
+        () => showScreen('screen-worldmap'),
+        (tab) => buildInventoryGrid(tab)
+      );
     }
 
-    buildInventoryGrid("plants");
+    buildInventoryGrid('plants');
     updateCoinDisplays();
   }
 
@@ -546,32 +509,19 @@ function buildLevelGrid(worldId) {
         const level = pp ? pp.level : 1;
         const seeds = pp ? pp.seeds : 0;
         const nextCost = Seeds.getLevelUpCost(level);
-        const pct = nextCost ? Math.min(seeds / nextCost, 1) : 1;
         const maxLevel = level >= 15;
 
-        const card = document.createElement("div");
-        card.className = "inv-item-card" + (owned ? "" : " inv-locked");
-        card.innerHTML = `
-          <img src="${def.image}" alt="${def.name}"
-            style="${owned ? "" : "filter:grayscale(1) brightness(0.3)"}"/>
-          <div class="inv-item-name">${def.name}</div>
-          <div class="inv-item-level">${owned ? `Lv.${level}` : "🔒"}</div>
-          ${
-            owned
-              ? `
-            <div class="inv-seed-bar-wrap">
-              <div class="inv-seed-bar" style="width:${maxLevel ? 100 : pct * 100}%;
-                background:${maxLevel ? "var(--gold)" : "var(--green)"}"></div>
-            </div>
-          `
-              : ""
-          }
-        `;
-        if (owned) {
-          card.addEventListener("click", () =>
-            selectInventoryItem("plant", def.id),
-          );
-        }
+        const card = WoodenCard.create({
+          img:      def.image,
+          name:     def.name,
+          sublabel: owned ? (maxLevel ? "⭐ MAX" : `Lv.${level}`) : null,
+          locked:   !owned,
+          seedBar:  owned && !maxLevel ? { current: seeds, max: nextCost || 1 } : null,
+          onClick:  owned ? () => selectInventoryItem("plant", def.id) : null,
+        });
+
+        // store id for selection highlight
+        card.dataset.plantId = def.id;
         grid.appendChild(card);
       });
     } else if (tab === "packets") {
@@ -587,16 +537,13 @@ function buildLevelGrid(worldId) {
         if (qty === 0) return;
         hasAny = true;
 
-        const card = document.createElement("div");
-        card.className = "inv-item-card inv-packet-card";
-        card.innerHTML = `
-          <div class="inv-packet-img">${getPacketEmoji(def.id)}</div>
-          <div class="inv-item-name">${def.name}</div>
-          <div class="inv-packet-qty">×${qty}</div>
-        `;
-        card.addEventListener("click", () =>
-          selectInventoryItem("packet", def.id),
-        );
+        const card = WoodenCard.create({
+          img:      def.image || null,
+          name:     def.name,
+          sublabel: `×${qty}`,
+          badge:    getPacketEmoji(def.id),
+          onClick:  () => selectInventoryItem("packet", def.id),
+        });
         grid.appendChild(card);
       });
 
@@ -605,17 +552,13 @@ function buildLevelGrid(worldId) {
       miniPackets.forEach((item) => {
         hasAny = true;
         const worldId = item.meta.worldId || "?";
-        const card = document.createElement("div");
-        card.className = "inv-item-card inv-packet-card inv-minipacket-card";
-        card.innerHTML = `
-          <img src="assets/shop/minipacket.png" style="width:56px;height:56px;object-fit:contain;filter:drop-shadow(0 0 10px #a855f7)"/>
-          <div class="inv-item-name">Seed Packet</div>
-          <div class="inv-packet-qty" style="color:#a855f7">W${worldId}</div>
-          <div style="font-size:9px;color:#6b7280;margin-top:2px">Tap to open</div>
-        `;
-        card.addEventListener("click", () =>
-          selectInventoryItem("minipacket", item.id),
-        );
+        const card = WoodenCard.create({
+          img:      "assets/shop/minipacket.png",
+          name:     "Seed Packet",
+          sublabel: `W${worldId}`,
+          badge:    "🌿",
+          onClick:  () => selectInventoryItem("minipacket", item.id),
+        });
         grid.appendChild(card);
       });
 
@@ -625,13 +568,12 @@ function buildLevelGrid(worldId) {
 
     } else if (tab === "coins") {
       // Coins card
-      const coinCard = document.createElement("div");
-      coinCard.className = "inv-item-card inv-packet-card";
-      coinCard.innerHTML = `
-        <div style="font-size:36px;line-height:1"><img src="assets/icons/gold.png" alt="gold" class="icon-gold"></div>
-        <div class="inv-item-name">Coins</div>
-        <div class="inv-packet-qty" style="color:#fbbf24">${Player.getCoins()}</div>
-      `;
+      const coinCard = WoodenCard.create({
+        img:      "assets/icons/gold.png",
+        name:     "Coins",
+        sublabel: String(Player.getCoins()),
+        onClick:  null,
+      });
       coinCard.addEventListener("click", () => {
         const left = document.getElementById("inv-left");
         if (!left) return;
@@ -651,14 +593,12 @@ function buildLevelGrid(worldId) {
       grid.appendChild(coinCard);
 
       // Looms card
-      const loomCard = document.createElement("div");
-      loomCard.className = "inv-item-card inv-packet-card";
-      loomCard.style.borderColor = "rgba(250,204,21,0.4)";
-      loomCard.innerHTML = `
-        <img src="assets/shop/loom.png" style="width:44px;height:44px;object-fit:contain"/>
-        <div class="inv-item-name" style="color:#fbbf24">Looms</div>
-        <div class="inv-packet-qty" style="color:#fbbf24">${Player.getLooms()}</div>
-      `;
+      const loomCard = WoodenCard.create({
+        img:      "assets/shop/loom.png",
+        name:     "Looms",
+        sublabel: String(Player.getLooms()),
+        onClick:  null,
+      });
       loomCard.addEventListener("click", () => {
         const left = document.getElementById("inv-left");
         if (!left) return;
@@ -690,6 +630,11 @@ function buildLevelGrid(worldId) {
   }
 
   function selectInventoryItem(type, id) {
+    // Clear previous selection highlight
+    document.querySelectorAll('#inv-grid .wc-card').forEach(c => c.classList.remove('wc-selected'));
+    // Highlight selected card
+    const sel = document.querySelector(`#inv-grid .wc-card[data-plant-id="${id}"]`);
+    if (sel) sel.classList.add('wc-selected');
     inventorySelectedItem = { type, id };
     const left = document.getElementById("inv-left");
     if (!left) return;
@@ -762,6 +707,11 @@ function buildLevelGrid(worldId) {
       return;
     }
 
+    // Highlight selected card
+    document.querySelectorAll('#inv-grid .wc-card').forEach(c => c.classList.remove('wc-selected'));
+    const selCard = document.querySelector(`#inv-grid .wc-card[data-plant-id="${id}"]`);
+    if (selCard) selCard.classList.add('wc-selected');
+
     if (type === "plant") {
       const def = PlantRegistry.get(id);
       const pp = Player.getPlant(id);
@@ -774,6 +724,21 @@ function buildLevelGrid(worldId) {
       const canUp = !maxLevel && seeds >= (nextCost || 0);
       const pct = nextCost ? Math.min(seeds / nextCost, 1) : 1;
 
+      InventoryScreen.renderPlantDetail(left, def, pp, (plantId) => {
+        const pid = plantId;
+        const pDef = PlantRegistry.get(pid);
+        const oldLevel = Player.getPlant(pid).level;
+        const oldStats = pDef.levelStats ? { ...(pDef.levelStats[oldLevel] || {}) } : {};
+        if (Seeds.tryLevelUp(pid)) {
+          const newLevel = Player.getPlant(pid).level;
+          const newStats = pDef.levelStats ? { ...(pDef.levelStats[newLevel] || {}) } : {};
+          buildInventoryGrid('plants');
+          selectInventoryItem('plant', pid);
+          showUpgradeCard(pDef, oldLevel, newLevel, oldStats, newStats);
+        }
+      });
+      return;
+      // OLD CODE BELOW — kept for reference but unreachable:
       left.innerHTML = `
         <div class="inv-detail">
           <div class="inv-detail-name">${def.name}</div>
