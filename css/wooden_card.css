@@ -152,9 +152,6 @@
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
   transition: transform 0.15s;
 }
-.wc-card:not(.wc-locked):hover .wc-img {
-  transform: scale(1.1);
-}
 
 /* Lock icon centred over recess */
 .wc-lock-icon {

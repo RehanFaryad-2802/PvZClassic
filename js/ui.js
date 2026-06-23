@@ -1485,37 +1485,17 @@ function buildLevelGrid(worldId) {
   let shopTab = "seeds";
 
   function buildShop() {
-    const container = document.getElementById("shop-grid");
-    if (!container) return;
+    const screen = document.getElementById('screen-shop');
+    if (!screen) return;
 
-    // Build shop shell once
-    if (!document.getElementById("shop-tab-bar")) {
-      const screen = document.getElementById("screen-shop");
-      const header =
-        screen.querySelector(".shop-header") || screen.querySelector("h2");
-
-      const tabBar = document.createElement("div");
-      tabBar.id = "shop-tab-bar";
-      tabBar.className = "shop-tab-bar";
-      tabBar.innerHTML = `
-        <button class="shop-tab active" data-tab="seeds">Seeds</button>
-        <button class="shop-tab" data-tab="packets">Packets</button>
-        <button class="shop-tab" data-tab="plants">Plants</button>
-        <button class="shop-tab" data-tab="event">Event</button>
-      `;
-      container.parentNode.insertBefore(tabBar, container);
-
-      tabBar.addEventListener("click", (e) => {
-        const tab = e.target.dataset.tab;
-        if (!tab) return;
-        document
-          .querySelectorAll(".shop-tab")
-          .forEach((t) => t.classList.toggle("active", t.dataset.tab === tab));
-        shopTab = tab;
-        renderShopTab(tab);
-      });
+    if (!document.getElementById('shop-tab-bar')) {
+      ShopScreen.buildShell(
+        screen,
+        () => showScreen('screen-worldmap'),
+        (tab) => { shopTab = tab; renderShopTab(tab); }
+      );
+      updateCoinDisplays();
     }
-
     renderShopTab(shopTab);
   }
 
@@ -1541,125 +1521,38 @@ function buildLevelGrid(worldId) {
     return `${s}s`;
   }
 
-  function renderSeedsTab(container) {
+ function renderSeedsTab(container) {
     const data = Shop.getSeedOffers();
-    const now = Date.now();
+    const now  = Date.now();
     const timeLeft = data.nextRefresh - now;
 
     if (!data.offers || data.offers.length === 0) {
-      container.innerHTML = `<div class="shop-empty">Complete more levels to unlock plant offers! 🌿</div>`;
+      container.appendChild(ShopScreen.buildComingSoon('🌿', 'No Offers Yet', 'Complete more levels to unlock plant offers!'));
       return;
     }
 
-    const grid = document.createElement("div");
-    grid.className = "shop-seeds-grid";
+    container.appendChild(ShopScreen.buildRefreshTimer(timeLeft));
+
+    const grid = document.createElement('div');
+    grid.className = 'sh-seeds-grid';
     container.appendChild(grid);
 
     data.offers.forEach((offer, idx) => {
       const def = PlantRegistry.get(offer.plantId);
       if (!def) return;
-      const pp = Player.getPlant(offer.plantId);
+      const pp    = Player.getPlant(offer.plantId);
       const level = pp ? pp.level : 1;
+      const isExpiringSoon = timeLeft < 3600000;
 
-      const isExpiringSoon = timeLeft < 3600000; // under 1 hour
-      const badgeColor =
-        offer.seeds >= 15
-          ? "var(--gold)"
-          : offer.seeds >= 10
-            ? "var(--purple-light)"
-            : "var(--green)";
+      // patch nextRefresh onto offer for timer
+      offer._nextRefresh = data.nextRefresh;
 
-      const card = document.createElement("div");
-      card.className =
-        "shop-seed-card" + (offer.purchased ? " shop-purchased" : "");
-
-      card.innerHTML = `
-        <img src="${def.image}" alt="${def.name}" class="shop-seed-img"/>
-        <div class="shop-seed-name">${def.name}</div>
-        <div class="shop-seed-level">Lv.${level}</div>
-        <div class="shop-seed-amount">+${offer.seeds} Seeds</div>
-        <div class="shop-seed-timer ${isExpiringSoon ? "expiring-soon" : ""}"
-             data-refresh="${data.nextRefresh}">
-          🔄 ${formatTimeLeft(timeLeft)}
-        </div>
-        <button class="shop-buy-btn ${offer.purchased ? "shop-bought-btn" : ""}"
-          ${offer.purchased ? "disabled" : ""}>
-          ${offer.purchased ? "✓ Purchased" : `<img src="assets/icons/gold.png" alt="gold" class="icon-gold"> ${offer.coinCost}`}</button>
-      `;
-
-      if (!offer.purchased) {
-        card.querySelector(".shop-buy-btn").addEventListener("click", () => {
-          const result = Shop.buySeedOffer(idx);
-          if (result.ok) {
-            showToast(`+${offer.seeds} 🌱 seeds for ${def.name}!`);
-            updateCoinDisplays();
-            renderShopTab("seeds");
-          } else {
-            showToast(result.msg);
-          }
-        });
-      }
-
-      grid.appendChild(card);
-    });
-
-    // Live countdown update every second
-    const timerInterval = setInterval(() => {
-      document
-        .querySelectorAll(".shop-seed-timer[data-refresh]")
-        .forEach((el) => {
-          const refresh = parseInt(el.dataset.refresh);
-          const left = refresh - Date.now();
-          el.textContent = `🔄 ${formatTimeLeft(left)}`;
-          el.classList.toggle("expiring-soon", left < 3600000);
-          if (left <= 0) {
-            clearInterval(timerInterval);
-            renderShopTab("seeds"); // auto-refresh
-          }
-        });
-    }, 1000);
-  }
-
-  function renderPacketsTab(container) {
-    const grid = document.createElement("div");
-    grid.className = "shop-packets-grid";
-    container.appendChild(grid);
-
-    const rarityColors = {
-      common: "#22c55e",
-      rare: "#3b82f6",
-      epic: "#a855f7",
-      legendary: "#f59e0b",
-    };
-
-    Object.values(Shop.SEED_PACKETS).filter(def => !def.isMiniPacket).forEach((def) => {
-      const inv = Player.getInventory();
-      const owned = inv.find((i) => i.id === def.id);
-      const qty = owned ? owned.quantity : 0;
-
-      const card = document.createElement("div");
-      card.className = "shop-packet-card flex";
-      card.innerHTML = `
-        <div class="shop-packet-rarity">${def.rarity.toUpperCase()}</div>
-        <div class="shop-packet-emoji">${getPacketEmoji(def.id)}</div>
-        <div class="shop-packet-name">${def.name}</div>
-        <div class="shop-packet-desc">${def.description || ""}</div>
-        <div class="shop-packet-seeds">
-          <strong>${def.seedCount}</strong> seeds
-          ${!def.allowRepeats ? "· No repeats" : "· May repeat"}
-        </div>
-        <button class="shop-buy-btn shop-loom-btn">
-        <img src="assets/shop/loom.png" class="loom-icon-sm"/> ${def.loomCost}
-        </button>
-        ${qty > 0 ? `<div class="shop-packet-owned">×${qty}</div>` : ""}
-      `;
-
-      card.querySelector(".shop-loom-btn").addEventListener("click", () => {
-        const result = Shop.buyPacket(def.id);
+      const card = ShopScreen.buildSeedCard(offer, def, level, timeLeft, isExpiringSoon, () => {
+        const result = Shop.buySeedOffer(idx);
         if (result.ok) {
-          showToast(`${def.name} added to inventory! 📦`);
+          showToast(`+${offer.seeds} 🌱 seeds for ${def.name}!`);
           updateCoinDisplays();
-          renderShopTab("packets");
+          renderShopTab('seeds');
         } else {
           showToast(result.msg);
         }
@@ -1667,31 +1560,62 @@ function buildLevelGrid(worldId) {
 
       grid.appendChild(card);
     });
+
+    // Live countdown
+    const timerInterval = setInterval(() => {
+      document.querySelectorAll('.sh-timer[data-refresh]').forEach(el => {
+        const left = parseInt(el.dataset.refresh) - Date.now();
+        el.textContent = `🔄 ${left > 0 ? _fmtTime(left) : 'Refreshing...'}`;
+        el.classList.toggle('sh-expiring', left < 3600000);
+        if (left <= 0) { clearInterval(timerInterval); renderShopTab('seeds'); }
+      });
+      document.querySelectorAll('.sh-refresh-time[data-refresh-target]').forEach(el => {
+        const left = parseInt(el.dataset.refreshTarget) - Date.now();
+        el.textContent = left > 0 ? _fmtTime(left) : 'Refreshing...';
+      });
+    }, 1000);
+  }
+
+  function _fmtTime(ms) {
+    if (ms <= 0) return 'Refreshing...';
+    const s = Math.floor(ms / 1000);
+    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    if (h > 0) return `${h}h ${m}m`;
+    if (m > 0) return `${m}m ${sec}s`;
+    return `${sec}s`;
+  }
+
+  function renderPacketsTab(container) {
+    const grid = document.createElement('div');
+    grid.className = 'sh-packets-grid';
+    container.appendChild(grid);
+
+    Object.values(Shop.SEED_PACKETS).filter(def => !def.isMiniPacket).forEach(def => {
+      const inv   = Player.getInventory();
+      const owned = inv.find(i => i.id === def.id);
+      const qty   = owned ? owned.quantity : 0;
+
+      const card = ShopScreen.buildPacketCard(def, qty, getPacketEmoji, () => {
+        const result = Shop.buyPacket(def.id);
+        if (result.ok) {
+          showToast(`${def.name} added to inventory! 📦`);
+          updateCoinDisplays();
+          renderShopTab('packets');
+        } else {
+          showToast(result.msg);
+        }
+      });
+      grid.appendChild(card);
+    });
   }
 
 
   function renderPlantsTab(container) {
-    container.innerHTML = `
-      <div class="shop-coming-soon">
-        <div style="font-size:48px">🛒</div>
-        <div style="font-size:18px;font-weight:900;color:var(--gold)">Plant Shop Coming Soon!</div>
-        <div style="color:var(--gray);font-size:13px;margin-top:8px">
-          Exclusive plants available for purchase will appear here.
-        </div>
-      </div>
-    `;
+    container.appendChild(ShopScreen.buildComingSoon('🛒', 'Plant Shop Coming Soon!', 'Exclusive plants available for purchase will appear here.'));
   }
 
   function renderEventTab(container) {
-    container.innerHTML = `
-      <div class="shop-coming-soon">
-        <div style="font-size:48px">🎉</div>
-        <div style="font-size:18px;font-weight:900;color:var(--gold)">No Active Events</div>
-        <div style="color:var(--gray);font-size:13px;margin-top:8px">
-          Check back during special events for limited-time items!
-        </div>
-      </div>
-    `;
+    container.appendChild(ShopScreen.buildComingSoon('🎉', 'No Active Events', 'Check back during special events for limited-time items!'));
   }
 
   function showBattleResult(
