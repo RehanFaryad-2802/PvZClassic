@@ -25,7 +25,7 @@
   width: 100%;
   max-width: 800px;
   /* On 752×351 landscape, cap at ~90% height so background shows */
-  max-height: 100vh;
+  height: 100vh;
   background: linear-gradient(170deg, #0e0022 0%, #060012 100%);
   border-radius: 16px 16px 0 0;
   border-top: 1px solid rgba(168,85,247,0.4);
@@ -86,15 +86,15 @@
 
 /* ── LEFT COL: selected slots ── */
 .pp-left-col {
-  width: 96px;
-  min-width: 96px;
+  width: 78px;
+  min-width: 78px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 8px 4px 6px;
+  padding: 5px 3px 4px;
   border-right: 1px solid rgba(255,255,255,0.06);
   background: rgba(0,0,0,0.3);
-  gap: 5px;
+  gap: 3px;
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -117,9 +117,9 @@
 
 /* Selected slot cards */
 .pp-sel-slot {
-  width: 46px;
-  height: 46px;
-  border-radius: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -135,12 +135,12 @@
 }
 .pp-sel-filled:hover { border-color: rgba(239,68,68,0.7); }
 .pp-sel-filled img {
-  width: 28px; height: 28px;
+  width: 22px; height: 22px;
   object-fit: contain;
 }
 .pp-sel-empty,
 .pp-unlock-slot {
-  height: 46px;
+  height: 34px;
 }
 .pp-sel-plus {
   font-size: 14px;
@@ -175,9 +175,9 @@
   margin-top: 2px;
 }
 .pp-unlock-slot {
-  width: 58px;
-  height: 52px;
-  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -278,9 +278,9 @@
 /* ── Plant grid ── */
 .pp-plant-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
-  gap: 4px;
-  padding: 5px 10px 8px;
+  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+  gap: 3px;
+  padding: 4px 8px 6px;
   overflow-y: auto;
   flex: 1;
   min-height: 0;
@@ -293,8 +293,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 5px 3px 3px;
-  border-radius: 9px;
+  padding: 4px 2px 3px;
+  border-radius: 7px;
   border: 1.5px solid rgba(168,85,247,0.25);
   background: rgba(15,5,35,0.8);
   cursor: pointer;
@@ -306,7 +306,7 @@
 }
 .pp-plant-card:active { transform: scale(0.92); }
 .pp-plant-card img {
-  width: 38px; height: 38px;
+  width: 30px; height: 30px;
   object-fit: contain;
   display: block;
 }
@@ -363,8 +363,8 @@
 
 /* ── Start battle button ── */
 .pp-start-btn {
-  margin: 5px 12px 10px;
-  padding: 11px;
+  margin: 4px 10px 8px;
+  padding: 9px;
   background: linear-gradient(135deg, #16a34a, #15803d);
   border: none;
   border-radius: 11px;

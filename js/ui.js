@@ -377,14 +377,8 @@ function buildLevelGrid(worldId) {
       const def = PlantRegistry.get(id);
       if (!def) return;
 
-      const card = document.createElement("div");
-      card.className = "tray-card";
-      card.dataset.plantId = id;
-      card.innerHTML = `
-        <img src="${def.image}" alt="${def.name}" />
-        <div class="tray-cost">☀️${def.levelStats?.[Player.getPlant(id)?.level ?? 1]?.cost ?? def.cost}</div>
-        <div class="tray-select-line"></div>
-      `;
+      const cost = def.levelStats?.[Player.getPlant(id)?.level ?? 1]?.cost ?? def.cost;
+      const card = BattleTray.makeCard(def, cost);
       card.addEventListener("click", () => {
         SoundFX.play("plant_select");
         Core.selectPlant(id);
@@ -398,10 +392,12 @@ function buildLevelGrid(worldId) {
     const arenaWrap = document.querySelector(".battle-arena-wrap");
     let shovel = document.getElementById("shovel-btn");
     if (!shovel && arenaWrap) {
-      shovel = document.createElement("button");
-      shovel.className = "shovel-btn";
-      shovel.id = "shovel-btn";
-      shovel.innerHTML = `🪣<span>SHOVEL</span>`;
+      const newShovelEl = BattleTray.makeShovel();
+      arenaWrap.appendChild(newShovelEl);
+      // skip the block below since we appended directly
+      shovel = null;
+    }
+    if (false) { // skip old append, handled above
       arenaWrap.appendChild(shovel);
     }
     if (shovel) {

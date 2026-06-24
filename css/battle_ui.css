@@ -1,0 +1,601 @@
+/* ══════════════════════════════════════════════════
+   css/battle_ui.css — PvZClassic
+   Battle HUD + Plant Tray wooden theme.
+   Replaces relevant sections of game.css.
+   Mobile-first, 752×351px landscape target.
+══════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════
+   BATTLE HUD  — top wooden bar
+══════════════════════════════════════════════════ */
+.battle-hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 30px;
+  min-height: 30px;
+  max-height: 30px;
+  padding: 0 6px;
+  flex-shrink: 0;
+  gap: 4px;
+  z-index: 30;
+  box-sizing: border-box;
+  /* Wooden plank — same system as inventory/shop */
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px, transparent 3px,
+      rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px
+    ),
+    linear-gradient(180deg, #7a4e10 0%, #5a3408 50%, #7a4e10 100%);
+  border-bottom: 2px solid #4a2808;
+  box-shadow:
+    0 2px 0 #3a1e08,
+    0 3px 8px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,210,100,0.15);
+}
+
+/* ── Left: sun + level ── */
+.bh-left {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.bh-sun-pill {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(251,191,36,0.55);
+  border-radius: 10px;
+  padding: 1px 6px;
+  height: 20px;
+}
+.bh-sun-icon { font-size: 11px; line-height: 1; }
+.bh-sun-val {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  color: #fde68a;
+  text-shadow: 0 0 6px rgba(251,191,36,0.5);
+  min-width: 22px;
+  text-align: center;
+}
+
+.bh-level-tag {
+  font-family: var(--font-display);
+  font-size: 8px;
+  color: rgba(255,220,120,0.6);
+  letter-spacing: 1px;
+}
+
+/* ── Centre: wave + progress ── */
+.bh-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.bh-wave-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.bh-wave-label {
+  font-family: var(--font-display);
+  font-size: 7px;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.45);
+  text-transform: uppercase;
+}
+.bh-wave-num {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  color: #fef3c7;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+}
+.bh-wave-sep {
+  font-size: 9px;
+  color: rgba(255,255,255,0.3);
+  margin: 0 1px;
+}
+
+.bh-progress-track {
+  width: 100%;
+  max-width: 100px;
+  height: 4px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 3px;
+  overflow: visible;
+  position: relative;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.bh-progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #c2730a, #f97316, #fbbf24);
+  transition: width 0.5s ease;
+  position: relative;
+  z-index: 1;
+}
+.bh-progress-glow {
+  height: 100%;
+  width: 0%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #f97316, #fbbf24);
+  position: absolute;
+  top: 0; left: 0;
+  filter: blur(4px);
+  opacity: 0.6;
+  transition: width 0.5s ease;
+  z-index: 0;
+}
+
+/* ── Right: coins + pause ── */
+.bh-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.bh-coin-pill {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(200,148,26,0.45);
+  border-radius: 10px;
+  padding: 1px 6px;
+  height: 20px;
+}
+.bh-coin-icon { width: 12px; height: 12px; object-fit: contain; }
+.bh-coin-val {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  color: #fde68a;
+  min-width: 20px;
+}
+
+.bh-pause-btn {
+  width: 22px; height: 22px;
+  background: linear-gradient(180deg, rgba(90,55,15,0.9) 0%, rgba(55,30,6,0.95) 100%);
+  border: 1px solid rgba(200,148,26,0.5);
+  border-bottom: 2px solid rgba(58,30,8,0.8);
+  border-radius: 5px;
+  color: #fde68a;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.4);
+  transition: transform 0.1s;
+  flex-shrink: 0;
+}
+.bh-pause-btn:active { transform: translateY(1px); box-shadow: none; }
+
+/* Keep old IDs working (hud-sun etc are just spans, IDs are unchanged) */
+/* These ensure old game.css fallback rules don't conflict */
+.sun-display { display: none !important; }  /* hidden, replaced by bh-sun-pill */
+.wave-display { display: none !important; }
+.progress-bar { display: none !important; }
+.hud-level-info { display: none !important; }
+.coin-display { display: none !important; }
+.btn-pause:not(.bh-pause-btn) { display: none !important; }
+
+/* ══════════════════════════════════════════════════
+   PLANT TRAY  — vertical wooden sidebar
+══════════════════════════════════════════════════ */
+.plant-tray {
+  width: 64px;
+  min-width: 64px;
+  max-width: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 3px 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex-shrink: 0;
+  z-index: 25;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+  /* Wooden plank sidebar */
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px, transparent 4px,
+      rgba(0,0,0,0.025) 4px, rgba(0,0,0,0.025) 5px
+    ),
+    linear-gradient(180deg,
+      #b07838 0%,
+      #8c5820 30%,
+      #7a4a14 60%,
+      #8c5820 100%);
+  border-right: 3px solid #c8941a;
+  box-shadow:
+    3px 0 0 #4a2808,
+    4px 0 10px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,210,100,0.12);
+}
+.plant-tray::-webkit-scrollbar { display: none; }
+
+/* ── Tray card — LANDSCAPE wooden plank ── */
+.tray-card,
+.bt-card {
+  flex-shrink: 0;
+  width: 54px;
+  height: 36px;        /* landscape: wider than tall */
+  position: relative;
+  display: flex;
+  flex-direction: row;  /* horizontal layout */
+  align-items: center;
+  cursor: pointer;
+  padding: 3px 3px 3px 6px;
+  overflow: visible;
+  user-select: none;
+  -webkit-user-select: none;
+  box-sizing: border-box;
+  /* Wood body */
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px, transparent 3px,
+      rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px
+    ),
+    linear-gradient(160deg, #c8914a 0%, #a06828 30%, #8a5218 60%, #7a4410 100%);
+  border-radius: 6px 6px 4px 4px;
+  border-top:    2px solid #daa050;
+  border-left:   1px solid #b87838;
+  border-right:  1px solid #6a3810;
+  border-bottom: 3px solid #4a2808;
+  box-shadow:
+    0 3px 0 #3a1e08,
+    0 4px 8px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,210,100,0.18);
+  transition: transform 0.12s, box-shadow 0.12s, opacity 0.15s;
+}
+.tray-card:active,
+.bt-card:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #3a1e08, 0 2px 4px rgba(0,0,0,0.4);
+}
+
+/* Nail pin */
+.tray-card::before,
+.bt-pin {
+  content: '';
+  position: absolute;
+  top: -4px; left: 50%;
+  transform: translateX(-50%);
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e8d090, #b8922a 60%, #6a4800);
+  border: 1px solid #4a3000;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  z-index: 2;
+}
+.bt-pin {
+  /* JS-created pin element, same style */
+  position: absolute;
+  top: -4px; left: 50%;
+  transform: translateX(-50%);
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e8d090, #b8922a 60%, #6a4800);
+  border: 1px solid #4a3000;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+/* Image recess */
+.tray-card .bt-recess,
+.bt-recess {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  aspect-ratio: 1;
+  background: linear-gradient(135deg,
+    rgba(0,0,0,0.35) 0%,
+    rgba(0,0,0,0.15) 50%,
+    rgba(0,0,0,0.28) 100%);
+  border-radius: 4px;
+  border: 1px solid rgba(0,0,0,0.4);
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* Plant image */
+.tray-card img,
+.bt-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.6));
+  transition: transform 0.12s;
+}
+.tray-card:not(.no-sun):not(.cooldown):hover img,
+.bt-card:not(.no-sun):not(.cooldown):hover .bt-img {
+  transform: scale(1.08);
+}
+
+/* Cost strip — right side label in landscape */
+.tray-card .tray-cost,
+.bt-strip {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2px;
+  background: none;
+  border: none;
+  border-left: 1px solid rgba(255,170,50,0.15);
+  margin-left: 3px;
+}
+.tray-card .tray-cost {
+  position: static !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 8px;
+  font-weight: 700;
+  color: #fde68a;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  background: none;
+  border: none;
+  border-left: 1px solid rgba(255,170,50,0.15);
+  padding: 0 2px;
+  margin-left: 3px;
+  width: auto;
+  flex: 1;
+  text-align: center;
+  box-sizing: border-box;
+}
+.bt-cost {
+  font-family: var(--font-display);
+  font-size: 8px;
+  font-weight: 700;
+  color: #fde68a;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+/* ── Selected state — gold glow ── */
+.tray-card.selected,
+.bt-card.selected {
+  border-top-color: #fbbf24;
+  border-left-color: #f59e0b;
+  box-shadow:
+    0 3px 0 #3a1e08,
+    0 0 14px rgba(251,191,36,0.7),
+    inset 0 1px 0 rgba(255,220,100,0.25);
+  transform: translateY(-2px);
+}
+
+/* ── No-sun state — dim + desaturate ── */
+.tray-card.no-sun,
+.bt-card.no-sun {
+  opacity: 0.55;
+  filter: saturate(0.4);
+}
+
+/* ── Cooldown overlay ── */
+.tray-card.cooldown,
+.bt-card.cooldown {
+  opacity: 0.7;
+}
+.cooldown-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.62);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 900;
+  color: #fde68a;
+  text-shadow: 0 0 8px rgba(251,191,36,0.8);
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* ── Tray select line (kept for compat, hidden) ── */
+.tray-select-line { display: none; }
+
+/* ══════════════════════════════════════════════════
+   SHOVEL BUTTON  — bottom-right of arena
+══════════════════════════════════════════════════ */
+.shovel-btn,
+.bt-shovel {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 46px;
+  height: 40px;
+  z-index: 20;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  border-radius: 8px;
+  /* Wood button */
+  background: linear-gradient(180deg, #c8914a 0%, #8a5218 60%, #7a4410 100%);
+  border-top:    2px solid #daa050;
+  border-left:   1px solid #b87838;
+  border-right:  1px solid #6a3810;
+  border-bottom: 3px solid #4a2808;
+  box-shadow:
+    0 3px 0 #3a1e08,
+    0 4px 8px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,210,100,0.2);
+  transition: transform 0.12s, box-shadow 0.12s;
+  user-select: none;
+}
+.shovel-btn:active,
+.bt-shovel:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #3a1e08, 0 2px 4px rgba(0,0,0,0.4);
+}
+.shovel-btn.active,
+.bt-shovel.active {
+  background: linear-gradient(180deg, #22863a 0%, #166028 100%);
+  border-top-color: #4ade80;
+  border-bottom-color: #0d4020;
+  box-shadow:
+    0 3px 0 #0a2e18,
+    0 0 14px rgba(74,222,128,0.6),
+    inset 0 1px 0 rgba(74,222,128,0.25);
+}
+.bt-shovel-icon,
+.shovel-btn > :first-child {
+  font-size: 16px;
+  line-height: 1;
+}
+.bt-shovel-label,
+.shovel-btn span {
+  font-family: var(--font-display);
+  font-size: 7px;
+  font-weight: 700;
+  color: #fde68a;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+  line-height: 1;
+}
+
+/* ══════════════════════════════════════════════════
+   LOCKED TRAY SLOTS  (TraySlots.js)
+══════════════════════════════════════════════════ */
+.tray-slot-locked {
+  flex-shrink: 0;
+  width: 52px;
+  min-height: 58px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  box-sizing: border-box;
+  /* Dark locked wood */
+  background: linear-gradient(160deg, #5a4428 0%, #3e2a10 60%, #2e1e08 100%);
+  border-top:    2px solid #6a5030;
+  border-left:   1px solid #5a3f20;
+  border-right:  1px solid #3a2410;
+  border-bottom: 3px solid #2a1808;
+  box-shadow: 0 2px 0 #1a1008, inset 0 1px 0 rgba(255,200,80,0.06);
+  cursor: pointer;
+}
+.tray-slot-locked:hover {
+  border-top-color: #c8941a;
+  box-shadow: 0 2px 0 #1a1008, 0 0 8px rgba(200,148,26,0.35);
+}
+.lock-icon { font-size: 14px; line-height: 1; }
+.lock-cost {
+  font-family: var(--font-display);
+  font-size: 7px;
+  color: #c4a96a;
+  text-align: center;
+  line-height: 1.3;
+  white-space: pre-line;
+  padding: 0 2px;
+}
+.lock-cost .icon-gold { width: 9px; height: 9px; }
+
+/* ══════════════════════════════════════════════════
+   PLANT PICKER  — wooden theme override
+   (overrides dark purple theme in plant_picker.css)
+══════════════════════════════════════════════════ */
+.pp-sheet {
+  background: linear-gradient(170deg,
+    rgba(62,36,5,0.97) 0%,
+    rgba(44,24,4,0.99) 100%) !important;
+  border-top: 2px solid #c8941a !important;
+  border-radius: 14px 14px 0 0 !important;
+  box-shadow: 0 -6px 30px rgba(0,0,0,0.7) !important;
+}
+
+.pp-left-col {
+  background: linear-gradient(180deg,
+    rgba(90,55,15,0.5) 0%,
+    rgba(55,30,6,0.55) 100%) !important;
+  border-right: 2px solid #8b5e1a !important;
+}
+
+.pp-sel-filled {
+  border-color: rgba(200,148,26,0.6) !important;
+  background: rgba(200,148,26,0.08) !important;
+}
+.pp-sel-filled:hover { border-color: rgba(239,68,68,0.7) !important; }
+
+.pp-sel-empty {
+  border-color: rgba(139,94,26,0.3) !important;
+  background: rgba(0,0,0,0.2) !important;
+}
+.pp-sel-plus { color: rgba(200,148,26,0.25) !important; }
+
+.pp-section-label {
+  color: rgba(255,220,120,0.45) !important;
+}
+
+.pp-plant-card {
+  border-color: rgba(139,94,26,0.4) !important;
+  background: rgba(50,28,4,0.85) !important;
+}
+.pp-plant-card:hover:not(.pp-card-locked):not(.pp-card-selected) {
+  border-color: rgba(200,148,26,0.7) !important;
+  background: rgba(90,55,15,0.85) !important;
+}
+.pp-card-selected {
+  border-color: rgba(200,148,26,0.9) !important;
+  background: rgba(120,72,10,0.35) !important;
+  box-shadow: 0 0 8px rgba(200,148,26,0.4) !important;
+}
+.pp-check { color: #fbbf24 !important; }
+
+.pp-plant-name { color: #fef3c7 !important; }
+.pp-plant-cost { color: #fbbf24 !important; }
+
+.pp-title { color: #fef3c7 !important; }
+.pp-title strong { color: #fbbf24 !important; }
+
+.pp-start-btn {
+  background: linear-gradient(180deg, #22863a 0%, #166028 100%) !important;
+  border: 2px solid #4ade80 !important;
+  border-bottom: 3px solid #0d4020 !important;
+  box-shadow: 0 3px 0 #0a2e18, 0 0 14px rgba(74,222,128,0.35) !important;
+}
+
+.pp-unlock-available {
+  border-color: rgba(200,148,26,0.5) !important;
+  background: rgba(120,72,10,0.12) !important;
+}
+.pp-unlock-available:hover {
+  border-color: rgba(200,148,26,0.85) !important;
+  background: rgba(120,72,10,0.25) !important;
+}
+.pp-unlock-label { color: #fbbf24 !important; }
+
+/* Divider */
+.pp-divider { background: rgba(200,148,26,0.12) !important; }

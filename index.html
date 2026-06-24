@@ -88,6 +88,7 @@
     <link rel="stylesheet" href="css/wooden_card.css" />
 <link rel="stylesheet" href="css/level_select_map.css" />
 <link rel="stylesheet" href="css/battle_layout.css" />
+<link rel="stylesheet" href="css/battle_ui.css" />
     <link rel="stylesheet" href="css/plant_picker.css" />
     <link rel="stylesheet" href="css/plantsanimation/emberdoze.css">
   </head>
@@ -346,25 +347,37 @@
 
       <!-- ── Slim Top HUD ── -->
       <div class="battle-hud">
-        <div class="hud-left">
-          <div class="sun-display">☀️ <span id="hud-sun">50</span></div>
-          <div class="hud-level-info"><span id="hud-world">W1</span>-<span id="hud-level">L1</span></div>
+        <div class="bh-left">
+          <div class="bh-sun-pill">
+            <span class="bh-sun-icon">☀️</span>
+            <span id="hud-sun" class="bh-sun-val">50</span>
+          </div>
+          <div class="bh-level-tag">
+            <span id="hud-world">W1</span>·<span id="hud-level">L1</span>
+          </div>
         </div>
-        <div class="hud-center">
-          <div class="wave-display">Wave <span id="hud-wave">1</span>/<span id="hud-wave-total">3</span></div>
-          <div class="progress-bar"><div class="progress-fill" id="wave-progress"></div></div>
+        <div class="bh-center">
+          <div class="bh-wave-row">
+            <span class="bh-wave-label">WAVE</span>
+            <span id="hud-wave" class="bh-wave-num">1</span>
+            <span class="bh-wave-sep">/</span>
+            <span id="hud-wave-total" class="bh-wave-num">3</span>
+          </div>
+          <div class="bh-progress-track">
+            <div class="bh-progress-fill" id="wave-progress"></div>
+            <div class="bh-progress-glow"></div>
+          </div>
         </div>
-        <div class="hud-right">
-          <span class="coin-display"><img src="assets/icons/gold.png" alt="gold" class="icon-gold"> <span id="hud-coins">0</span></span>
-          <button class="btn-pause" id="btn-pause">⏸</button>
+        <div class="bh-right">
+          <div class="bh-coin-pill">
+            <img src="assets/icons/gold.png" alt="coins" class="bh-coin-icon"/>
+            <span id="hud-coins" class="bh-coin-val">0</span>
+          </div>
+          <button class="bh-pause-btn" id="btn-pause">⏸</button>
         </div>
       </div>
 
       <!-- ── Main battle body: tray left + arena right ── -->
-      <div class="battle-body">
-
-        <!-- Battle body: tray left | arena right -->
-      <!-- Battle body: tray left | arena right -->
       <div class="battle-body">
 
         <!-- Vertical plant tray — cards + locked slots injected by ui.js / TraySlots.js -->
@@ -384,11 +397,7 @@
         </div>
 
       </div>
-        </div>
 
-      </div>
-
-      <!-- Demon preview removed -->
 
       <!-- Pause overlay -->
       <div id="pause-overlay" class="overlay hidden">
@@ -547,6 +556,8 @@
     <script src="js/comp/ConfirmPopup.js"></script>
     <script src="js/comp/TraySlots.js"></script>
     <script src="js/comp/PlantPicker.js"></script>
+<script src="js/comp/BattleHud.js"></script>
+<script src="js/comp/BattleTray.js"></script>
 <script src="js/comp/WoodenCard.js"></script>
 <script src="js/comp/InventoryScreen.js"></script>
 <script src="js/comp/ShopScreen.js"></script>
