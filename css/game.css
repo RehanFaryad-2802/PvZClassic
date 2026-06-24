@@ -1079,8 +1079,38 @@
   transition: all 0.15s;
 }
 .shovel-btn.active {
-  border-color: #ff0000;
-  box-shadow: 0 0 12px rgba(239,68,68,0.7);
+  border-top-color:    #654118 !important;
+  border-bottom-color: #2f1808 !important;
+  border-left-color:   #7a4d1d !important;
+  border-right-color:  #5a2f10 !important;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px, transparent 3px,
+      rgba(0,0,0,0.05) 3px, rgba(0,0,0,0.05) 4px
+    ),
+    linear-gradient(160deg, #8a551a 0%, #6f3e14 30%, #5b3210 60%, #4a290d 100%) !important;
+  box-shadow:
+    0 3px 0 rgba(0,0,0,0.55),
+    0 0 6px rgba(0,0,0,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.12) !important;
+}
+.bt-shovel.active {
+  border-top-color:    #654118 !important;
+  border-bottom-color: #2f1808 !important;
+  border-left-color:   #7a4d1d !important;
+  border-right-color:  #5a2f10 !important;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px, transparent 3px,
+      rgba(0,0,0,0.05) 3px, rgba(0,0,0,0.05) 4px
+    ),
+    linear-gradient(160deg, #8a551a 0%, #6f3e14 30%, #5b3210 60%, #4a290d 100%) !important;
+  box-shadow:
+    0 3px 0 rgba(0,0,0,0.55),
+    0 0 6px rgba(0,0,0,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.12) !important;
 }
 .shovel-btn span { font-size: 10px; color: #fca5a5; font-weight: 700; }
 

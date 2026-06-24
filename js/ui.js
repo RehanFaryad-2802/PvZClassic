@@ -272,7 +272,7 @@ function buildLevelGrid(worldId) {
   let pendingBattleWorld = 1;
   let pendingBattleLevel = 0;
   let selectedPlants = [];
-  // MAX_PICKS driven by TraySlots — 6 base + unlockable 7 & 8
+  // MAX_PICKS driven by TraySlots — 6 base + unlockable 7
   function getMaxPicks() {
     return typeof TraySlots !== 'undefined' ? TraySlots.getUnlockedCount() : 6;
   }
@@ -386,19 +386,12 @@ function buildLevelGrid(worldId) {
       tray.appendChild(card);
     });
 
-    // Locked battle slots are not shown during gameplay
-
-    // Shovel — attach to arena-wrap bottom-right (not inside tray)
     const arenaWrap = document.querySelector(".battle-arena-wrap");
     let shovel = document.getElementById("shovel-btn");
     if (!shovel && arenaWrap) {
       const newShovelEl = BattleTray.makeShovel();
       arenaWrap.appendChild(newShovelEl);
-      // skip the block below since we appended directly
-      shovel = null;
-    }
-    if (false) { // skip old append, handled above
-      arenaWrap.appendChild(shovel);
+      shovel = newShovelEl;
     }
     if (shovel) {
       // Remove old listeners by cloning

@@ -12,9 +12,11 @@ const PlantPicker = (() => {
   let _tempPlants     = [];
   let _overlay        = null;
   let _unlockedSlots  = 6;
+  let _availableCount = 0;
 
-  function getMaxPicks() {
-    return Math.max(6, _unlockedSlots);
+  function getMaxPicks(availableCount = Infinity) {
+    const allowed = Math.max(6, _unlockedSlots);
+    return Math.min(Math.max(1, availableCount), allowed);
   }
 
   // Define level-forced plants here: key = "worldId-levelIdx"
@@ -28,7 +30,7 @@ const PlantPicker = (() => {
     _tempPlants    = Levels.getTempPlants(worldId, levelIdx);
     _lockedPlants  = LEVEL_LOCKED_PLANTS[`${worldId}-${levelIdx}`] || [];
     _selectedPlants = [..._lockedPlants];
-    _unlockedSlots = 6;
+    _unlockedSlots = typeof TraySlots !== 'undefined' ? TraySlots.getUnlockedCount() : 6;
     _buildOverlay();
   }
 
@@ -128,7 +130,22 @@ const PlantPicker = (() => {
     const grid = _overlay.querySelector('#pp-plant-grid');
     grid.innerHTML = '';
 
-    PlantRegistry.getAll().forEach(def => {
+    const availableDefs = PlantRegistry.getAll().filter(def => {
+      const pp     = Player.getPlant(def.id);
+      const owned  = pp && pp.owned;
+      const temp   = _tempPlants.includes(def.id);
+      const locked = _lockedPlants.includes(def.id);
+      return owned || temp || locked;
+    });
+
+    _availableCount = availableDefs.length;
+    const max = getMaxPicks(_availableCount);
+    _selectedPlants = _selectedPlants.filter(id => availableDefs.some(def => def.id === id));
+    if (_selectedPlants.length > max) {
+      _selectedPlants.length = max;
+    }
+
+    availableDefs.forEach(def => {
       const pp       = Player.getPlant(def.id);
       const owned    = (pp && pp.owned) || _tempPlants.includes(def.id);
       const isTemp   = _tempPlants.includes(def.id) && !(pp && pp.owned);
@@ -166,7 +183,7 @@ const PlantPicker = (() => {
       cardEl.classList.remove('pp-card-selected');
       cardEl.querySelector('.pp-check')?.remove();
     } else {
-      const max = getMaxPicks();
+      const max = getMaxPicks(_availableCount);
       if (_selectedPlants.length >= max) {
         if (typeof UI !== 'undefined') UI.showToast(`Max ${max} plants!`);
         return;
@@ -188,7 +205,7 @@ const PlantPicker = (() => {
     const unlockCol = _overlay.querySelector('#pp-slot-unlocks');
 
     col.innerHTML = '';
-    const max = getMaxPicks();
+    const max = getMaxPicks(_availableCount);
 
     // Filled slots
     _selectedPlants.forEach(id => {
@@ -224,12 +241,12 @@ const PlantPicker = (() => {
       col.appendChild(el);
     }
 
-    // Unlock slot buttons (7 & 8)
+    // Unlock slot button (7)
     unlockCol.innerHTML = '';
     if (typeof TraySlots !== 'undefined') {
       const unlocked = _unlockedSlots;
-      for (let slot = 7; slot <= 8; slot++) {
-        if (unlocked >= slot) continue;
+      const slot = 7;
+      if (unlocked < slot) {
         const slotCost     = TraySlots.SLOT_COSTS[slot];
         const prevUnlocked = unlocked >= slot - 1;
         const el = document.createElement('div');
@@ -265,7 +282,7 @@ const PlantPicker = (() => {
       onConfirm: () => {
         const coinCost = slotCost.coins;
         const loomCost = slotCost.looms;
-          if (Player.getCoins() < coinCost) {
+        if (Player.getCoins() < coinCost) {
           if (typeof UI !== 'undefined') UI.showToast(`Need ${coinCost} <img src="assets/icons/gold.png" alt="gold" class="icon-gold"> coins`);
           return;
         }
@@ -275,6 +292,9 @@ const PlantPicker = (() => {
         }
         Player.spendCoins(coinCost);
         if (loomCost > 0) Player.spendLooms(loomCost);
+        if (typeof TraySlots !== 'undefined') {
+          TraySlots.unlockSlot(slot);
+        }
         _unlockedSlots = slot;
         _refreshSelected();
       },
@@ -282,7 +302,7 @@ const PlantPicker = (() => {
   }
 
   function _startBattle() {
-    const max = getMaxPicks();
+    const max = getMaxPicks(_availableCount);
     if (_selectedPlants.length < max) {
       if (typeof UI !== 'undefined') UI.showToast(`Fill all ${max} plant slots before starting.`);
       return;
@@ -309,8 +329,8 @@ const PlantPicker = (() => {
   }
 
   function _beginBattle() {
-    close();
-    Core.startBattle(_worldId, _levelIdx, _selectedPlants, _tempPlants);
+    close(false);
+    Core.startBattle(_worldId, _levelIdx, _selectedPlants, _tempPlants, _unlockedSlots);
   }
 
   function close() {

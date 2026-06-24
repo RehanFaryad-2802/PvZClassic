@@ -530,8 +530,8 @@ const Demons = (() => {
               d.targeting = null;
               d.biteTimer = 0;
               eating = false;
-              d.eating = false; // force-clear regardless of stopEating guard
               stopEating(d);
+              d.eating = false; // keep state cleared after animation cleanup
               // Clear all row shaking as a safety net
               for (let sc = 0; sc < Grid.getCols(); sc++) {
                 Grid.stopShaking(d.row, sc);
@@ -924,7 +924,6 @@ const Demons = (() => {
   }
 
   function stopEating(demon) {
-    if (!demon.eating) return;
     demon.eating = false;
 
     // Remove eat lean
@@ -951,10 +950,13 @@ const Demons = (() => {
     if (demon.video && demon.video.tagName === "VIDEO") {
       const walkSrc = Levels.getDemonStats(demon.type)?.animation || "";
       if (walkSrc) {
-        demon.video.pause();
-        demon.video.src = walkSrc;
-        demon.video.loop = true;
-        demon.video.play().catch(() => {});
+        if (demon.video.src !== walkSrc) {
+          demon.video.pause();
+          demon.video.src = walkSrc;
+          demon.video.loop = true;
+          demon.video.currentTime = 0;
+          demon.video.play().catch(() => {});
+        }
       }
     }
   }

@@ -26,6 +26,7 @@ const Core = (() => {
   let battleEnding = false;
   let totalDemons = 0;
   let currentTempPlants = [];
+  let battleUnlockedSlots = 6; // Temporary unlock during battle, reset after
 
   // Lawnmower states: [row] = 'ready' | 'used' | 'gone'
   let lawnmowers = [];
@@ -34,10 +35,11 @@ const Core = (() => {
   let trayCooldowns = {}; // plantId -> ms remaining
 
   // ── Public: Start Battle ───────────────────────
-  function startBattle(worldId, levelIdx, plantIds, tempPlants = []) {
+  function startBattle(worldId, levelIdx, plantIds, tempPlants = [], unlockedSlots = 6) {
     running = false;
     cancelAnimationFrame(rafId);
     currentWorld = worldId;
+    battleUnlockedSlots = unlockedSlots;
 // Set world class on demon layer for per-world effects
 const demonLayer = document.getElementById("demons-layer");
 if (demonLayer) {
@@ -418,6 +420,11 @@ Grid.init(arenaEl, worldId);
     running = false;
     battleEnding = false;
     cancelAnimationFrame(rafId);
+
+    // Reset temporary unlock: if player unlocked slot 7 during battle, revert to base 6
+    if (typeof TraySlots !== 'undefined' && battleUnlockedSlots > 6) {
+      TraySlots.resetToBase();
+    }
 
     if (won) {
       const coinReward = Math.floor(Coins.getLevelReward(currentWorld) * (1 + currentLevel * 0.1));

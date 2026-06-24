@@ -2,7 +2,6 @@
    PvZClassic — Tray Slot Manager
    ─ 6 base slots always available
    ─ Slot 7: unlock for 500 coins
-   ─ Slot 8: unlock for 1000 coins + 2 looms
    ─ Persisted in localStorage
    ─ Renders locked slot UI inside #plant-tray
    ─ Called by ui.js after tray cards are built
@@ -12,18 +11,22 @@ const TraySlots = (() => {
   const SAVE_KEY   = 'pvzc_tray_slots';
   const BASE_SLOTS = 6;
   const SLOT_COSTS = {
-    7: { coins: 500,  looms: 0 },
-    8: { coins: 1000, looms: 2 },
+    7: { coins: 500, looms: 0 },
   };
 
   function load() {
     try {
       const raw = localStorage.getItem(SAVE_KEY);
-      return raw ? JSON.parse(raw) : { unlocked: 6 };
-    } catch { return { unlocked: 6 }; }
+      const state = raw ? JSON.parse(raw) : { unlocked: BASE_SLOTS };
+      state.unlocked = Math.min(7, Math.max(BASE_SLOTS, state.unlocked || BASE_SLOTS));
+      return state;
+    } catch {
+      return { unlocked: BASE_SLOTS };
+    }
   }
 
   function save(state) {
+    state.unlocked = Math.min(7, Math.max(BASE_SLOTS, state.unlocked || BASE_SLOTS));
     localStorage.setItem(SAVE_KEY, JSON.stringify(state));
   }
 
@@ -57,16 +60,21 @@ const TraySlots = (() => {
     return { ok: true };
   }
 
+  function resetToBase() {
+    const state = { unlocked: BASE_SLOTS };
+    save(state);
+  }
+
   /* renderLockedSlots(trayEl, currentPlantCount)
      Appends locked slot buttons for slots beyond currentPlantCount
-     but only up to slot 8. Call after tray cards are rendered. */
+     but only up to slot 7. Call after tray cards are rendered. */
   function renderLockedSlots(trayEl, currentPlantCount) {
     const unlocked = getUnlockedCount();
 
     // Remove any existing locked slots
     trayEl.querySelectorAll('.tray-slot-locked').forEach(el => el.remove());
 
-    for (let slot = BASE_SLOTS + 1; slot <= 8; slot++) {
+    for (let slot = BASE_SLOTS + 1; slot <= 7; slot++) {
       const alreadyUnlocked = unlocked >= slot;
       if (alreadyUnlocked) continue; // slot open, plants fill it naturally
 
@@ -78,7 +86,7 @@ const TraySlots = (() => {
       el.dataset.slot = slot;
 
       if (!prevUnlocked) {
-        // Slot 8 shown only after slot 7 unlocked
+        // Slot 7 unlock only available after base slots
         el.innerHTML = `
           <span class="lock-icon">🔒</span>
           <span class="lock-cost" style="color:rgba(255,255,255,0.3)">Unlock 7 first</span>
@@ -115,6 +123,7 @@ const TraySlots = (() => {
   return {
     getUnlockedCount,
     unlockSlot,
+    resetToBase,
     renderLockedSlots,
     SLOT_COSTS,
     BASE_SLOTS,
