@@ -84,125 +84,241 @@
   overflow: hidden;
 }
 
-/* ── LEFT COL: selected slots ── */
+/* ── Left col: identical to battle tray ── */
 .pp-left-col {
-  width: 78px;
-  min-width: 78px;
+  width: 64px;
+  min-width: 64px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 5px 3px 4px;
-  border-right: 1px solid rgba(255,255,255,0.06);
-  background: rgba(0,0,0,0.3);
   gap: 3px;
+  padding: 4px 3px 4px;
   flex-shrink: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  /* Exact same wood as .plant-tray */
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px, transparent 4px,
+      rgba(0,0,0,0.025) 4px, rgba(0,0,0,0.025) 5px
+    ),
+    linear-gradient(180deg, #b07838 0%, #8c5820 30%, #7a4a14 60%, #8c5820 100%);
+  border-right: 3px solid #c8941a;
+  box-shadow:
+    3px 0 0 #4a2808,
+    inset 0 1px 0 rgba(255,210,100,0.12);
+}
+.pp-left-col::-webkit-scrollbar { display: none; }
+
+.pp-selected-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  align-items: center;
+}
+
+/* Slot = landscape tray card clone */
+.pp-sel-slot {
+  width: 54px;
+  height: 36px;
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+  box-sizing: border-box;
+  border-radius: 6px 6px 4px 4px;
+  overflow: visible;
+  /* Same wood as tray-card */
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px, transparent 3px,
+      rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px
+    ),
+    linear-gradient(160deg, #c8914a 0%, #a06828 30%, #8a5218 60%, #7a4410 100%);
+  border-top:    2px solid #daa050;
+  border-left:   1px solid #b87838;
+  border-right:  1px solid #6a3810;
+  border-bottom: 3px solid #4a2808;
+  box-shadow:
+    0 3px 0 #3a1e08,
+    0 4px 8px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,210,100,0.18);
+}
+
+/* Nail pin */
+.pp-sel-slot::before {
+  content: '';
+  position: absolute;
+  top: -4px; left: 50%;
+  transform: translateX(-50%);
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e8d090, #b8922a 60%, #6a4800);
+  border: 1px solid #4a3000;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  z-index: 2;
+}
+
+/* Filled slot — image inside carved recess */
+.pp-sel-filled {
+  cursor: pointer;
+  transition: box-shadow 0.12s, border-color 0.12s;
+}
+.pp-sel-filled:hover {
+  border-top-color: #f87171;
+  box-shadow:
+    0 3px 0 #3a1e08,
+    0 0 8px rgba(239,68,68,0.4),
+    inset 0 1px 0 rgba(255,210,100,0.18);
+}
+
+/* Image recess inside slot */
+.pp-sel-filled .pp-sel-recess,
+.pp-sel-slot .pp-sel-img-wrap {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  margin-left: 2px;
+  background: linear-gradient(135deg,
+    rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.28) 100%);
+  border-radius: 4px;
+  border: 1px solid rgba(0,0,0,0.4);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
   overflow: hidden;
 }
 
-.pp-selected-col {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px;
-  width: 100%;
-  justify-items: center;
-  align-items: center;
-}
-
-.pp-slot-unlocks {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px;
-}
-
-/* Selected slot cards */
-.pp-sel-slot {
-  width: 34px;
-  height: 34px;
-  border-radius: 7px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  flex-shrink: 0;
-  box-sizing: border-box;
-}
-.pp-sel-filled {
-  border: 1.5px solid rgba(34,197,94,0.6);
-  background: rgba(34,197,94,0.08);
-  cursor: pointer;
-  transition: border-color 0.12s;
-}
-.pp-sel-filled:hover { border-color: rgba(239,68,68,0.7); }
 .pp-sel-filled img {
-  width: 22px; height: 22px;
+  width: 24px; height: 24px;
   object-fit: contain;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.6));
 }
-.pp-sel-empty,
-.pp-unlock-slot {
-  height: 34px;
+
+/* Empty slot */
+.pp-sel-empty {
+  height: 36px;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px, transparent 3px,
+      rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px
+    ),
+    linear-gradient(160deg, #7a6040 0%, #5c4428 50%, #4a3418 100%);
+  border-top-color:    #8a7050;
+  border-left-color:   #6a5030;
+  border-right-color:  #3a2810;
+  border-bottom-color: #2a1808;
+  box-shadow: 0 2px 0 #1a1008;
 }
+
 .pp-sel-plus {
-  font-size: 14px;
+  font-size: 12px;
+  color: rgba(200,148,26,0.25);
+  font-weight: 300;
+  margin: auto;
 }
+.pp-sel-empty-label {
+  font-family: var(--font-display);
+  font-size: 6px;
+  color: rgba(200,148,26,0.2);
+  letter-spacing: 0.5px;
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+/* Cost label — right side of landscape slot, same as tray-card cost */
+.pp-sel-cost {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: 8px;
+  font-weight: 700;
+  color: #fde68a;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  text-align: center;
+  border-left: 1px solid rgba(255,170,50,0.15);
+  margin-left: 2px;
+  padding: 0 2px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* Forced (locked) slot */
 .pp-sel-forced {
-  border-color: rgba(168,85,247,0.6) !important;
-  background: rgba(168,85,247,0.08) !important;
+  border-top-color:  #a78bfa !important;
+  border-left-color: #9060d0 !important;
+  box-shadow:
+    0 3px 0 #3a1e08,
+    0 0 8px rgba(167,139,250,0.3) !important;
   cursor: default !important;
 }
+
 .pp-sel-lock {
   position: absolute;
   bottom: 2px; right: 3px;
-  font-size: 9px;
-}
-.pp-sel-empty {
-  border: 1.5px dashed rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.02);
-}
-.pp-sel-plus {
-  font-size: 16px;
-  color: rgba(255,255,255,0.1);
-  font-weight: 300;
+  font-size: 8px;
 }
 
-/* Unlock slot buttons */
+/* Unlock slot buttons — same tray-card locked style */
 .pp-slot-unlocks {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 3px;
   width: 100%;
-  margin-top: 2px;
+  margin-top: 0;
 }
 .pp-unlock-slot {
-  width: 34px;
-  height: 34px;
-  border-radius: 7px;
+  width: 54px;
+  height: 36px;
+  border-radius: 6px 6px 4px 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 1px;
   box-sizing: border-box;
   flex-shrink: 0;
 }
 .pp-unlock-available {
-  border: 1.5px dashed rgba(251,191,36,0.5);
-  background: rgba(251,191,36,0.05);
+  background: linear-gradient(160deg, #5a4428 0%, #3e2a10 60%, #2e1e08 100%);
+  border-top:    2px solid #c8941a;
+  border-left:   1px solid #8b6530;
+  border-right:  1px solid #3a2410;
+  border-bottom: 3px solid #2a1808;
+  box-shadow: 0 2px 0 #1a1008;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 .pp-unlock-available:hover {
-  border-color: rgba(251,191,36,0.9);
-  background: rgba(251,191,36,0.12);
+  border-top-color: #fbbf24;
+  box-shadow: 0 2px 0 #1a1008, 0 0 8px rgba(200,148,26,0.4);
 }
 .pp-unlock-blocked {
-  border: 1.5px dashed rgba(255,255,255,0.08);
+  background: linear-gradient(160deg, #3a2a18 0%, #281c08 100%);
+  border-top:    2px solid #4a3828;
+  border-left:   1px solid #3a2810;
+  border-right:  1px solid #221808;
+  border-bottom: 3px solid #181008;
+  box-shadow: 0 1px 0 #100800;
+  opacity: 0.5;
   background: rgba(0,0,0,0.2);
   cursor: default;
   opacity: 0.5;
 }
-.pp-unlock-icon { font-size: 16px; line-height: 1; }
+.pp-unlock-icon { font-size: 9px; line-height: 1; }
+.pp-unlock-label img{
+  width: 8px;
+  height: 8px;
+}
 .pp-unlock-label {
   font-size: 8px;
   font-weight: 700;

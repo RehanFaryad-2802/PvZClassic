@@ -563,10 +563,12 @@ PlantRegistry.clearTimers();
     if (document.hidden) {
       clearTimeout(skyDropTimer);
       skyDropTimer = null;
+      if (typeof SoundFX !== 'undefined') SoundFX.pauseMusic();
     } else {
       if (running && !paused && !skyDropTimer) {
         scheduleDrop();
       }
+      if (running && !paused && typeof SoundFX !== 'undefined') SoundFX.resumeMusic();
     }
   }
 

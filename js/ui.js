@@ -418,7 +418,7 @@ function buildLevelGrid(worldId) {
 
   function updateTrayCard(plantId, sunAvailable, onCooldown, cdMs) {
     const card = document.querySelector(
-      `.tray-card[data-plant-id="${plantId}"]`,
+      `.bt-card[data-plant-id="${plantId}"]`,
     );
     if (!card) return;
     const def = PlantRegistry.get(plantId);
@@ -446,7 +446,7 @@ function buildLevelGrid(worldId) {
   }
 
   function setSelectedTrayCard(plantId) {
-    document.querySelectorAll(".tray-card").forEach((c) => {
+    document.querySelectorAll(".bt-card").forEach((c) => {
       c.classList.toggle("selected", c.dataset.plantId === plantId);
     });
     const shovelBtn = document.getElementById("shovel-btn");
@@ -457,7 +457,7 @@ function buildLevelGrid(worldId) {
     const btn = document.getElementById("shovel-btn");
     if (btn) btn.classList.toggle("active", active);
     document
-      .querySelectorAll(".tray-card")
+      .querySelectorAll(".bt-card")
       .forEach((c) => c.classList.remove("selected"));
   }
 

@@ -195,10 +195,16 @@ const PlantPicker = (() => {
       const def = PlantRegistry.get(id);
       if (!def) return;
       const isLocked = _lockedPlants.includes(id);
+      const cost = (() => {
+        const pp = Player.getPlant(id);
+        const lv = pp ? pp.level : 1;
+        return def.levelStats?.[lv]?.cost ?? def.cost ?? '?';
+      })();
       const el = document.createElement('div');
       el.className = 'pp-sel-slot pp-sel-filled' + (isLocked ? ' pp-sel-forced' : '');
       el.innerHTML = `
         <img src="${def.image}" alt="${def.name}" />
+        <div class="pp-sel-cost">☀️${cost}</div>
         ${isLocked ? '<span class="pp-sel-lock">🔒</span>' : ''}
       `;
       if (!isLocked) {
@@ -214,7 +220,7 @@ const PlantPicker = (() => {
     for (let i = _selectedPlants.length; i < max; i++) {
       const el = document.createElement('div');
       el.className = 'pp-sel-slot pp-sel-empty';
-      el.innerHTML = '<span class="pp-sel-plus">+</span>';
+      el.innerHTML = '<span class="pp-sel-plus">+</span><span class="pp-sel-empty-label">PICK</span>';
       col.appendChild(el);
     }
 

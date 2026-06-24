@@ -378,16 +378,24 @@
   text-shadow: 0 1px 3px rgba(0,0,0,0.8);
 }
 
-/* ── Selected state — gold glow ── */
+/* ── Selected state — darker card for active plant ── */
 .tray-card.selected,
 .bt-card.selected {
-  border-top-color: #fbbf24;
-  border-left-color: #f59e0b;
+  border-top-color:    #654118 !important;
+  border-bottom-color: #2f1808 !important;
+  border-left-color:   #7a4d1d !important;
+  border-right-color:  #5a2f10 !important;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px, transparent 3px,
+      rgba(0,0,0,0.05) 3px, rgba(0,0,0,0.05) 4px
+    ),
+    linear-gradient(160deg, #8a551a 0%, #6f3e14 30%, #5b3210 60%, #4a290d 100%) !important;
   box-shadow:
-    0 3px 0 #3a1e08,
-    0 0 14px rgba(251,191,36,0.7),
-    inset 0 1px 0 rgba(255,220,100,0.25);
-  transform: translateY(-2px);
+    0 3px 0 rgba(0,0,0,0.55),
+    0 0 6px rgba(0,0,0,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.12) !important;
 }
 
 /* ── No-sun state — dim + desaturate ── */
@@ -534,13 +542,6 @@
   border-top: 2px solid #c8941a !important;
   border-radius: 14px 14px 0 0 !important;
   box-shadow: 0 -6px 30px rgba(0,0,0,0.7) !important;
-}
-
-.pp-left-col {
-  background: linear-gradient(180deg,
-    rgba(90,55,15,0.5) 0%,
-    rgba(55,30,6,0.55) 100%) !important;
-  border-right: 2px solid #8b5e1a !important;
 }
 
 .pp-sel-filled {
