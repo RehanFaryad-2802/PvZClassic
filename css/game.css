@@ -18,6 +18,7 @@
 @import url('plantsanimation/cosmbloom.css');
 @import url('plantsanimation/glacierbud.css');
 @import url('game_grid_enhanced.css');
+@import url('gameeffects.css');
 
 
 /* ─── Battle HUD ─────────────────────────────────── */
@@ -119,7 +120,78 @@
   box-sizing: border-box;
 }
 .plant-tray::-webkit-scrollbar { display: none; }
-
+#pause-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pause-box {
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px, transparent 4px,
+      rgba(0,0,0,0.025) 4px, rgba(0,0,0,0.025) 5px
+    ),
+    linear-gradient(160deg, #7a4e10 0%, #5a3408 50%, #7a4e10 100%);
+  border: 3px solid #c8941a;
+  border-bottom: 4px solid #4a2808;
+  border-radius: 16px;
+  padding: 24px 28px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  box-shadow:
+    0 8px 0 #3a1e08,
+    0 10px 30px rgba(0,0,0,0.7),
+    inset 0 1px 0 rgba(255,210,100,0.2);
+  min-width: 200px;
+}
+.pause-box h2 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 900;
+  color: #fef3c7;
+  letter-spacing: 3px;
+  text-shadow:
+    -1px -1px 0 #3a5a10,  1px -1px 0 #3a5a10,
+    -1px  1px 0 #3a5a10,  1px  1px 0 #3a5a10,
+    0 3px 8px rgba(0,0,0,0.7);
+  margin: 0;
+}
+.pause-box button {
+  width: 100%;
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.pause-box button:active { transform: translateY(2px); }
+#btn-resume {
+  background: linear-gradient(180deg, #22863a 0%, #166028 100%);
+  border: 2px solid #4ade80;
+  border-bottom: 3px solid #0d4020;
+  color: #f0fff0;
+  box-shadow: 0 4px 0 #0a2e18, 0 0 14px rgba(74,222,128,0.3);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
+#btn-quit-battle {
+  background: linear-gradient(180deg, #7a4e10 0%, #5a3408 100%);
+  border: 2px solid #c8941a;
+  border-bottom: 3px solid #3e2405;
+  color: #fef3c7;
+  box-shadow: 0 4px 0 #2a1608;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
 .tray-card {
   flex-shrink: 0;
   width: 56px;
@@ -224,45 +296,159 @@
 
 /* ═══════════════════════════════════════════════════
    WORLD 1 — Nature Valley
-   Classic PvZ lush green turf lanes
+   Rich garden turf with depth, soil, grass blades
 ═══════════════════════════════════════════════════ */
+
+/* Arena background — sky + distant garden */
+.arena-bg.world-1 {
+  background:
+    linear-gradient(180deg,
+      #a8d8ea 0%,
+      #87ceeb 25%,
+      #b8e0a0 55%,
+      #6aaa3a 70%,
+      #3d7a1a 100%);
+}
+
+/* ── Lane rows: alternating light/dark turf strips ── */
 .arena-bg.world-1 ~ .grid-container .grid-row:nth-child(odd) {
-  background: linear-gradient(180deg, #2e7d1e 0%, #1e5c12 100%);
+  background: linear-gradient(180deg,
+    #5aaa28 0%,
+    #4a9020 35%,
+    #3a7818 65%,
+    #2e6010 100%);
+  box-shadow:
+    inset 0 -3px 6px rgba(0,0,0,0.25),
+    inset 0 2px 4px rgba(150,255,80,0.12);
 }
 .arena-bg.world-1 ~ .grid-container .grid-row:nth-child(even) {
-  background: linear-gradient(180deg, #1a5510 0%, #123a08 100%);
+  background: linear-gradient(180deg,
+    #3e8818 0%,
+    #326e12 35%,
+    #26560e 65%,
+    #1c4008 100%);
+  box-shadow:
+    inset 0 -3px 6px rgba(0,0,0,0.3),
+    inset 0 1px 3px rgba(0,0,0,0.2);
 }
+
+/* ── Row border = visible lane divider with soil edge ── */
+.arena-bg.world-1 ~ .grid-container .grid-row {
+  border-bottom: 3px solid #1a3a08;
+  position: relative;
+}
+.arena-bg.world-1 ~ .grid-container .grid-row:last-child {
+  border-bottom: none;
+}
+
+/* Soil strip at bottom of each lane (the planting row) */
+.arena-bg.world-1 ~ .grid-container .grid-row::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg,
+    #3d1f05 0%,
+    #6b3a10 20%,
+    #8b5018 40%,
+    #6b3a10 60%,
+    #4a2a08 80%,
+    #3d1f05 100%);
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Cell base: vertical grass blade texture ── */
 .arena-bg.world-1 ~ .grid-container .grid-cell {
-  border-right: 1px solid rgba(0,0,0,0.20);
+  border-right: 1px solid rgba(0,0,0,0.15);
   border-left: none; border-top: none; border-bottom: none;
   background:
+    /* grass blade streaks */
     repeating-linear-gradient(
-      0deg,
-      rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 2px,
-      transparent 2px, transparent 7px
+      175deg,
+      transparent 0px,
+      transparent 4px,
+      rgba(80,200,30,0.07) 4px,
+      rgba(80,200,30,0.07) 5px
+    ),
+    repeating-linear-gradient(
+      185deg,
+      transparent 0px,
+      transparent 6px,
+      rgba(0,0,0,0.05) 6px,
+      rgba(0,0,0,0.05) 7px
     );
 }
-/* Bright soil patch on every 3rd cell */
-.arena-bg.world-1 ~ .grid-container .grid-cell:nth-child(3n) {
-  background-image:
-    radial-gradient(ellipse 70% 45% at 50% 85%, rgba(90,50,15,0.22) 0%, transparent 100%),
-    repeating-linear-gradient(
-      0deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px,
-      transparent 2px, transparent 7px
-    );
-}
-/* Sunlit grass tip on top edge */
+
+/* ── Perspective depth: darker bottom corners ── */
 .arena-bg.world-1 ~ .grid-container .grid-cell::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, transparent, rgba(130,230,60,0.45), transparent);
-  pointer-events: none; z-index: 1;
+  inset: 0;
+  background:
+    /* top grass highlight — lit by sun */
+    linear-gradient(180deg,
+      rgba(180,255,100,0.12) 0%,
+      transparent 30%,
+      transparent 70%,
+      rgba(0,0,0,0.18) 100%);
+  pointer-events: none;
+  z-index: 1;
 }
-/* Hover: bright sun glow */
+
+/* ── Soil patches on alternating cells for realism ── */
+.arena-bg.world-1 ~ .grid-container .grid-cell:nth-child(odd)::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 10%; right: 10%;
+  height: 30%;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 100%,
+      rgba(70,35,8,0.28) 0%,
+      transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Left edge of each cell: subtle vertical shadow ── */
+.arena-bg.world-1 ~ .grid-container .grid-cell:first-child {
+  border-left: 1px solid rgba(0,0,0,0.1);
+}
+
+/* ── Hover: sun highlight glow ── */
 .arena-bg.world-1 ~ .grid-container .grid-cell:not(.occupied):hover {
-  filter: brightness(1.40) saturate(1.5);
-  box-shadow: inset 0 0 14px rgba(100,255,50,0.25);
+  background-color: rgba(150,255,80,0.18) !important;
+  box-shadow:
+    inset 0 0 0 2px rgba(120,230,50,0.6),
+    inset 0 0 14px rgba(120,230,50,0.2);
+  filter: brightness(1.2) saturate(1.3);
+  transition: all 0.1s;
+  z-index: 2;
+}
+
+/* ── Odd row cells slightly lighter (sun-facing) ── */
+.arena-bg.world-1 ~ .grid-container .grid-row:nth-child(odd) .grid-cell {
+  filter: brightness(1.08);
+}
+.arena-bg.world-1 ~ .grid-container .grid-row:nth-child(even) .grid-cell {
+  filter: brightness(0.94);
+}
+
+/* ── Lawnmower column: soil strip on far left ── */
+.arena-bg.world-1 ~ .lawnmowers-layer {
+  background: linear-gradient(90deg,
+    #2e1204 0%,
+    #5a2e0a 40%,
+    #3e1e06 100%);
+  border-right: 2px solid #1a0c02;
+}
+
+/* ── Depth shadow at bottom of entire grid ── */
+.arena-bg.world-1 ~ .grid-container {
+  box-shadow:
+    inset 0 -8px 20px rgba(0,0,0,0.4),
+    inset 0 0 40px rgba(0,0,0,0.15);
 }
 
 /* ═══════════════════════════════════════════════════

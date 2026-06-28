@@ -402,10 +402,9 @@ function buildLevelGrid(worldId) {
         Core.toggleShovel();
       });
       newShovel.addEventListener("touchend", (e) => {
-        e.preventDefault();
         SoundFX.play("plant_remove");
         Core.toggleShovel();
-      }, { passive: false });
+      }, { passive: true });
     }
   }
 
@@ -1839,13 +1838,10 @@ function buildLevelGrid(worldId) {
       );
     }
     // Collection back
-    document
-      .getElementById("btn-back-collection")
-      .addEventListener("click", () => showScreen("screen-menu"));
-    // Shop back
-    document
-      .getElementById("btn-back-shop")
-      .addEventListener("click", () => showScreen("screen-worldmap"));
+    document.getElementById("btn-back-collection")
+      ?.addEventListener("click", () => showScreen("screen-menu"));
+    document.getElementById("btn-back-shop")
+      ?.addEventListener("click", () => showScreen("screen-worldmap"));
 
     // Settings open/back
     // New menu bottom bar buttons
@@ -1855,19 +1851,18 @@ function buildLevelGrid(worldId) {
     document.getElementById('btn-play-quick')?.addEventListener('click', () => showScreen('screen-worldmap'));
 
 document.getElementById('btn-settings')
-      .addEventListener("click", () => showScreen("screen-settings"));
-    document
-      .getElementById("btn-back-settings")
-      .addEventListener("click", () => showScreen("screen-menu"));
+      ?.addEventListener("click", () => showScreen("screen-settings"));
+    document.getElementById("btn-back-settings")
+      ?.addEventListener("click", () => showScreen("screen-menu"));
 
     // Settings controls
-    document.getElementById("set-mute").addEventListener("change", (e) => {
+    document.getElementById("set-mute")?.addEventListener("change", (e) => {
       SoundFX.muteAll(e.target.checked);
     });
     ["ui", "demon", "plant", "music"].forEach((cat) => {
       const slider = document.getElementById(`set-vol-${cat}`);
       const label = document.getElementById(`val-${cat}`);
-      slider.addEventListener("input", () => {
+      slider?.addEventListener("input", () => {
         label.textContent = slider.value;
         SoundFX.setVolume(cat, slider.value / 100);
       });
@@ -2037,7 +2032,7 @@ document.getElementById('btn-settings')
     `;
     document.body.appendChild(overlay);
 
-    requestAnimationFrame(() => overlay.classList.add("packet-open-active"));
+    setTimeout(() => overlay.classList.add("packet-open-active"), 50);
 
     const cardsArea = overlay.querySelector("#packet-cards-area");
     const summary = overlay.querySelector("#packet-summary");
@@ -2121,6 +2116,7 @@ document.getElementById('btn-settings')
       `;
     }
 
+    setTimeout(() => {
     const skipBtn = overlay.querySelector("#packet-skip-btn");
     if (skipBtn) {
       skipBtn.classList.remove("hidden");
@@ -2143,6 +2139,7 @@ document.getElementById('btn-settings')
         selectInventoryItem("packet", packetId);
       }, 300);
     });
+    }, 350); // end setTimeout for button listeners
 
     revealNext();
   } // end showPacketOpenAnimation
@@ -2345,32 +2342,31 @@ document.getElementById('btn-settings')
     `;
 
     document.body.appendChild(overlay);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        overlay.classList.add("active");
-        // Animate bars after overlay appears
-        setTimeout(() => {
-          overlay.querySelectorAll(".upgrade-stat-bar-new").forEach((bar) => {
-            bar.style.width = bar.dataset.pct + "%";
-          });
-        }, 400);
-      });
-    });
 
-    document
-      .getElementById("upgrade-close-btn")
-      .addEventListener("click", () => {
+    // Delay adding active + close listeners so the opening touch
+    // event doesn't immediately trigger the close button
+    setTimeout(() => {
+      overlay.classList.add("active");
+      // Animate bars after overlay appears
+      setTimeout(() => {
+        overlay.querySelectorAll(".upgrade-stat-bar-new").forEach((bar) => {
+          bar.style.width = bar.dataset.pct + "%";
+        });
+      }, 400);
+
+      const closeOverlay = () => {
         overlay.classList.remove("active");
         setTimeout(() => overlay.remove(), 300);
-      });
+      };
 
-    // Also close on backdrop tap
-    overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) {
-        overlay.classList.remove("active");
-        setTimeout(() => overlay.remove(), 300);
-      }
-    });
+      document.getElementById("upgrade-close-btn")
+        ?.addEventListener("click", closeOverlay);
+
+      // Backdrop tap — only if tapping the dark overlay itself
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) closeOverlay();
+      });
+    }, 350); // 350ms delay clears the opening touch from event queue
   }
   return {
     init,

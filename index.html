@@ -594,15 +594,22 @@
         const ready = () => {
           setProgress(100, tips[4]);
           setTimeout(() => {
-            // Make body visible now that fonts are ready
             document.body.style.visibility = "visible";
-            // Fade out loading screen
+
+            // Safe init — catch any error so loading screen always fades
+            try {
+              UI.init();
+            } catch(e) {
+              console.error("UI.init error:", e);
+            }
+
+            // Fade out loading screen AFTER init
             const ld = document.getElementById("screen-loading");
             if (ld) {
-              ld.style.transition = "opacity 0.4s ease";
-              setTimeout(() => ld.remove(), 400);
+              ld.style.transition = "opacity 0.5s ease";
+              ld.style.opacity = "0";              // ← actually triggers the fade
+              setTimeout(() => ld.remove(), 520);
             }
-            UI.init();
             const params = new URLSearchParams(window.location.search);
             const qWorld = parseInt(params.get("world"), 10);
             const qLevel = parseInt(params.get("level"), 10);
@@ -641,11 +648,10 @@
               "button, .btn-menu, .btn-primary, .btn-secondary, .btn-back",
             );
             if (btn) {
-              e.preventDefault();
               btn.click();
             }
           },
-          { passive: false },
+          { passive: true },
         );
       });
 

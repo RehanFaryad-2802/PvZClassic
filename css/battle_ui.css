@@ -468,21 +468,25 @@
 }
 .shovel-btn.active,
 .bt-shovel.active {
-  border-top-color:    #654118 !important;
-  border-bottom-color: #2f1808 !important;
-  border-left-color:   #7a4d1d !important;
-  border-right-color:  #5a2f10 !important;
-  background:
-    repeating-linear-gradient(
-      180deg,
-      transparent 0px, transparent 3px,
-      rgba(0,0,0,0.05) 3px, rgba(0,0,0,0.05) 4px
-    ),
-    linear-gradient(160deg, #8a551a 0%, #6f3e14 30%, #5b3210 60%, #4a290d 100%) !important;
+  background: linear-gradient(180deg, #1a6030 0%, #0e4020 60%, #0a3018 100%);
+  border-top-color: #4ade80;
+  border-left-color: #22c55e;
+  border-right-color: #16a34a;
+  border-bottom-color: #0d4020;
   box-shadow:
-    0 3px 0 rgba(0,0,0,0.55),
-    0 0 6px rgba(0,0,0,0.25),
-    inset 0 1px 0 rgba(255,255,255,0.12) !important;
+    0 3px 0 #0a2e18,
+    0 0 12px rgba(74,222,128,0.5),
+    0 0 24px rgba(74,222,128,0.2),
+    inset 0 1px 0 rgba(74,222,128,0.2),
+    inset 0 0 8px rgba(0,0,0,0.4);
+  filter: brightness(0.85);
+}
+.shovel-btn.active .bt-shovel-label,
+.bt-shovel.active .bt-shovel-label,
+.shovel-btn.active span,
+.bt-shovel.active span {
+  color: #4ade80;
+  text-shadow: 0 0 6px rgba(74,222,128,0.6);
 }
 .bt-shovel-icon,
 .shovel-btn > :first-child {

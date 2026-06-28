@@ -215,7 +215,7 @@ const Grid = (() => {
         cell.addEventListener('mouseenter', () => onCellHover(cell, r, c, theme, true));
         cell.addEventListener('mouseleave', () => onCellHover(cell, r, c, theme, false));
         cell.addEventListener('click',      () => onCellClick(r, c));
-        cell.addEventListener('touchstart', (e) => { e.preventDefault(); onCellClick(r, c); }, { passive: false });
+        cell.addEventListener('touchstart', (e) => { onCellClick(r, c); }, { passive: true });
 
         rowEl.appendChild(cell);
 
